@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Globe, BarChart3 } from 'lucide-react';
+import { Home, Globe, BarChart3, Gamepad2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -15,7 +15,9 @@ const navItems =[
   { href: '/', label: 'HOME', icon: Home },
   { href: '/map', label: 'EXPLORER', icon: Globe },
   { href: '/rankings', label: 'RANKINGS', icon: BarChart3 },
+  { href: '/games', label: 'GAMES', icon: Gamepad2 },
 ];
+
 
 export default function Header() {
   const pathname = usePathname();
