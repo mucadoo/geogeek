@@ -32,7 +32,7 @@ interface GameState {
   resetGame: () => void;
 }
 
-const INITIAL_TIME = 120; // 2 minutes
+const INITIAL_TIME = 300; // 5 minutes
 
 const FIFTY_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", 

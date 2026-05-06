@@ -7,7 +7,7 @@
   --accent: #ffcd42;     
   --danger: #ff5a5f;     
   --map-fill: #dbe5df;
-  --map-stroke: #ffffff;
+  --map-stroke: #adb5bd;
 }
 
 @theme inline {
@@ -17,6 +17,7 @@
   --color-accent: var(--accent);
   --color-danger: var(--danger);
   --color-map-fill: var(--map-fill);
+  --color-map-stroke: var(--map-stroke);
   --font-inter: var(--font-inter);
 }
 

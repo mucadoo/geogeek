@@ -47,7 +47,7 @@ export default function USStatesGame() {
               </div>
               <h1 className="text-3xl font-bold text-gray-800 mb-4">US States Quiz</h1>
               <p className="text-gray-600 mb-8">
-                How many United States can you name? A state will be highlighted, and you have 2 minutes to guess as many as you can!
+                How many United States can you name? A state will be highlighted, and you have 5 minutes to guess as many as you can!
               </p>
               <button
                 onClick={handleStartGame}
