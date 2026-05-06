@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useUSMapData } from '@/hooks/useUSMapData';
+import { useBrazilMapData } from '@/hooks/useBrazilMapData';
 import { useGameStore, StateFeature } from '@/store/useGameStore';
 import GameMap from '@/components/GameMap';
 import GameUI from '@/components/GameUI';
 import { feature } from 'topojson-client';
 import { Trophy, RefreshCw, Play } from 'lucide-react';
 import * as d3 from 'd3';
-import { US_STATES } from '@/config/gameConstants';
+import { BRAZIL_STATES } from '@/config/gameConstants';
 
-export default function USStatesGame() {
-  const { data: mapData, status: mapStatus } = useUSMapData();
+export default function BrazilStatesGame() {
+  const { data: mapData, status: mapStatus } = useBrazilMapData();
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates 
   } = useGameStore();
@@ -19,8 +19,8 @@ export default function USStatesGame() {
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const states = (feature(mapData, mapData.objects.states) as any).features as StateFeature[];
-      startGame(states, US_STATES);
+      const states = (feature(mapData, mapData.objects.brazil) as any).features as StateFeature[];
+      startGame(states, BRAZIL_STATES);
     }
   };
 
@@ -28,8 +28,10 @@ export default function USStatesGame() {
     return () => resetGame();
   }, [resetGame]);
 
-  const projection = d3.geoAlbersUsa()
-    .scale(1200)
+  // Center on Brazil [lng -55, lat -15]
+  const projection = d3.geoMercator()
+    .center([-55, -15])
+    .scale(700)
     .translate([960 / 2, 600 / 2]);
 
   if (mapStatus === 'pending') {
@@ -51,9 +53,9 @@ export default function USStatesGame() {
               <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <Trophy size={40} />
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">US States Quiz</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">Brazil States Quiz</h1>
               <p className="text-gray-600 mb-8">
-                How many United States can you name? A state will be highlighted, and you have 5 minutes to guess as many as you can!
+                How well do you know Brazil? A state will be highlighted, and you have 5 minutes to guess as many as you can!
               </p>
               <button
                 onClick={handleStartGame}
@@ -69,8 +71,8 @@ export default function USStatesGame() {
                 mapData={mapData} 
                 highlightedStateId={currentState?.id || null} 
                 projection={projection}
-                objectName="states"
-                validNames={US_STATES}
+                objectName="brazil"
+                validNames={BRAZIL_STATES}
               />
               {gameStatus === 'finished' && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 p-4">

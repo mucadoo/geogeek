@@ -13,14 +13,13 @@ function cn(...inputs: ClassValue[]) {
 export default function GameUI() {
   const { 
     status, score, timeLeft, userInput, lastGuessCorrect,
-    remainingStates, currentState,
+    remainingStates, currentState, totalToGuess,
     setUserInput, submitGuess, skipState, tick 
   } = useGameStore();
   
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const totalStates = 50; // Standard for US states quiz
-  const currentProgress = totalStates - (remainingStates.length + (currentState ? 1 : 0));
+  const currentProgress = totalToGuess - (remainingStates.length + (currentState ? 1 : 0));
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -68,7 +67,7 @@ export default function GameUI() {
       <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
         <div 
           className="h-full bg-primary transition-all duration-500 ease-out"
-          style={{ width: `${(currentProgress / totalStates) * 100}%` }}
+          style={{ width: `${totalToGuess > 0 ? (currentProgress / totalToGuess) * 100 : 0}%` }}
         />
       </div>
 
@@ -104,7 +103,7 @@ export default function GameUI() {
       ) : (
         <div className="text-center py-4">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Game Over!</h2>
-          <p className="text-gray-500">Your final score: <span className="font-bold text-primary">{score}</span> / {totalStates}</p>
+          <p className="text-gray-500">Your final score: <span className="font-bold text-primary">{score}</span> / {totalToGuess}</p>
         </div>
       )}
       

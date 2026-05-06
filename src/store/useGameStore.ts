@@ -22,9 +22,10 @@ interface GameState {
   correctlyGuessedIds: string[];
   userInput: string;
   lastGuessCorrect: boolean | null;
+  totalToGuess: number;
   
   // Actions
-  startGame: (states: StateFeature[]) => void;
+  startGame: (states: StateFeature[], validNames: string[]) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
   tick: () => void;
@@ -33,17 +34,6 @@ interface GameState {
 }
 
 const INITIAL_TIME = 300; // 5 minutes
-
-const FIFTY_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", 
-  "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", 
-  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", 
-  "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", 
-  "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
-  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", 
-  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", 
-  "Wisconsin", "Wyoming"
-];
 
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'idle',
@@ -55,9 +45,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   correctlyGuessedIds: [],
   userInput: '',
   lastGuessCorrect: null,
+  totalToGuess: 0,
 
-  startGame: (states) => {
-    const filtered = states.filter(s => FIFTY_STATES.includes(s.properties.name));
+  startGame: (states, validNames) => {
+    const filtered = states.filter(s => 
+      validNames.some(name => s.properties.name.toLowerCase() === name.toLowerCase())
+    );
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
     set({
       status: 'playing',
@@ -69,6 +62,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       correctlyGuessedIds: [],
       userInput: '',
       lastGuessCorrect: null,
+      totalToGuess: filtered.length,
     });
   },
 

@@ -11,6 +11,14 @@ const games = [
     href: '/games/us-states',
     color: 'bg-blue-500',
   },
+  {
+    id: 'brazil-states',
+    title: 'Brazil States Quiz',
+    description: 'Test your knowledge of the Brazilian territory! Can you name all the states?',
+    icon: Map,
+    href: '/games/brazil-states',
+    color: 'bg-green-600',
+  },
 ];
 
 export default function GamesPage() {
