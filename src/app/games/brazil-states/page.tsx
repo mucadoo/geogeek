@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useBrazilMapData } from '@/hooks/useBrazilMapData';
+import { useBrazilMapData } from '@/hooks/useRegionMapData';
 import { useGameStore, StateFeature } from '@/store/useGameStore';
 import GameMap from '@/components/GameMap';
 import GameUI from '@/components/GameUI';

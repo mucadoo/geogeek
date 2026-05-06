@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useUSMapData } from '@/hooks/useRegionMapData';
+import { useCanadaMapData } from '@/hooks/useRegionMapData';
 import { useGameStore, StateFeature } from '@/store/useGameStore';
 import GameMap from '@/components/GameMap';
 import GameUI from '@/components/GameUI';
 import { feature } from 'topojson-client';
 import { Trophy, RefreshCw, Play } from 'lucide-react';
 import * as d3 from 'd3';
-import { US_STATES } from '@/config/gameConstants';
+import { CANADA_PROVINCES } from '@/config/gameConstants';
 
-export default function USStatesGame() {
-  const { data: mapData, status: mapStatus } = useUSMapData();
+export default function CanadaProvincesGame() {
+  const { data: mapData, status: mapStatus } = useCanadaMapData();
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates 
   } = useGameStore();
@@ -19,8 +19,8 @@ export default function USStatesGame() {
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const states = (feature(mapData, mapData.objects.states) as any).features as StateFeature[];
-      startGame(states, US_STATES);
+      const provinces = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
+      startGame(provinces, CANADA_PROVINCES);
     }
   };
 
@@ -28,8 +28,9 @@ export default function USStatesGame() {
     return () => resetGame();
   }, [resetGame]);
 
-  const projection = d3.geoAlbersUsa()
-    .scale(1200)
+  const projection = d3.geoAzimuthalEqualArea()
+    .rotate([96, -60])
+    .scale(600)
     .translate([960 / 2, 600 / 2]);
 
   if (mapStatus === 'pending') {
@@ -44,16 +45,15 @@ export default function USStatesGame() {
   return (
     <main className="max-w-[1400px] mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Map */}
         <div className="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px] flex items-center justify-center relative">
           {gameStatus === 'idle' ? (
             <div className="text-center p-12 max-w-md">
               <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <Trophy size={40} />
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">US States Quiz</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">Canada Provinces Quiz</h1>
               <p className="text-gray-600 mb-8">
-                How many United States can you name? A state will be highlighted, and you have 5 minutes to guess as many as you can!
+                How many Canadian provinces and territories can you name? Test your knowledge of the Great White North!
               </p>
               <button
                 onClick={handleStartGame}
@@ -69,19 +69,19 @@ export default function USStatesGame() {
                 mapData={mapData} 
                 highlightedStateId={currentState?.id || null} 
                 projection={projection}
-                objectName="states"
-                validNames={US_STATES}
+                objectName="default"
+                validNames={CANADA_PROVINCES}
               />
               {gameStatus === 'finished' && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 p-4">
                   <div className="text-center p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-y-auto max-h-full">
                     <Trophy size={64} className="text-amber-500 mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Well Done!</h2>
-                    <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> states correctly.</p>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Great Job, Eh?</h2>
+                    <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> provinces correctly.</p>
                     
                     {missedStates.length > 0 && (
                       <div className="mb-8 text-left">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">States you missed:</h3>
+                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Provinces you missed:</h3>
                         <div className="flex flex-wrap gap-2">
                           {missedStates.map(state => (
                             <span key={state.id} className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold border border-red-100">
@@ -106,7 +106,6 @@ export default function USStatesGame() {
           )}
         </div>
 
-        {/* Right Column: UI */}
         <div className="lg:col-span-4 lg:sticky lg:top-8">
           <GameUI />
         </div>

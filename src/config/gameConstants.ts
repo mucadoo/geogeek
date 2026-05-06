@@ -16,3 +16,28 @@ export const BRAZIL_STATES = [
   "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", 
   "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
 ];
+
+export const ITALY_REGIONS = [
+  "Abruzzo", "Valle d'Aosta", "Aosta Valley", "Puglia", "Apulia", "Basilicata", "Calabria", "Campania", 
+  "Emilia-Romagna", "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Lombardy", "Marche", 
+  "Molise", "Piemonte", "Piedmont", "Sardegna", "Sardinia", "Sicilia", "Sicily", "Toscana", "Tuscany", 
+  "Trentino-Alto Adige", "Trentino-South Tyrol", "Umbria", "Veneto"
+];
+
+export const FRANCE_REGIONS = [
+  "Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Bretagne", "Brittany", "Centre-Val de Loire", 
+  "Corse", "Corsica", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandie", "Normandy", 
+  "Nouvelle-Aquitaine", "Occitanie", "Pays de la Loire", "Provence-Alpes-Côte d'Azur",
+  "Guadeloupe", "Guyane", "French Guiana", "La Réunion", "Reunion", "Martinique", "Mayotte"
+];
+
+export const CANADA_PROVINCES = [
+  "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", 
+  "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", 
+  "Northwest Territories", "Nunavut", "Yukon"
+];
+
+export const AUSTRALIA_STATES = [
+  "New South Wales", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia", 
+  "Australian Capital Territory", "Northern Territory"
+];

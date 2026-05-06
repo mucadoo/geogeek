@@ -19,6 +19,38 @@ const games = [
     href: '/games/brazil-states',
     color: 'bg-green-600',
   },
+  {
+    id: 'italy-regions',
+    title: 'Italy Regions Quiz',
+    description: 'Explore the regions of Italy, from Piedmont to Sicily. How many can you name?',
+    icon: Map,
+    href: '/games/italy-regions',
+    color: 'bg-red-500',
+  },
+  {
+    id: 'france-regions',
+    title: 'France Regions Quiz',
+    description: 'From Brittany to Corsica, test your knowledge of the 18 regions of France!',
+    icon: Map,
+    href: '/games/france-regions',
+    color: 'bg-indigo-600',
+  },
+  {
+    id: 'canada-provinces',
+    title: 'Canada Provinces Quiz',
+    description: 'How many Canadian provinces and territories do you know? Give it a try, eh!',
+    icon: Map,
+    href: '/games/canada-provinces',
+    color: 'bg-red-600',
+  },
+  {
+    id: 'australia-states',
+    title: 'Australia States Quiz',
+    description: 'Test your knowledge of the land down under! Can you name all Australian states?',
+    icon: Map,
+    href: '/games/australia-states',
+    color: 'bg-blue-700',
+  },
 ];
 
 export default function GamesPage() {
