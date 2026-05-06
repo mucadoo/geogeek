@@ -1,29 +1,70 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { ComposableMap, ZoomableGroup } from '@vnedyalk0v/react19-simple-maps';
+import * as d3 from 'd3';
 import { useMapStore } from '@/store/useMapStore';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import MapPolygons from './MapPolygons';
 
 export default function Map() {
   const { data: mapData, status } = useWorldMapData();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const gRef = useRef<SVGGElement>(null);
   
   const { 
-    position, setPosition, 
+    position, 
     selectedContinent, tooltip, setTooltip,
     resetMap
   } = useMapStore();
+
+  const width = 800;
+  const height = 450;
+
+  const projection = useMemo(() => {
+    return d3.geoMercator()
+      .scale(120)
+      .translate([width / 2, height / 2 + 50]);
+  }, []);
+
+  useEffect(() => {
+    if (!svgRef.current || !gRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    const g = d3.select(gRef.current);
+
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([1, 8])
+      .on('zoom', (event) => {
+        g.attr('transform', event.transform);
+      });
+
+    svg.call(zoom);
+
+    // Initial position or when store position changes (e.g. from continent click)
+    // We need to convert [lng, lat] to [x, y] and then to D3 transform
+    const [lng, lat] = position.coordinates;
+    const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
+    
+    svg.transition()
+      .duration(750)
+      .call(
+        zoom.transform,
+        d3.zoomIdentity
+          .translate(width / 2, height / 2)
+          .scale(position.zoom)
+          .translate(-x, -y)
+      );
+
+  }, [position, projection]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
   };
 
   return (
-    // Replaced -mt-10 with a nice white card container UI
     <div 
-      className="relative w-full h-[650px] flex items-center justify-center bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100"
+      className="relative w-full h-[650px] flex items-center justify-center bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTooltip({ ...tooltip, show: false })}
     >
@@ -43,23 +84,15 @@ export default function Map() {
             {tooltip.content}
           </div>
 
-          <ComposableMap
-            projection="geoMercator"
-            width={800}
-            height={450}
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${width} ${height}`}
             className="w-full h-full outline-none"
-            style={{ width: '100%', height: '100%' }}
           >
-            <ZoomableGroup
-              zoom={position.zoom}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              center={position.coordinates as any}
-              onMoveEnd={(pos) => setPosition({ coordinates: pos.coordinates as [number, number], zoom: pos.zoom })}
-              className="transition-transform duration-1000 ease-in-out outline-none"
-            >
-              <MapPolygons mapData={mapData} />
-            </ZoomableGroup>
-          </ComposableMap>
+            <g ref={gRef}>
+              <MapPolygons mapData={mapData} projection={projection} />
+            </g>
+          </svg>
 
           {selectedContinent && (
             <button

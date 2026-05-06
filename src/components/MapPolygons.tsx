@@ -1,18 +1,29 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import NProgress from 'nprogress';
-import { Geographies, Geography } from '@vnedyalk0v/react19-simple-maps';
+import * as d3 from 'd3';
+import { feature } from 'topojson-client';
+import { Topology } from 'topojson-specification';
 import { useMapStore } from '@/store/useMapStore';
 import { NUMERIC_TO_CONTINENT, NUMERIC_TO_ALPHA2, CONTINENT_VIEWS } from '@/config/mapConstants';
 
-interface MapPolygonsProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapData: any;
+interface CountryFeature {
+  id: string | number;
+  properties: {
+    name: string;
+  };
+  type: "Feature";
+  geometry: d3.GeoGeometryObjects;
 }
 
-export default function MapPolygons({ mapData }: MapPolygonsProps) {
+interface MapPolygonsProps {
+  mapData: Topology;
+  projection: d3.GeoProjection;
+}
+
+export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
   const router = useRouter();
   const { 
     selectedContinent, hoveredContinent, hoveredCountry, 
@@ -21,15 +32,22 @@ export default function MapPolygons({ mapData }: MapPolygonsProps) {
     handleContinentClick
   } = useMapStore();
 
+  const pathGenerator = d3.geoPath().projection(projection);
+
+  const geographies = useMemo(() => {
+    if (!mapData) return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const countries = feature(mapData, mapData.objects.countries) as any;
+    return countries.features as d3.GeoPermissibleObjects[];
+  }, [mapData]);
+
   return (
-    <Geographies geography={mapData}>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {({ geographies }: { geographies: any[] }) => geographies.map((geo) => {
-        const geoData = geo;
-        const numericId = geoData.id ? String(geoData.id).padStart(3, '0') : `geo-${Math.random()}`;
+    <g className="map-geographies">
+      {(geographies as unknown as CountryFeature[]).map((geo, index) => {
+        const numericId = geo.id ? String(geo.id).padStart(3, '0') : `geo-${index}`;
         const continent = NUMERIC_TO_CONTINENT[numericId] || 'Other';
         const alpha2 = NUMERIC_TO_ALPHA2[numericId];
-        const countryName = geoData.properties?.name || "Unknown";
+        const countryName = geo.properties?.name || "Unknown";
         
         const isClickable = continent !== 'Other';
 
@@ -42,16 +60,17 @@ export default function MapPolygons({ mapData }: MapPolygonsProps) {
         let fillColor = "var(--color-map-fill)"; 
         if (isHovered && isClickable) fillColor = "var(--color-danger)";
 
+        const pathData = pathGenerator(geo);
+        if (!pathData) return null;
+
         return (
-          <Geography
+          <path
             key={numericId}
-            geography={geoData}
+            d={pathData}
             fill={fillColor}
             stroke="var(--color-map-stroke)"
             strokeWidth={0.5}
-            // Passing cursor and fill transitions to Tailwind CSS ensures the browser native 
-            // engine handles the hover/pointer, preventing the Javascript from ever getting stuck.
-            className={`outline-none focus:outline-none focus:ring-0 transition-colors duration-200 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+            className={`outline-none transition-colors duration-200 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
             onMouseEnter={(e) => {
               if (!isClickable) return;
               if (selectedContinent) {
@@ -84,16 +103,9 @@ export default function MapPolygons({ mapData }: MapPolygonsProps) {
                 }
               }
             }}
-            style={{
-              default: { outline: "none" },
-              hover: { outline: "none" },
-              pressed: { outline: "none" },
-              // @ts-expect-error simple-maps typings miss focus but React DOM accepts it
-              focus: { outline: "none" }
-            }}
           />
         );
       })}
-    </Geographies>
+    </g>
   );
 }
