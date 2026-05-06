@@ -35,6 +35,14 @@ interface GameState {
 
 const INITIAL_TIME = 300; // 5 minutes
 
+const normalizeString = (str: string) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+};
+
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'idle',
   score: 0,
@@ -49,7 +57,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   startGame: (states, validNames) => {
     const filtered = states.filter(s => 
-      validNames.some(name => s.properties.name.toLowerCase() === name.toLowerCase())
+      validNames.some(name => normalizeString(s.properties.name) === normalizeString(name))
     );
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
     set({
@@ -72,9 +80,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { currentState, remainingStates, score, correctlyGuessedIds } = get();
     if (!currentState) return false;
 
-    const isCorrect = guess.trim().toLowerCase() === currentState.properties.name.toLowerCase();
+    const normalizedGuess = normalizeString(guess);
+    const normalizedTarget = normalizeString(currentState.properties.name);
 
-    if (isCorrect) {
+    if (normalizedGuess === normalizedTarget) {
       const newCorrectIds = [...correctlyGuessedIds, currentState.id];
       if (remainingStates.length === 0) {
         set({ status: 'finished', score: score + 1, currentState: null, userInput: '', lastGuessCorrect: true, correctlyGuessedIds: newCorrectIds });
@@ -130,6 +139,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     timeLeft: INITIAL_TIME,
     currentState: null,
     remainingStates: [],
+    missedStates: [],
+    correctlyGuessedIds: [],
     userInput: '',
+    lastGuessCorrect: null,
+    totalToGuess: 0,
   }),
 }));

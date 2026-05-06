@@ -19,7 +19,7 @@ export default function BrazilStatesGame() {
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const states = (feature(mapData, mapData.objects.brazil) as any).features as StateFeature[];
+      const states = (feature(mapData, mapData.objects.uf) as any).features as StateFeature[];
       startGame(states, BRAZIL_STATES);
     }
   };
@@ -71,7 +71,7 @@ export default function BrazilStatesGame() {
                 mapData={mapData} 
                 highlightedStateId={currentState?.id || null} 
                 projection={projection}
-                objectName="brazil"
+                objectName="uf"
                 validNames={BRAZIL_STATES}
               />
               {gameStatus === 'finished' && (

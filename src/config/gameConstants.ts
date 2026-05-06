@@ -10,7 +10,7 @@ export const US_STATES = [
 ];
 
 export const BRAZIL_STATES = [
-  "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", 
+  "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "DF",
   "Espírito Santo", "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", 
   "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco", "Piauí", 
   "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", 

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-const BRAZIL_GEO_URL = 'https://raw.githubusercontent.com/luizpedone/brazil-topojson/master/brazil-states.json';
+const BRAZIL_GEO_URL = 'https://raw.githubusercontent.com/fititnt/gis-dataset-brasil/master/uf/topojson/uf.json';
 
 const fetchBrazilMapData = async () => {
   const response = await fetch(BRAZIL_GEO_URL);
