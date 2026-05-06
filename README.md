@@ -25,7 +25,7 @@ This project consumes the public [Wikipedia Country Info Scraper API](https://gi
 *   **Framework:** [Next.js](https://nextjs.org/) (App Router).
 *   **Library:** [React](https://react.dev/).
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/) with a focus on custom, responsive design and accessibility.
-*   **Maps:** [react-simple-maps](https://www.react-simple-maps.com/) for interactive vector-based map visualizations.
+*   **Maps:** [D3.js](https://d3js.org/) for high-performance, custom vector-based map projections and interactive zooming.
 *   **State Management:** [Zustand](https://zustand.docs.pmndrs.org/).
 *   **Data Fetching:** [TanStack React Query](https://tanstack.com/query/latest).
 *   **Type Safety:** Fully typed with [TypeScript](https://www.typescriptlang.org/).
