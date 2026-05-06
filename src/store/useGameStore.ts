@@ -35,7 +35,8 @@ interface GameState {
 
 const INITIAL_TIME = 300; // 5 minutes
 
-const normalizeString = (str: string) => {
+const normalizeString = (str: string | null | undefined) => {
+  if (!str) return "";
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -56,16 +57,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   totalToGuess: 0,
 
   startGame: (states, validNames) => {
-    const filtered = states.filter(s => 
-      validNames.some(name => normalizeString(s.properties.name) === normalizeString(name))
-    );
+    const filtered = states.filter(s => {
+      const stateName = s.properties?.name;
+      if (!stateName) return false;
+      return validNames.some(name => normalizeString(stateName) === normalizeString(name));
+    });
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
     set({
       status: 'playing',
       score: 0,
       timeLeft: INITIAL_TIME,
       remainingStates: shuffled.slice(1),
-      currentState: shuffled[0],
+      currentState: shuffled[0] || null,
       missedStates: [],
       correctlyGuessedIds: [],
       userInput: '',

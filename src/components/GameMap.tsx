@@ -16,6 +16,15 @@ interface GameMapProps {
   height?: number;
 }
 
+const normalizeString = (str: string | null | undefined) => {
+  if (!str) return "";
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+};
+
 export default function GameMap({ 
   mapData, 
   highlightedStateId, 
@@ -33,9 +42,11 @@ export default function GameMap({
     if (!mapData || !mapData.objects[objectName]) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const geo = feature(mapData, mapData.objects[objectName]) as any;
-    return (geo.features as StateFeature[]).filter(s => 
-      validNames.some(name => s.properties.name.toLowerCase() === name.toLowerCase())
-    );
+    return (geo.features as StateFeature[]).filter(s => {
+      const stateName = s.properties?.name;
+      if (!stateName) return false;
+      return validNames.some(name => normalizeString(stateName) === normalizeString(name));
+    });
   }, [mapData, objectName, validNames]);
 
   return (
