@@ -32,6 +32,7 @@ export default function AustraliaStatesGame() {
   };
 
   const getFeedback = () => {
+    if (totalToGuess === 0) return "Keep practicing!";
     const percentage = score / totalToGuess;
     if (percentage === 1) return "Perfect! You know your geography!";
     if (percentage > 0.8) return "Excellent work!";
@@ -45,7 +46,7 @@ export default function AustraliaStatesGame() {
 
   const projection = d3.geoConicEquidistant()
     .center([133, -25])
-    .rotate([-133, 0])
+      .rotate([-133, 0])
     .scale(800)
     .translate([960 / 2, 600 / 2]);
 
@@ -125,10 +126,16 @@ export default function AustraliaStatesGame() {
                     )}
                     <button
                       onClick={handleStartGame}
-                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all mt-6"
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-[#008c98] transition-all mt-6"
                     >
                       <RefreshCw size={20} />
                       PLAY AGAIN
+                    </button>
+                    <button
+                      onClick={resetGame}
+                      className="w-full mt-4 py-2 text-gray-500 hover:text-primary transition-colors font-semibold text-sm"
+                    >
+                      Change Difficulty
                     </button>
                   </div>
                 </div>
@@ -136,7 +143,6 @@ export default function AustraliaStatesGame() {
             </>
           )}
         </div>
-
         <div className="lg:col-span-4 lg:sticky lg:top-8">
           <GameUI />
         </div>

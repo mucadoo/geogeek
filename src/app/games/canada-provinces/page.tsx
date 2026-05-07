@@ -15,7 +15,7 @@ export default function CanadaProvincesGame() {
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
-  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
+  const[difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   const handleStartGame = () => {
     if (mapData) {
@@ -30,7 +30,7 @@ export default function CanadaProvincesGame() {
   }, [resetGame]);
 
   const projection = d3.geoAzimuthalEqualArea()
-    .rotate([96, -60])
+      .rotate([96, -60])
     .scale(600)
     .translate([960 / 2, 600 / 2]);
 
@@ -56,6 +56,21 @@ export default function CanadaProvincesGame() {
               <p className="text-gray-600 mb-8">
                 How many Canadian provinces and territories can you name? Test your knowledge of the Great White North!
               </p>
+
+              <div className="flex gap-2 mb-8 justify-center">
+                {(['easy', 'medium', 'hard'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    className={`px-4 py-2 rounded-lg font-bold capitalize transition-all ${
+                      difficulty === d ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+
               <button
                 onClick={handleStartGame}
                 className="flex items-center justify-center gap-3 w-full py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-lg shadow-primary/25"
@@ -93,10 +108,16 @@ export default function CanadaProvincesGame() {
                     )}
                     <button
                       onClick={handleStartGame}
-                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all mt-6"
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-[#008c98] transition-all mt-6"
                     >
                       <RefreshCw size={20} />
                       PLAY AGAIN
+                    </button>
+                    <button
+                      onClick={resetGame}
+                      className="w-full mt-4 py-2 text-gray-500 hover:text-primary transition-colors font-semibold text-sm"
+                    >
+                      Change Difficulty
                     </button>
                   </div>
                 </div>
@@ -104,7 +125,6 @@ export default function CanadaProvincesGame() {
             </>
           )}
         </div>
-
         <div className="lg:col-span-4 lg:sticky lg:top-8">
           <GameUI />
         </div>

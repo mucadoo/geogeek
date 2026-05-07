@@ -45,7 +45,6 @@ export default function ItalyRegionsGame() {
   return (
     <main className="max-w-[1400px] mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Map */}
         <div className="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px] flex items-center justify-center relative">
           {gameStatus === 'idle' ? (
             <div className="text-center p-12 max-w-md">
@@ -56,6 +55,21 @@ export default function ItalyRegionsGame() {
               <p className="text-gray-600 mb-8">
                 How many Italian regions can you name? Test your knowledge!
               </p>
+
+              <div className="flex gap-2 mb-8 justify-center">
+                {(['easy', 'medium', 'hard'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    className={`px-4 py-2 rounded-lg font-bold capitalize transition-all ${
+                      difficulty === d ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+
               <button
                 onClick={handleStartGame}
                 className="flex items-center justify-center gap-3 w-full py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-lg shadow-primary/25"
@@ -70,7 +84,7 @@ export default function ItalyRegionsGame() {
                 mapData={mapData} 
                 highlightedStateId={currentState?.id || null} 
                 projection={projection}
-                objectName="states"
+                objectName="default"
                 validNames={ITALY_REGIONS}
               />
               {gameStatus === 'finished' && (
@@ -92,10 +106,16 @@ export default function ItalyRegionsGame() {
                     )}
                     <button
                       onClick={handleStartGame}
-                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all mt-6"
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-[#008c98] transition-all mt-6"
                     >
                       <RefreshCw size={20} />
                       PLAY AGAIN
+                    </button>
+                    <button
+                      onClick={resetGame}
+                      className="w-full mt-4 py-2 text-gray-500 hover:text-primary transition-colors font-semibold text-sm"
+                    >
+                      Change Difficulty
                     </button>
                   </div>
                 </div>
@@ -103,8 +123,6 @@ export default function ItalyRegionsGame() {
             </>
           )}
         </div>
-
-        {/* Right Column: UI */}
         <div className="lg:col-span-4 lg:sticky lg:top-8">
           <GameUI />
         </div>

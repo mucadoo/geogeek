@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/useGameStore';
-import { Timer, Trophy, SkipForward } from 'lucide-react';
+import { Timer, Trophy, SkipForward, XCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -14,11 +14,10 @@ export default function GameUI() {
   const { 
     status, score, timeLeft, userInput, lastGuessCorrect,
     remainingStates, currentState, totalToGuess,
-    setUserInput, submitGuess, skipState, tick 
+    setUserInput, submitGuess, skipState, tick, resetGame
   } = useGameStore();
   
   const inputRef = useRef<HTMLInputElement>(null);
-
   const currentProgress = totalToGuess - (remainingStates.length + (currentState ? 1 : 0));
 
   useEffect(() => {
@@ -80,7 +79,7 @@ export default function GameUI() {
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type state name..."
+              placeholder="Type region name..."
               className={cn(
                 "w-full px-6 py-4 bg-gray-50 border-2 outline-none rounded-2xl text-lg font-medium transition-all",
                 lastGuessCorrect === false ? "border-red-400 bg-red-50 shake" : "border-transparent focus:border-primary focus:bg-white"
@@ -97,8 +96,18 @@ export default function GameUI() {
             className="flex items-center justify-center gap-2 py-3 px-6 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all font-semibold mt-2"
           >
             <SkipForward size={18} />
-            Skip State
+            Skip Region
           </button>
+
+          {/* Gameplay Navigation (Quit) */}
+          <div className="flex justify-center mt-2 pt-4 border-t border-gray-100">
+            <button
+              onClick={resetGame}
+              className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors font-medium"
+            >
+              <XCircle size={16} /> Quit Game
+            </button>
+          </div>
         </div>
       ) : (
         <div className="text-center py-4">

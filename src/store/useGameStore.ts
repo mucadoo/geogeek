@@ -27,7 +27,6 @@ interface GameState {
   lastGuessCorrect: boolean | null;
   totalToGuess: number;
   
-  // Actions
   startGame: (states: StateFeature[], validNames: string[], duration: number, difficulty: Difficulty) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
@@ -36,7 +35,7 @@ interface GameState {
   resetGame: () => void;
 }
 
-const INITIAL_TIME = 300; // 5 minutes
+const INITIAL_TIME = 300;
 
 const normalizeString = (str: string | null | undefined) => {
   if (!str) return "";
@@ -47,6 +46,38 @@ const normalizeString = (str: string | null | undefined) => {
     .trim();
 };
 
+export const getFeedback = (score: number, total: number): string => {
+  if (total === 0) return "Keep practicing!";
+  const percentage = (score / total) * 100;
+  if (percentage === 100) return "Perfect! You're a geography master!";
+  if (percentage > 80) return "Amazing job! Almost perfect!";
+  if (percentage > 50) return "Good work! You know your way around!";
+  return "Keep practicing, you'll get there!";
+};
+
+const ALIASES: Record<string, string[]> = {
+  "provence-alpes-cote d'azur": ["cote dazur", "paca", "provence"],
+  "trentino-alto adige": ["south tyrol", "trentino"],
+  "distrito federal": ["df"],
+  "friuli-venezia giulia": ["friuli"],
+  "emilia-romagna": ["emilia", "romagna"],
+  "valle d'aosta":["aosta", "aosta valley"],
+  "corse": ["corsica"],
+  "bretagne":["brittany"],
+  "bourgogne-franche-comte":["bourgogne", "burgundy", "franche-comte"],
+  "centre-val de loire": ["centre", "val de loire"],
+  "nouvelle-aquitaine": ["aquitaine"],
+  "grand est":["alsace-champagne-ardenne-lorraine"],
+  "hauts-de-france":["nord-pas-de-calais-picardie"],
+  "washington dc": ["dc", "district of columbia"],
+  "australian capital territory": ["act"],
+  "northern territory": ["nt"],
+  "newfoundland and labrador": ["newfoundland", "labrador"],
+  "british columbia": ["bc"],
+  "prince edward island": ["pei"],
+  "northwest territories": ["nwt"]
+};
+
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'idle',
   difficulty: 'medium',
@@ -54,8 +85,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   timeLeft: INITIAL_TIME,
   currentState: null,
   remainingStates: [],
-  missedStates: [],
-  correctlyGuessedIds: [],
+  missedStates:[],
+  correctlyGuessedIds:[],
   userInput: '',
   lastGuessCorrect: null,
   totalToGuess: 0,
@@ -76,12 +107,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       remainingStates: shuffled.slice(1),
       currentState: shuffled[0] || null,
       missedStates: [],
-      correctlyGuessedIds: [],
+      correctlyGuessedIds:[],
       userInput: '',
       lastGuessCorrect: null,
       totalToGuess: filtered.length,
     });
   },
+  
   setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null }),
 
   submitGuess: (guess) => {
@@ -89,9 +121,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!currentState) return false;
 
     const normalizedGuess = normalizeString(guess);
-    const normalizedTarget = normalizeString(currentState.properties.name);
+    const targetName = currentState.properties.name;
+    const normalizedTarget = normalizeString(targetName);
+    
+    const targetAliases = ALIASES[normalizedTarget] || [];
 
-    if (normalizedGuess === normalizedTarget) {
+    if (
+      normalizedGuess === normalizedTarget || 
+      targetAliases.includes(normalizedGuess)
+    ) {
       const newCorrectIds = [...correctlyGuessedIds, currentState.id];
       if (remainingStates.length === 0) {
         set({ status: 'finished', score: score + 1, currentState: null, userInput: '', lastGuessCorrect: true, correctlyGuessedIds: newCorrectIds });
@@ -115,13 +153,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   skipState: () => {
     const { currentState, remainingStates, missedStates } = get();
-    
     if (!currentState) return;
     
-    // Add current state to the end of the remaining states queue
-    const updatedRemaining = [...remainingStates, currentState];
-    
-    // Only track skip if it wasn't previously added (to avoid duplicates, though we filter later)
+    const updatedRemaining =[...remainingStates, currentState];
     const newMissed = [...new Set([...missedStates, currentState])];
     
     if (updatedRemaining.length === 0) {
@@ -150,12 +184,11 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   resetGame: () => set({
     status: 'idle',
-    difficulty: 'medium',
     score: 0,
     currentState: null,
-    remainingStates: [],
+    remainingStates:[],
     missedStates: [],
-    correctlyGuessedIds: [],
+    correctlyGuessedIds:[],
     userInput: '',
     lastGuessCorrect: null,
     totalToGuess: 0,
