@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as d3 from 'd3';
+import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -66,7 +67,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       return validNames.some(name => normalizeString(stateName) === normalizeString(name));
     });
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-    const difficultyMultiplier = difficulty === 'easy' ? 1.5 : difficulty === 'hard' ? 0.5 : 1.0;
+    const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
     set({
       status: 'playing',
       difficulty,
@@ -81,7 +82,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       totalToGuess: filtered.length,
     });
   },
-
   setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null }),
 
   submitGuess: (guess) => {
@@ -152,7 +152,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     status: 'idle',
     difficulty: 'medium',
     score: 0,
-    timeLeft: INITIAL_TIME,
     currentState: null,
     remainingStates: [],
     missedStates: [],
