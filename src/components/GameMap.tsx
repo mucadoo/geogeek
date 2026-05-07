@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useMemo } from 'react';
 import * as d3 from 'd3';
+import { Feature, FeatureCollection } from 'geojson';
+import React, { useMemo } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
-import { Feature, FeatureCollection } from 'geojson';
+
 import { useGameStore } from '@/store/useGameStore';
 
 interface GameMapProps {
@@ -47,10 +48,10 @@ export default function GameMap({
   }, [mapData, objectName]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4">
+    <div className="flex h-full w-full items-center justify-center p-4">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-full max-h-[600px] outline-none"
+        className="h-full max-h-[600px] w-full outline-none"
       >
         <g>
           {allFeatures.map((feat: Feature, i: number) => {

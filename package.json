@@ -22,6 +22,8 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "^16.2.5",
     "@tailwindcss/postcss": "^4",
     "@types/d3": "^7.4.3",
     "@types/node": "^25",
@@ -30,9 +32,13 @@
     "@types/react-dom": "^19",
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-specification": "^1.0.5",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-tailwindcss": "^3.18.3",
     "tailwindcss": "^4",
-    "typescript": "^6"
+    "typescript": "^6",
+    "typescript-eslint": "^8.59.2"
   }
 }

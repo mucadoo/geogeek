@@ -9,7 +9,7 @@ export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       className={twMerge(
-        clsx('animate-pulse bg-gray-200 rounded', className)
+        clsx('animate-pulse rounded bg-gray-200', className)
       )}
     />
   );

@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import * as d3 from 'd3';
+import { Trophy, RefreshCw, Play, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useUSMapData } from '@/hooks/useRegionMapData';
-import { useGameStore, StateFeature, getFeedback } from '@/store/useGameStore';
+import React, { useEffect } from 'react';
+import { feature } from 'topojson-client';
+
 import GameMap from '@/components/GameMap';
 import GameUI from '@/components/GameUI';
-import { feature } from 'topojson-client';
-import { Trophy, RefreshCw, Play, ArrowLeft } from 'lucide-react';
-import * as d3 from 'd3';
 import { US_STATES, GAME_DURATIONS }  from '@/config/gameConstants';
+import { useUSMapData } from '@/hooks/useRegionMapData';
+import { useGameStore, StateFeature, getFeedback } from '@/store/useGameStore';
+
+
 
 export default function USStatesGame() {
   const { data: mapData, status: mapStatus } = useUSMapData();
@@ -36,36 +39,36 @@ export default function USStatesGame() {
 
   if (mapStatus === 'pending') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-        <p className="text-gray-500 font-medium">Loading Map Data...</p>
+      <div className="flex min-h-[600px] flex-col items-center justify-center gap-4">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+        <p className="font-medium text-gray-500">Loading Map Data...</p>
       </div>
     );
   }
 
   return (
-    <main className="max-w-[1400px] mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px] flex items-center justify-center relative">
+    <main className="mx-auto max-w-[1400px] px-4 py-8">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <div className="relative flex min-h-[600px] items-center justify-center overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm lg:col-span-8">
           {gameStatus === 'idle' ? (
-            <div className="text-center p-12 max-w-md">
-              <Link href="/games" className="absolute top-8 left-8 flex items-center gap-2 text-gray-400 hover:text-primary transition-colors font-medium">
+            <div className="max-w-md p-12 text-center">
+              <Link href="/games" className="hover:text-primary absolute top-8 left-8 flex items-center gap-2 font-medium text-gray-400 transition-colors">
                 <ArrowLeft size={20} /> Back to Games
               </Link>
-              <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <div className="bg-primary/10 text-primary mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl">
                 <Trophy size={40} />
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">US States Quiz</h1>
-              <p className="text-gray-600 mb-8">
+              <h1 className="mb-4 text-3xl font-bold text-gray-800">US States Quiz</h1>
+              <p className="mb-8 text-gray-600">
                 How many United States can you name? A state will be highlighted, and you have 5 minutes to guess as many as you can!
               </p>
               
-              <div className="flex gap-2 mb-8 justify-center">
+              <div className="mb-8 flex justify-center gap-2">
                 {(['easy', 'medium', 'hard'] as const).map((d) => (
                   <button
                     key={d}
                     onClick={() => setDifficulty(d)}
-                    className={`px-4 py-2 rounded-lg font-bold capitalize transition-all ${
+                    className={`rounded-lg px-4 py-2 font-bold capitalize transition-all ${
                       difficulty === d ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
@@ -76,7 +79,7 @@ export default function USStatesGame() {
 
               <button
                 onClick={handleStartGame}
-                className="flex items-center justify-center gap-3 w-full py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-lg shadow-primary/25"
+                className="bg-primary shadow-primary/25 flex w-full items-center justify-center gap-3 rounded-2xl py-4 text-lg font-bold text-white shadow-lg transition-all hover:scale-105"
               >
                 <Play fill="currentColor" />
                 START GAME
@@ -92,17 +95,17 @@ export default function USStatesGame() {
                 validNames={US_STATES}
               />
               {gameStatus === 'finished' && (
-                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 p-4">
-                  <div className="text-center p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-y-auto max-h-full">
-                    <Trophy size={64} className="text-amber-500 mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">{getFeedback(score, totalToGuess)}</h2>
-                    <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> / {totalToGuess} states correctly.</p>
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 p-4 backdrop-blur-sm">
+                  <div className="max-h-full w-full max-w-lg overflow-y-auto rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-2xl">
+                    <Trophy size={64} className="mx-auto mb-4 text-amber-500" />
+                    <h2 className="mb-2 text-3xl font-bold text-gray-800">{getFeedback(score, totalToGuess)}</h2>
+                    <p className="mb-6 text-gray-600">You guessed <span className="text-primary text-xl font-bold">{score}</span> / {totalToGuess} states correctly.</p>
                     {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).length > 0 && (
                       <div className="mt-4 text-left">
-                        <h3 className="font-semibold text-gray-700 mb-2">Skipped States:</h3>
+                        <h3 className="mb-2 font-semibold text-gray-700">Skipped States:</h3>
                         <div className="flex flex-wrap gap-2">
                           {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).map(state => (
-                            <span key={state.id} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">
+                            <span key={state.id} className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-600">
                               {state.properties.name}
                             </span>
                           ))}
@@ -111,14 +114,14 @@ export default function USStatesGame() {
                     )}
                     <button
                       onClick={handleStartGame}
-                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-[#008c98] transition-all mt-6"
+                      className="bg-primary mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-bold text-white transition-all hover:bg-[#008c98]"
                     >
                       <RefreshCw size={20} />
                       PLAY AGAIN
                     </button>
                     <button
                       onClick={resetGame}
-                      className="w-full mt-4 py-2 text-gray-500 hover:text-primary transition-colors font-semibold text-sm"
+                      className="hover:text-primary mt-4 w-full py-2 text-sm font-semibold text-gray-500 transition-colors"
                     >
                       Change Difficulty
                     </button>
@@ -128,7 +131,7 @@ export default function USStatesGame() {
             </>
           )}
         </div>
-        <div className="lg:col-span-4 lg:sticky lg:top-8">
+        <div className="lg:sticky lg:top-8 lg:col-span-4">
           <GameUI />
         </div>
       </div>

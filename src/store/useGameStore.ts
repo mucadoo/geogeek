@@ -1,5 +1,6 @@
-import { create } from 'zustand';
 import * as d3 from 'd3';
+import { create } from 'zustand';
+
 import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';

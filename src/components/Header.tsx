@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { Home, Globe, BarChart3, Gamepad2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
+import { Home, Globe, BarChart3, Gamepad2 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: ClassValue[]) {
@@ -23,8 +23,8 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="h-[90px] flex justify-between items-center px-4 w-full max-w-[1400px] mx-auto">
-      <Link href="/" className="hover:opacity-80 transition-opacity">
+    <header className="mx-auto flex h-[90px] w-full max-w-[1400px] items-center justify-between px-4">
+      <Link href="/" className="transition-opacity hover:opacity-80">
         <Image 
           src="/media/logo.png" 
           alt="Geogeek logo" 

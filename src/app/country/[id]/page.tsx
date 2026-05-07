@@ -1,7 +1,8 @@
-import Header from '@/components/Header';
-import { countryService } from '@/lib/countryService';
 import { notFound } from 'next/navigation';
+
 import CountryDetailsClient from './CountryDetailsClient';
+
+import { countryService } from '@/lib/countryService';
 
 export async function generateStaticParams() {
   const countries = await countryService.getAllCountries();
@@ -18,10 +19,5 @@ export default async function CountryInfo({ params }: { params: { id: string } }
     notFound();
   }
 
-  return (
-    <>
-      <Header />
-      <CountryDetailsClient country={country} />
-    </>
-  );
+  return <CountryDetailsClient country={country} />;
 }

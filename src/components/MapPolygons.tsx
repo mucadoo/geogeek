@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import * as d3 from 'd3';
 import { useRouter } from 'next/navigation';
 import NProgress from 'nprogress';
-import * as d3 from 'd3';
+import React, { useMemo } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
-import { useMapStore } from '@/store/useMapStore';
+
 import { NUMERIC_TO_CONTINENT, NUMERIC_TO_ALPHA2, CONTINENT_VIEWS } from '@/config/mapConstants';
+import { useMapStore } from '@/store/useMapStore';
 
 interface CountryFeature {
   id: string | number;
@@ -70,7 +71,7 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
             fill={fillColor}
             stroke="var(--color-map-stroke)"
             strokeWidth={0.5}
-            className={`outline-none transition-colors duration-200 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+            className={`transition-colors duration-200 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
             onMouseEnter={(e) => {
               if (!isClickable) return;
               if (selectedContinent) {

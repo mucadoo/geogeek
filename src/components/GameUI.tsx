@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useGameStore } from '@/store/useGameStore';
-import { Timer, Trophy, SkipForward, XCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
+import { Timer, Trophy, SkipForward, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
+
+import { useGameStore } from '@/store/useGameStore';
+
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -58,21 +60,21 @@ export default function GameUI() {
   if (status === 'idle') return null;
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-md mx-auto p-6 bg-white rounded-3xl shadow-lg border border-gray-100">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full font-bold">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-lg">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 font-bold text-blue-700">
           <Timer size={18} />
           {formatTime(timeLeft)}
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-full font-bold">
+        <div className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 font-bold text-amber-700">
           <Trophy size={18} />
           {score}
         </div>
       </div>
 
-      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
         <div 
-          className="h-full bg-primary transition-all duration-500 ease-out"
+          className="bg-primary h-full transition-all duration-500 ease-out"
           style={{ width: `${totalToGuess > 0 ? (currentProgress / totalToGuess) * 100 : 0}%` }}
         />
       </div>
@@ -93,14 +95,14 @@ export default function GameUI() {
               )}
             />
             {lastGuessCorrect === false && (
-              <p className="absolute -bottom-6 left-2 text-xs text-red-500 font-semibold animate-in fade-in slide-in-from-top-1">
+              <p className="animate-in fade-in slide-in-from-top-1 absolute -bottom-6 left-2 text-xs font-semibold text-red-500">
                 Try again!
               </p>
             )}
           </div>
           <button
             onClick={skipState}
-            className="flex items-center justify-center gap-2 py-3 px-6 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all font-semibold mt-2"
+            className="mt-2 flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700"
           >
             <SkipForward size={18} />
             Skip Region
@@ -109,10 +111,10 @@ export default function GameUI() {
       ) : null}
 
       {/* Gameplay Navigation (Quit) */}
-      <div className="flex justify-center pt-4 border-t border-gray-100">
+      <div className="flex justify-center border-t border-gray-100 pt-4">
         <button
           onClick={handleQuit}
-          className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors font-medium"
+          className="flex items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-red-500"
         >
           <XCircle size={16} /> Quit Game
         </button>

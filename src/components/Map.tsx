@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useRef, useEffect, useMemo } from 'react';
-import Image from 'next/image';
 import * as d3 from 'd3';
-import { useMapStore } from '@/store/useMapStore';
-import { useWorldMapData } from '@/hooks/useWorldMapData';
+import Image from 'next/image';
+import React, { useRef, useEffect, useMemo } from 'react';
+
 import MapPolygons from './MapPolygons';
+
+import { useWorldMapData } from '@/hooks/useWorldMapData';
+import { useMapStore } from '@/store/useMapStore';
 
 export default function Map() {
   const { data: mapData, status } = useWorldMapData();
@@ -64,21 +66,21 @@ export default function Map() {
 
   return (
     <div 
-      className="relative w-full h-[650px] flex items-center justify-center bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden"
+      className="relative flex h-[650px] w-full items-center justify-center overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTooltip({ ...tooltip, show: false })}
     >
       {status === 'pending' && (
-        <div className="absolute flex flex-col items-center gap-4 animate-pulse">
-          <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-          <p className="text-gray-500 font-medium">Loading World Map...</p>
+        <div className="absolute flex animate-pulse flex-col items-center gap-4">
+          <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+          <p className="font-medium text-gray-500">Loading World Map...</p>
         </div>
       )}
 
       {status === 'success' && (
         <React.Fragment>
           <div
-            className="fixed z-50 px-5 py-2.5 bg-white text-gray-800 font-semibold text-sm rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-[120%] shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-opacity duration-150 border border-gray-100 whitespace-nowrap"
+            className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-gray-100 bg-white px-5 py-2.5 text-sm font-semibold whitespace-nowrap text-gray-800 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-opacity duration-150"
             style={{ left: tooltip.x, top: tooltip.y, opacity: tooltip.show ? 1 : 0 }}
           >
             {tooltip.content}
@@ -87,7 +89,7 @@ export default function Map() {
           <svg
             ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
-            className="w-full h-full outline-none"
+            className="h-full w-full outline-none"
           >
             <g ref={gRef}>
               <MapPolygons mapData={mapData} projection={projection} />
@@ -98,14 +100,14 @@ export default function Map() {
             <button
               onClick={resetMap}
               title="Return to World"
-              className="absolute top-6 left-6 animate-in fade-in slide-in-from-left-4 duration-500 shadow-xl p-2 bg-white rounded-full hover:scale-105 transition-all group cursor-pointer"
+              className="animate-in fade-in slide-in-from-left-4 group absolute top-6 left-6 cursor-pointer rounded-full bg-white p-2 shadow-xl transition-all duration-500 hover:scale-105"
             >
               <Image 
                 src="/media/back_icon.svg" 
                 alt="Return to World" 
                 width={32} 
                 height={32} 
-                className="group-hover:invert-[0.3] sepia-[1] hue-rotate-[180deg] saturate-[3] transition-all"
+                className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
               />
             </button>
           )}
