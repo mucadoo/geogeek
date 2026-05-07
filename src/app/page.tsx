@@ -1,12 +1,9 @@
 import Image from 'next/image';
-import Header from '@/components/Header';
 import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="container-custom flex-grow flex items-center justify-center animate-in fade-in duration-1000 -mt-10">
+    <main className="container-custom flex-grow flex items-center justify-center animate-in fade-in duration-1000 -mt-10">
         <div className="flex flex-col md:flex-row gap-16 items-center w-full max-w-[1000px]">
           
           {/* Left Column - Clean Image Presentation */}
@@ -36,7 +33,6 @@ export default function Home() {
           </div>
 
         </div>
-      </main>
-    </div>
+    </main>
   );
 }
