@@ -25,8 +25,7 @@ export default function ItalyRegionsGame() {
 
   const handleStartGame = () => {
     if (mapData) {
-      const firstKey = Object.keys(mapData.objects)[0];
-      const geo = feature(mapData, mapData.objects[firstKey]) as unknown as FeatureCollection;
+      const geo = feature(mapData, mapData.objects.regions) as unknown as FeatureCollection;
       const states = geo.features as unknown as StateFeature[];
       startGame(states, ITALY_REGIONS, GAME_DURATIONS.ITALY_REGIONS, difficulty);
     }
@@ -39,8 +38,7 @@ export default function ItalyRegionsGame() {
   const projection = useMemo(() => {
     if (!mapData) return d3.geoMercator();
 
-    const firstKey = Object.keys(mapData.objects)[0];
-    const geojson = feature(mapData, mapData.objects[firstKey]) as unknown as FeatureCollection;
+    const geojson = feature(mapData, mapData.objects.regions) as unknown as FeatureCollection;
 
     const regionsOnly: FeatureCollection = {
       type: "FeatureCollection",
@@ -109,7 +107,6 @@ export default function ItalyRegionsGame() {
                   mapData={mapData} 
                   highlightedStateId={currentState?.id || null} 
                   projection={projection}
-                  objectName={Object.keys(mapData.objects)[0]}
                   validNames={ITALY_REGIONS}
                 />
               )}

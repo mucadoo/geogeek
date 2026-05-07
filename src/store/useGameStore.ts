@@ -99,26 +99,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   totalToGuess: 0,
 
   startGame: (states, validNames, duration, difficulty) => {
-    const filtered = states
-      .map(s => {
-        // Highcharts maps sometimes put the name in 'name' or 'Name' 
-        // or a specific property like 'woe-name'
-        const properties = s.properties as Record<string, string>;
-        const name = properties.name || properties.Name || properties['hc-a2'] || "";
-        
-        return {
-          ...s,
-          id: s.id ? String(s.id) : name, // Use name as ID if ID is missing
-          properties: {
-            ...s.properties,
-            name: name // Normalize name location
-          }
-        };
-      })
-      .filter(s => {
-        if (!s.properties.name) return false;
-        return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
-      });
+    // Data is pre-normalized, just filter by name
+    const filtered = states.filter(s => {
+      if (!s.properties.name) return false;
+      return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
+    });
+
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
     const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
     set({

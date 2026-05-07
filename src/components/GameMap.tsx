@@ -12,11 +12,12 @@ interface GameMapProps {
   mapData: Topology;
   highlightedStateId: string | null;
   projection: d3.GeoProjection | d3.GeoIdentityTransform;
-  objectName: string;
   validNames: string[];
   width?: number;
   height?: number;
 }
+
+// ... (keep normalizeString)
 
 const normalizeString = (str: string | null | undefined) => {
   if (!str) return "";
@@ -31,7 +32,6 @@ export default function GameMap({
   mapData, 
   highlightedStateId, 
   projection, 
-  objectName, 
   validNames,
   width = 960,
   height = 600
@@ -42,10 +42,11 @@ export default function GameMap({
 
   // 1. Get ALL features for the background
   const allFeatures = useMemo(() => {
-    if (!mapData || !mapData.objects[objectName]) return [];
-    const geo = feature(mapData, mapData.objects[objectName]) as FeatureCollection;
+    // Data is pre-normalized to have a "regions" object
+    if (!mapData || !mapData.objects.regions) return [];
+    const geo = feature(mapData, mapData.objects.regions) as FeatureCollection;
     return geo.features as Feature[];
-  }, [mapData, objectName]);
+  }, [mapData]);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
@@ -55,20 +56,12 @@ export default function GameMap({
       >
         <g>
           {allFeatures.map((feat: Feature, i: number) => {
-            // Highcharts can store names in several different property keys
-            const properties = feat.properties as Record<string, string> || {};
-            const rawName = 
-              properties.name || 
-              properties.Name || 
-              properties.NAME || 
-              properties['woe-name'] || 
-              "";
+            const stateId = String(feat.id);
+            const stateName = (feat.properties as { name: string }).name;
               
-            const stateId = feat.id ? String(feat.id) : rawName;
-            
             // Logic to determine if this feature is one of the target regions
             const isQuizRegion = validNames.some(vn => 
-              normalizeString(vn) === normalizeString(rawName)
+              normalizeString(vn) === normalizeString(stateName)
             );
 
             const isHighlighted = highlightedStateId === stateId;
@@ -78,7 +71,6 @@ export default function GameMap({
             if (!pathData) return null;
 
             // COLOR LOGIC:
-            // We want all of Italy to be the same color at the start.
             // If it's a quiz region, use --map-fill. 
             // If it's not (like a neighboring country border), make it very light/transparent.
             let fillColor = "#f3f4f6"; 
