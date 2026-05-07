@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/useGameStore';
 import { Timer, Trophy, SkipForward, XCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -11,6 +12,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function GameUI() {
+  const router = useRouter();
   const { 
     status, score, timeLeft, userInput, lastGuessCorrect,
     remainingStates, currentState, totalToGuess,
@@ -46,6 +48,11 @@ export default function GameUI() {
     if (e.key === 'Enter') {
       submitGuess(userInput);
     }
+  };
+
+  const handleQuit = () => {
+    resetGame();
+    router.push('/games');
   };
 
   if (status === 'idle') return null;
@@ -98,23 +105,18 @@ export default function GameUI() {
             <SkipForward size={18} />
             Skip Region
           </button>
+        </div>
+      ) : null}
 
-          {/* Gameplay Navigation (Quit) */}
-          <div className="flex justify-center mt-2 pt-4 border-t border-gray-100">
-            <button
-              onClick={resetGame}
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors font-medium"
-            >
-              <XCircle size={16} /> Quit Game
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Game Over!</h2>
-          <p className="text-gray-500">Your final score: <span className="font-bold text-primary">{score}</span> / {totalToGuess}</p>
-        </div>
-      )}
+      {/* Gameplay Navigation (Quit) */}
+      <div className="flex justify-center pt-4 border-t border-gray-100">
+        <button
+          onClick={handleQuit}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors font-medium"
+        >
+          <XCircle size={16} /> Quit Game
+        </button>
+      </div>
       
       <style jsx>{`
         .shake {
