@@ -1,6 +1,6 @@
 'use client';
 
-import { Map, Trophy, Play, MapPin, Globe, Search, Star, Sparkles } from 'lucide-react';
+import { Map, Play, MapPin, Globe, Search, Star, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useMemo } from 'react';
 
