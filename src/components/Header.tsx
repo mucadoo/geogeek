@@ -30,10 +30,9 @@ export default function Header() {
           alt="Geogeek logo" 
           width={140} 
           height={40}
-          className="object-contain"
+          className="h-auto w-auto object-contain" 
           priority
-        />
-      </Link>
+        />      </Link>
       <nav>
         <ul className="flex items-center gap-2">
           {navItems.map((item) => {
