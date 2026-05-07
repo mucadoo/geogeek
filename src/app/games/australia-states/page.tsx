@@ -9,19 +9,34 @@ import { feature } from 'topojson-client';
 import { Trophy, RefreshCw, Play } from 'lucide-react';
 import * as d3 from 'd3';
 import { AUSTRALIA_STATES, GAME_DURATIONS } from '@/config/gameConstants';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function AustraliaStatesGame() {
   const { data: mapData, status: mapStatus } = useAustraliaMapData();
   const { 
-    status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
+    status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds, totalToGuess
   } = useGameStore();
+  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
-      startGame(states, AUSTRALIA_STATES, GAME_DURATIONS.AUSTRALIA_STATES);
+      startGame(states, AUSTRALIA_STATES, GAME_DURATIONS.AUSTRALIA_STATES, difficulty);
     }
+  };
+
+  const getFeedback = () => {
+    const percentage = score / totalToGuess;
+    if (percentage === 1) return "Perfect! You know your geography!";
+    if (percentage > 0.8) return "Excellent work!";
+    if (percentage > 0.5) return "Good job!";
+    return "Keep practicing!";
   };
 
   useEffect(() => {
@@ -56,6 +71,22 @@ export default function AustraliaStatesGame() {
               <p className="text-gray-600 mb-8">
                 Can you name all the states and territories of Australia? From Western Australia to Tasmania, give it a go!
               </p>
+              
+              <div className="flex gap-2 mb-8 justify-center">
+                {(['easy', 'medium', 'hard'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg font-bold capitalize transition-all",
+                      difficulty === d ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    )}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+              
               <button
                 onClick={handleStartGame}
                 className="flex items-center justify-center gap-3 w-full py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:scale-105 transition-all shadow-lg shadow-primary/25"
@@ -78,7 +109,8 @@ export default function AustraliaStatesGame() {
                   <div className="text-center p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-y-auto max-h-full">
                     <Trophy size={64} className="text-amber-500 mx-auto mb-4" />
                     <h2 className="text-3xl font-bold text-gray-800 mb-2">Good on ya!</h2>
-                    <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> regions correctly.</p>
+                    <p className="text-gray-600 mb-2">{getFeedback()}</p>
+                    <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> / {totalToGuess} regions correctly.</p>
                     {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).length > 0 && (
                       <div className="mt-4 text-left">
                         <h3 className="font-semibold text-gray-700 mb-2">Skipped States:</h3>

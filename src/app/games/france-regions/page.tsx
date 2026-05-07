@@ -15,12 +15,13 @@ export default function FranceRegionsGame() {
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
+  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects.states) as any).features as StateFeature[];
-      startGame(states, FRANCE_REGIONS, GAME_DURATIONS.FRANCE_REGIONS);
+      startGame(states, FRANCE_REGIONS, GAME_DURATIONS.FRANCE_REGIONS, difficulty);
     }
   };
 

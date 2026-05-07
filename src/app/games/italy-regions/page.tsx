@@ -15,12 +15,13 @@ export default function ItalyRegionsGame() {
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
+  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects.states) as any).features as StateFeature[];
-      startGame(states, ITALY_REGIONS, GAME_DURATIONS.ITALY_REGIONS);
+      startGame(states, ITALY_REGIONS, GAME_DURATIONS.ITALY_REGIONS, difficulty);
     }
   };
 

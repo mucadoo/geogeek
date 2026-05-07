@@ -15,12 +15,13 @@ export default function CanadaProvincesGame() {
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
+  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const provinces = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
-      startGame(provinces, CANADA_PROVINCES, GAME_DURATIONS.CANADA_PROVINCES);
+      startGame(provinces, CANADA_PROVINCES, GAME_DURATIONS.CANADA_PROVINCES, difficulty);
     }
   };
 

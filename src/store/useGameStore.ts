@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as d3 from 'd3';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
+export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface StateFeature {
   id: string;
@@ -14,6 +15,7 @@ export interface StateFeature {
 
 interface GameState {
   status: GameStatus;
+  difficulty: Difficulty;
   score: number;
   timeLeft: number;
   currentState: StateFeature | null;
@@ -25,7 +27,7 @@ interface GameState {
   totalToGuess: number;
   
   // Actions
-  startGame: (states: StateFeature[], validNames: string[], duration: number) => void;
+  startGame: (states: StateFeature[], validNames: string[], duration: number, difficulty: Difficulty) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
   tick: () => void;
@@ -46,6 +48,7 @@ const normalizeString = (str: string | null | undefined) => {
 
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'idle',
+  difficulty: 'medium',
   score: 0,
   timeLeft: INITIAL_TIME,
   currentState: null,
@@ -56,17 +59,19 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastGuessCorrect: null,
   totalToGuess: 0,
 
-  startGame: (states, validNames, duration) => {
+  startGame: (states, validNames, duration, difficulty) => {
     const filtered = states.filter(s => {
       const stateName = s.properties?.name;
       if (!stateName) return false;
       return validNames.some(name => normalizeString(stateName) === normalizeString(name));
     });
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+    const difficultyMultiplier = difficulty === 'easy' ? 1.5 : difficulty === 'hard' ? 0.5 : 1.0;
     set({
       status: 'playing',
+      difficulty,
       score: 0,
-      timeLeft: duration,
+      timeLeft: Math.floor(duration * difficultyMultiplier),
       remainingStates: shuffled.slice(1),
       currentState: shuffled[0] || null,
       missedStates: [],
@@ -145,6 +150,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   resetGame: () => set({
     status: 'idle',
+    difficulty: 'medium',
     score: 0,
     timeLeft: INITIAL_TIME,
     currentState: null,

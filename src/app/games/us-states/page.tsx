@@ -15,12 +15,13 @@ export default function USStatesGame() {
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
+  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects.states) as any).features as StateFeature[];
-      startGame(states, US_STATES, GAME_DURATIONS.US_STATES);
+      startGame(states, US_STATES, GAME_DURATIONS.US_STATES, difficulty);
     }
   };
 

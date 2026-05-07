@@ -1,4 +1,10 @@
-export const TIME_PER_STATE_SECONDS = 10;
+export const TIME_PER_STATE_SECONDS = 20;
+
+export const DIFFICULTY_MULTIPLIERS = {
+  easy: 1.5,
+  medium: 1.0,
+  hard: 0.5,
+};
 
 export const GAME_DURATIONS: Record<string, number> = {
   US_STATES: 50 * TIME_PER_STATE_SECONDS,
