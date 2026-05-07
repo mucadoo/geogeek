@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { useMemo } from 'react';
 
 import QuizLayout from '@/components/QuizLayout';
-import { US_STATES, US_CAPITALS, GAME_DURATIONS } from '@/config/gameConstants';
+import { US_STATES, US_CAPITALS, GAME_DURATIONS, CAPITAL_COORDINATES } from '@/config/gameConstants';
 import { useUSMapData } from '@/hooks/useRegionMapData';
 
 export default function USCapitalsGame() {
@@ -27,6 +27,7 @@ export default function USCapitalsGame() {
       duration={GAME_DURATIONS.US_STATES}
       gameMode="capital"
       capitalMap={US_CAPITALS}
+      capitalCoordinates={CAPITAL_COORDINATES} // <--- Red Dot exactly where the city is
     />
   );
 }

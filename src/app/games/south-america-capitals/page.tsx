@@ -3,7 +3,7 @@
 import * as d3 from 'd3';
 
 import QuizLayout from '@/components/QuizLayout';
-import { SOUTH_AMERICA_COUNTRIES, SOUTH_AMERICA_CAPITALS, TIME_PER_STATE_SECONDS } from '@/config/gameConstants';
+import { SOUTH_AMERICA_COUNTRIES, SOUTH_AMERICA_CAPITALS, TIME_PER_STATE_SECONDS, CAPITAL_COORDINATES } from '@/config/gameConstants';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 
 export default function SouthAmericaCapitalsGame() {
@@ -25,6 +25,8 @@ export default function SouthAmericaCapitalsGame() {
       duration={SOUTH_AMERICA_COUNTRIES.length * TIME_PER_STATE_SECONDS}
       gameMode="capital"
       capitalMap={SOUTH_AMERICA_CAPITALS}
+      showOnlyValid={true} // <--- Hides the rest of the world
+      capitalCoordinates={CAPITAL_COORDINATES} // <--- Gives the Red Dot exact coordinates
     />
   );
 }

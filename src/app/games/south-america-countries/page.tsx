@@ -25,6 +25,7 @@ export default function SouthAmericaCountriesGame() {
       projection={projection}
       validNames={SOUTH_AMERICA_COUNTRIES}
       duration={SOUTH_AMERICA_COUNTRIES.length * TIME_PER_STATE_SECONDS}
+      showOnlyValid={true} // <--- Hides North America, Europe, etc.
     />
   );
 }

@@ -27,10 +27,15 @@ interface QuizLayoutProps {
   duration: number;
   gameMode?: GameMode;
   capitalMap?: Record<string, string>;
+  
+  // NEW PROPS
+  showOnlyValid?: boolean;
+  capitalCoordinates?: Record<string, [number, number]>;
 }
 
 export default function QuizLayout({
-  title, description, mapData, mapStatus, projection, validNames, duration, gameMode = 'name', capitalMap = {}
+  title, description, mapData, mapStatus, projection, validNames, duration, gameMode = 'name', capitalMap = {},
+  showOnlyValid = false, capitalCoordinates = {}
 }: QuizLayoutProps) {
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
@@ -100,7 +105,16 @@ export default function QuizLayout({
           ) : (
             <>
               {mapData && (
-                <GameMap mapData={mapData} highlightedStateId={currentState?.id || null} projection={projection} validNames={validNames} />
+                <GameMap 
+                  mapData={mapData} 
+                  highlightedStateId={currentState?.id || null} 
+                  projection={projection} 
+                  validNames={validNames}
+                  gameMode={gameMode}
+                  capitalMap={capitalMap}
+                  capitalCoordinates={capitalCoordinates}
+                  showOnlyValid={showOnlyValid}
+                />
               )}
               {gameStatus === 'finished' && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 p-4 backdrop-blur-sm">
