@@ -26,8 +26,8 @@ export default function AustraliaStatesGame() {
 
   const handleStartGame = () => {
     if (mapData) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const states = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
+      const firstKey = Object.keys(mapData.objects)[0];
+      const states = (feature(mapData, mapData.objects[firstKey]) as any).features as StateFeature[];
       startGame(states, AUSTRALIA_STATES, GAME_DURATIONS.AUSTRALIA_STATES, difficulty);
     }
   };
@@ -36,10 +36,9 @@ export default function AustraliaStatesGame() {
     return () => resetGame();
   }, [resetGame]);
 
-  const projection = d3.geoConicEquidistant()
-    .center([133, -25])
-      .rotate([-133, 0])
-    .scale(800)
+  const projection = d3.geoMercator()
+    .center([133, -27]) // Center of Australia
+    .scale(600)
     .translate([960 / 2, 600 / 2]);
 
   if (mapStatus === 'pending') {
@@ -93,13 +92,15 @@ export default function AustraliaStatesGame() {
             </div>
           ) : (
             <>
-              <GameMap 
-                mapData={mapData} 
-                highlightedStateId={currentState?.id || null} 
-                projection={projection}
-                objectName="default"
-                validNames={AUSTRALIA_STATES}
-              />
+              {mapData && (
+                <GameMap 
+                  mapData={mapData} 
+                  highlightedStateId={currentState?.id || null} 
+                  projection={projection}
+                  objectName={Object.keys(mapData.objects)[0]}
+                  validNames={AUSTRALIA_STATES}
+                />
+              )}
               {gameStatus === 'finished' && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 p-4">
                   <div className="text-center p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-y-auto max-h-full">

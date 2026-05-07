@@ -56,9 +56,10 @@ export default function GameMap({
         className="w-full h-full max-h-[600px] outline-none"
       >
         <g>
-          {states.map((state) => {
-            const isHighlighted = highlightedStateId === state.id;
-            const isCorrect = correctlyGuessedIds.includes(state.id);
+          {states.map((state, index) => {
+            const stateId = state.id ? String(state.id) : state.properties?.name;
+            const isHighlighted = highlightedStateId === stateId;
+            const isCorrect = correctlyGuessedIds.includes(stateId);
             const pathData = pathGenerator(state as d3.GeoPermissibleObjects);
 
             if (!pathData) return null;
@@ -69,7 +70,7 @@ export default function GameMap({
 
             return (
               <path
-                key={state.id}
+                key={stateId || index}
                 d={pathData}
                 fill={fillColor}
                 stroke="var(--color-map-stroke)"

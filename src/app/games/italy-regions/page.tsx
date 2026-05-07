@@ -20,8 +20,9 @@ export default function ItalyRegionsGame() {
 
   const handleStartGame = () => {
     if (mapData) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const states = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
+      // Dynamically find the first key (usually "default" or "it-all")
+      const firstKey = Object.keys(mapData.objects)[0];
+      const states = (feature(mapData, mapData.objects[firstKey]) as any).features as StateFeature[];
       startGame(states, ITALY_REGIONS, GAME_DURATIONS.ITALY_REGIONS, difficulty);
     }
   };
@@ -85,13 +86,15 @@ export default function ItalyRegionsGame() {
             </div>
           ) : (
             <>
-              <GameMap 
-                mapData={mapData} 
-                highlightedStateId={currentState?.id || null} 
-                projection={projection}
-                objectName="default"
-                validNames={ITALY_REGIONS}
-              />
+              {mapData && (
+                <GameMap 
+                  mapData={mapData} 
+                  highlightedStateId={currentState?.id || null} 
+                  projection={projection}
+                  objectName={Object.keys(mapData.objects)[0]}
+                  validNames={ITALY_REGIONS}
+                />
+              )}
               {gameStatus === 'finished' && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 p-4">
                   <div className="text-center p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-y-auto max-h-full">
