@@ -1,3 +1,14 @@
+export const TIME_PER_STATE_SECONDS = 10;
+
+export const GAME_DURATIONS: Record<string, number> = {
+  US_STATES: 50 * TIME_PER_STATE_SECONDS,
+  BRAZIL_STATES: 28 * TIME_PER_STATE_SECONDS,
+  ITALY_REGIONS: 28 * TIME_PER_STATE_SECONDS,
+  FRANCE_REGIONS: 23 * TIME_PER_STATE_SECONDS,
+  CANADA_PROVINCES: 13 * TIME_PER_STATE_SECONDS,
+  AUSTRALIA_STATES: 8 * TIME_PER_STATE_SECONDS,
+};
+
 export const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", 
   "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", 
