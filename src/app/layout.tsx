@@ -4,6 +4,7 @@ import NextTopLoader from 'nextjs-toploader';
 
 import Providers from "./providers";
 
+import AnimatedBackground from "@/components/AnimatedBackground"; 
 import Header from "@/components/Header";
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col antialiased">
         <NextTopLoader color="#00a8b5" showSpinner={false} height={3} />
         <Providers>
+          <AnimatedBackground /> 
           <Header />
           {children}
         </Providers>
