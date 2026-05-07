@@ -2,7 +2,7 @@ import Map from '@/components/Map';
 
 export default function MapExplorer() {
   return (
-    <main className="container-custom animate-in fade-in relative mt-2 mb-10 w-full flex-grow duration-1000">
+    <main className="animate-in fade-in fixed inset-0 z-0 h-screen w-screen bg-[#f1f5f3] duration-1000">
       <Map />
     </main>
   );

@@ -66,21 +66,21 @@ export default function Map() {
 
   return (
     <div 
-      className="relative flex h-[650px] w-full items-center justify-center overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+      className="absolute inset-0 h-full w-full overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTooltip({ ...tooltip, show: false })}
     >
       {status === 'pending' && (
-        <div className="absolute flex animate-pulse flex-col items-center gap-4">
+        <div className="absolute inset-0 flex animate-pulse flex-col items-center justify-center gap-4">
           <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-          <p className="font-medium text-gray-500">Loading World Map...</p>
+          <p className="font-medium text-gray-500">Loading Explorer...</p>
         </div>
       )}
 
       {status === 'success' && (
         <React.Fragment>
           <div
-            className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-gray-100 bg-white px-5 py-2.5 text-sm font-semibold whitespace-nowrap text-gray-800 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-opacity duration-150"
+            className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-gray-100 bg-white/95 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-gray-800 shadow-xl backdrop-blur transition-opacity duration-150"
             style={{ left: tooltip.x, top: tooltip.y, opacity: tooltip.show ? 1 : 0 }}
           >
             {tooltip.content}
@@ -89,7 +89,8 @@ export default function Map() {
           <svg
             ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
-            className="h-full w-full outline-none"
+            preserveAspectRatio="xMidYMid meet"
+            className="h-full w-full outline-none cursor-grab active:cursor-grabbing"
           >
             <g ref={gRef}>
               <MapPolygons mapData={mapData} projection={projection} />
@@ -100,7 +101,7 @@ export default function Map() {
             <button
               onClick={resetMap}
               title="Return to World"
-              className="animate-in fade-in slide-in-from-left-4 group absolute top-6 left-6 cursor-pointer rounded-full bg-white p-2 shadow-xl transition-all duration-500 hover:scale-105"
+              className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-white p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
             >
               <Image 
                 src="/media/back_icon.svg" 

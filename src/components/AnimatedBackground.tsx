@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import React, { useEffect, useRef } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
+import { usePathname } from 'next/navigation';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 
@@ -16,9 +17,13 @@ const randomCoords = (): [number, number] =>[
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: mapData } = useWorldMapData();
+  const pathname = usePathname();
+  
+  const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
 
   useEffect(() => {
-    if (!mapData || !canvasRef.current) return;
+    // DO NOT animate if we are on a fullscreen map page!
+    if (!mapData || !canvasRef.current || isFullscreen) return;
 
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on base

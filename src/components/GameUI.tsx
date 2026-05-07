@@ -53,17 +53,17 @@ export default function GameUI() {
   if (status === 'idle') return null;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-lg">
+    <div className="mx-auto flex w-full flex-col gap-5 rounded-3xl border border-gray-100/50 bg-white/95 p-6 shadow-2xl backdrop-blur-xl">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 font-bold text-blue-700">
+        <div className="flex items-center gap-2 rounded-full bg-blue-50/80 px-4 py-2 font-bold text-blue-700 backdrop-blur-sm">
           <Timer size={18} /> {formatTime(timeLeft)}
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 font-bold text-amber-700">
+        <div className="flex items-center gap-2 rounded-full bg-amber-50/80 px-4 py-2 font-bold text-amber-700 backdrop-blur-sm">
           <Trophy size={18} /> {score}
         </div>
       </div>
 
-      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200/50">
         <div className="bg-primary h-full transition-all duration-500 ease-out"
           style={{ width: `${totalToGuess > 0 ? (currentProgress / totalToGuess) * 100 : 0}%` }}
         />
@@ -71,12 +71,11 @@ export default function GameUI() {
 
       {status === 'playing' ? (
         <div className="flex flex-col gap-4">
-          
-          {/* NEW: Display the Target Name if guessing capitals */}
+          {/* Display Target Name */}
           {gameMode === 'capital' && currentState && (
-            <div className="mb-2 flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 p-4">
-              <span className="mb-1 text-xs font-bold tracking-widest text-primary uppercase">Name the capital of</span>
-              <span className="text-center text-2xl font-extrabold text-[#2c3e50]">{currentState.properties.name}</span>
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 p-3 shadow-inner">
+              <span className="mb-1 text-[10px] font-bold tracking-widest text-primary uppercase">Name the capital of</span>
+              <span className="text-center text-xl font-extrabold text-[#2c3e50]">{currentState.properties.name}</span>
             </div>
           )}
 
@@ -89,25 +88,25 @@ export default function GameUI() {
               onKeyDown={handleKeyDown}
               placeholder={gameMode === 'capital' ? "Type capital name..." : "Type region name..."}
               className={cn(
-                "w-full px-6 py-4 bg-gray-50 border-2 outline-none rounded-2xl text-lg font-medium transition-all",
-                lastGuessCorrect === false ? "border-red-400 bg-red-50 shake" : "border-transparent focus:border-primary focus:bg-white"
+                "w-full px-6 py-4 bg-gray-50/80 border-2 outline-none rounded-2xl text-lg font-bold text-[#2c3e50] shadow-sm transition-all placeholder:font-medium placeholder:text-gray-400",
+                lastGuessCorrect === false ? "border-red-400 bg-red-50 shake" : "border-gray-100 focus:border-primary focus:bg-white"
               )}
             />
             {lastGuessCorrect === false && (
-              <p className="animate-in fade-in slide-in-from-top-1 absolute -bottom-6 left-2 text-xs font-semibold text-red-500">
+              <p className="animate-in fade-in slide-in-from-top-1 absolute -bottom-5 left-3 text-[11px] font-bold tracking-wide text-red-500 uppercase">
                 Try again!
               </p>
             )}
           </div>
-          <button onClick={skipState} className="mt-2 flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700">
-            <SkipForward size={18} /> Skip
+          <button onClick={skipState} className="mt-1 flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-700">
+            <SkipForward size={16} /> Skip
           </button>
         </div>
       ) : null}
 
       <div className="flex justify-center border-t border-gray-100 pt-4">
-        <button onClick={handleQuit} className="flex items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-red-500">
-          <XCircle size={16} /> Quit Game
+        <button onClick={handleQuit} className="flex items-center gap-1.5 text-[13px] font-bold tracking-wide text-gray-400 transition-colors hover:text-red-500 uppercase">
+          <XCircle size={15} /> Quit Game
         </button>
       </div>
       
