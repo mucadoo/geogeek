@@ -1,4 +1,6 @@
 'use client';
+'use client';
+'use client';
 
 import * as d3 from 'd3';
 import { FeatureCollection } from 'geojson';
@@ -10,7 +12,7 @@ import QuizLayout from '@/components/QuizLayout';
 import { ITALY_REGIONS, GAME_DURATIONS } from '@/config/gameConstants';
 import { useItalyMapData } from '@/hooks/useRegionMapData';
 
-export default function ItalyRegionsGame() {
+export default function ItalyRegionsClient() {
   const { data: mapData, status: mapStatus } = useItalyMapData();
   const t = useTranslations('Games');
   const tRegions = useTranslations('RegionNames');

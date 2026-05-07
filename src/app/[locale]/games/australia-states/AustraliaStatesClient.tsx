@@ -8,7 +8,7 @@ import QuizLayout from '@/components/QuizLayout';
 import { AUSTRALIA_STATES, GAME_DURATIONS } from '@/config/gameConstants';
 import { useAustraliaMapData } from '@/hooks/useRegionMapData';
 
-export default function AustraliaStatesGame() {
+export default function AustraliaStatesClient() {
   const { data: mapData, status: mapStatus } = useAustraliaMapData();
   const t = useTranslations('Games');
   const tRegions = useTranslations('RegionNames');

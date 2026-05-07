@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { routing } from '@/i18n/routing';
 
 import CountryDetailsClient from './CountryDetailsClient';
 
+import { routing } from '@/i18n/routing';
 import { countryService } from '@/lib/countryService';
 
 export async function generateStaticParams() {

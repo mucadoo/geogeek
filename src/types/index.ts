@@ -1,3 +1,21 @@
+export enum GameCategory {
+  ALL = 'all',
+  CONTINENTS = 'continents',
+  REGIONS = 'regions',
+  CAPITALS = 'capitals'
+}
+
+export enum RankingCategory {
+  MOST_POPULOUS = 'most-populous-countries',
+  LESS_POPULOUS = 'less-populous-countries',
+  LARGER = 'larger-countries',
+  SMALLER = 'smaller-countries',
+  MOST_POPULATED = 'most-populated-countries',
+  LESS_POPULATED = 'less-populated-countries',
+  HIGHEST_HDI = 'highest-hdi',
+  LOWEST_HDI = 'lowest-hdi'
+}
+
 export interface Country {
   ISO_code: string;
   name: string;

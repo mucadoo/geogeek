@@ -12,7 +12,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const navItems =[
+interface NavItem {
+  href: string;
+  labelKey: 'HOME' | 'EXPLORER' | 'RANKINGS' | 'GAMES';
+  icon: React.ElementType;
+}
+
+const navItems: NavItem[] = [
   { href: '/', labelKey: 'HOME', icon: Home },
   { href: '/map', labelKey: 'EXPLORER', icon: Globe },
   { href: '/rankings', labelKey: 'RANKINGS', icon: BarChart3 },
@@ -66,7 +72,7 @@ export default function Header() {
                 return (
                   <li key={item.href}>
                     <Link 
-                      href={item.href as any}
+                      href={item.href as "/"}
                       className={cn(
                         "flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-[13px] tracking-widest uppercase transition-all duration-300 shadow-sm",
                         isActive 
@@ -75,7 +81,7 @@ export default function Header() {
                       )}
                     >
                       <Icon size={15} className={isActive ? "text-primary" : "text-[#2c3e50]/50"} />
-                      <span className="hidden md:inline">{item.labelKey === 'HOME' ? 'HOME' : t(item.labelKey.toLowerCase())}</span>
+                      <span className="hidden md:inline">{item.labelKey === 'HOME' ? 'HOME' : t(item.labelKey.toLowerCase() as any)}</span>
                     </Link>
                   </li>
                 );

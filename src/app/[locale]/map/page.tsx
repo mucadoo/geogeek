@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
-import { routing } from '@/i18n/routing';
+
 import Map from '@/components/Map';
+import { routing } from '@/i18n/routing';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));

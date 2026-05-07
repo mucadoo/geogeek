@@ -1,9 +1,9 @@
 'use client';
-
 import { useTranslations } from 'next-intl';
 
 import { RANKING_CATEGORIES } from '@/config/rankingsConfig';
 import { Link } from '@/i18n/routing';
+import { RankingCategory } from '@/types';
 
 export default function RankingsClient() {
   const t = useTranslations('Rankings');
@@ -15,11 +15,11 @@ export default function RankingsClient() {
         {RANKING_CATEGORIES.map((category) => (
           <Link 
             key={category.slug}
-            href={`/rankings/${category.slug}` as any}
+            href={`/rankings/${category.slug}`}
             className="hover:border-primary/20 group flex h-[140px] items-center justify-center rounded-2xl border border-gray-100 bg-white px-6 text-center shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,168,181,0.1)]"
           >
             <h3 className="group-hover:text-primary text-[16px] font-medium text-gray-700 transition-colors">
-              {t(`categories.${category.slug}`)}
+              {t(`categories.${category.slug as RankingCategory}`)}
             </h3>
           </Link>
         ))}
@@ -27,3 +27,4 @@ export default function RankingsClient() {
     </main>
   );
 }
+

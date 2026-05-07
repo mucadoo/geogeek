@@ -1,4 +1,6 @@
 'use client';
+'use client';
+'use client';
 
 import * as d3 from 'd3';
 import { FeatureCollection } from 'geojson';
@@ -10,7 +12,7 @@ import QuizLayout from '@/components/QuizLayout';
 import { CANADA_PROVINCES, GAME_DURATIONS } from '@/config/gameConstants';
 import { useCanadaMapData } from '@/hooks/useRegionMapData';
 
-export default function CanadaProvincesGame() {
+export default function CanadaProvincesClient() {
   const { data: mapData, status: mapStatus } = useCanadaMapData();
   const t = useTranslations('Games');
   const tRegions = useTranslations('RegionNames');

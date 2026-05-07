@@ -5,16 +5,15 @@ import { useTranslations } from 'next-intl';
 import React, { useState, useMemo } from 'react';
 
 import { Link } from '@/i18n/routing';
+import { GameCategory } from '@/types';
 
-type GameCategory = 'all' | 'continents' | 'regions' | 'capitals';
-
-const games =[
+const games = [
   {
     id: 'us-states',
     icon: Map,
     href: '/games/us-states',
     color: 'bg-blue-500',
-    category: 'regions',
+    category: GameCategory.REGIONS,
     count: 50,
     difficulty: 2,
   },
@@ -23,7 +22,7 @@ const games =[
     icon: MapPin,
     href: '/games/us-capitals',
     color: 'bg-indigo-500',
-    category: 'capitals',
+    category: GameCategory.CAPITALS,
     count: 50,
     difficulty: 3,
   },
@@ -32,7 +31,7 @@ const games =[
     icon: Globe,
     href: '/games/south-america-countries',
     color: 'bg-green-500',
-    category: 'continents',
+    category: GameCategory.CONTINENTS,
     count: 12,
     difficulty: 1,
   },
@@ -41,7 +40,7 @@ const games =[
     icon: MapPin,
     href: '/games/south-america-capitals',
     color: 'bg-emerald-600',
-    category: 'capitals',
+    category: GameCategory.CAPITALS,
     count: 12,
     difficulty: 2,
   },
@@ -50,7 +49,7 @@ const games =[
     icon: Map,
     href: '/games/brazil-states',
     color: 'bg-green-600',
-    category: 'regions',
+    category: GameCategory.REGIONS,
     count: 27,
     difficulty: 2,
   },
@@ -59,7 +58,7 @@ const games =[
     icon: Map,
     href: '/games/italy-regions',
     color: 'bg-red-500',
-    category: 'regions',
+    category: GameCategory.REGIONS,
     count: 20,
     difficulty: 2,
   },
@@ -68,7 +67,7 @@ const games =[
     icon: Map,
     href: '/games/france-regions',
     color: 'bg-blue-600',
-    category: 'regions',
+    category: GameCategory.REGIONS,
     count: 18,
     difficulty: 2,
   },
@@ -77,7 +76,7 @@ const games =[
     icon: Map,
     href: '/games/canada-provinces',
     color: 'bg-red-600',
-    category: 'regions',
+    category: GameCategory.REGIONS,
     count: 13,
     difficulty: 1,
   },
@@ -86,24 +85,24 @@ const games =[
     icon: Map,
     href: '/games/australia-states',
     color: 'bg-amber-600',
-    category: 'regions',
+    category: GameCategory.REGIONS,
     count: 8,
     difficulty: 1,
   },
 ];
 
-const categories: GameCategory[] = ['all', 'continents', 'regions', 'capitals'];
+const categories: GameCategory[] = [GameCategory.ALL, GameCategory.CONTINENTS, GameCategory.REGIONS, GameCategory.CAPITALS];
 
 export default function GamesClient() {
   const t = useTranslations('Games');
-  const [activeCategory, setActiveCategory] = useState<GameCategory>('all');
+  const [activeCategory, setActiveCategory] = useState<GameCategory>(GameCategory.ALL);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
       const title = t(`gameData.${game.id}.title`);
       const description = t(`gameData.${game.id}.description`);
-      const matchesCategory = activeCategory === 'all' || game.category === activeCategory;
+      const matchesCategory = activeCategory === GameCategory.ALL || game.category === activeCategory;
       const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
@@ -214,7 +213,7 @@ export default function GamesClient() {
             <h3 className="mb-2 text-xl font-bold text-gray-800">{t('noGamesFound')}</h3>
             <p className="text-gray-500">{t('noGamesDescription')}</p>
             <button 
-              onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
+              onClick={() => { setSearchQuery(''); setActiveCategory(GameCategory.ALL); }}
               className="mt-6 font-bold text-primary hover:underline"
             >
               {t('clearFilters')}

@@ -1,4 +1,6 @@
 'use client';
+'use client';
+'use client';
 
 import * as d3 from 'd3';
 import { useTranslations } from 'next-intl';
@@ -8,7 +10,7 @@ import QuizLayout from '@/components/QuizLayout';
 import { US_STATES, US_CAPITALS, GAME_DURATIONS, CAPITAL_COORDINATES } from '@/config/gameConstants';
 import { useUSMapData } from '@/hooks/useRegionMapData';
 
-export default function USCapitalsGame() {
+export default function USCapitalsClient() {
   const { data: mapData, status: mapStatus } = useUSMapData();
   const t = useTranslations('Games');
   const tRegions = useTranslations('RegionNames');
