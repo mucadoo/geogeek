@@ -12,7 +12,7 @@ export default function USStatesGame() {
 
   const projection = useMemo(() => {
     return d3.geoAlbersUsa()
-      .scale(1200)
+      .scale(1300)
       .translate([960 / 2, 600 / 2]);
   }, []);
 

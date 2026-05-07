@@ -1,10 +1,10 @@
 'use client';
 
 import * as d3 from 'd3';
+import { usePathname } from 'next/navigation';
 import React, { useEffect, useRef } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
-import { usePathname } from 'next/navigation';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 

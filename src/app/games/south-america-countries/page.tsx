@@ -12,8 +12,8 @@ export default function SouthAmericaCountriesGame() {
 
   // Focus the projection strictly on South America
   const projection = d3.geoMercator()
-    .center([-60, -20])
-    .scale(450)
+    .center([-60, -22])
+    .scale(550)
     .translate([960 / 2, 600 / 2]);
 
   return (
