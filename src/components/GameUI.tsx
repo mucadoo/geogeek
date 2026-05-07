@@ -8,7 +8,6 @@ import { twMerge } from 'tailwind-merge';
 
 import { useGameStore } from '@/store/useGameStore';
 
-
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -17,7 +16,7 @@ export default function GameUI() {
   const router = useRouter();
   const { 
     status, score, timeLeft, userInput, lastGuessCorrect,
-    remainingStates, currentState, totalToGuess,
+    remainingStates, currentState, totalToGuess, gameMode,
     setUserInput, submitGuess, skipState, tick, resetGame
   } = useGameStore();
   
@@ -27,17 +26,13 @@ export default function GameUI() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (status === 'playing') {
-      interval = setInterval(() => {
-        tick();
-      }, 1000);
+      interval = setInterval(() => tick(), 1000);
     }
     return () => clearInterval(interval);
   }, [status, tick]);
 
   useEffect(() => {
-    if (status === 'playing') {
-      inputRef.current?.focus();
-    }
+    if (status === 'playing') inputRef.current?.focus();
   }, [status, currentState]);
 
   const formatTime = (seconds: number) => {
@@ -47,9 +42,7 @@ export default function GameUI() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      submitGuess(userInput);
-    }
+    if (e.key === 'Enter') submitGuess(userInput);
   };
 
   const handleQuit = () => {
@@ -63,24 +56,30 @@ export default function GameUI() {
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-lg">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 font-bold text-blue-700">
-          <Timer size={18} />
-          {formatTime(timeLeft)}
+          <Timer size={18} /> {formatTime(timeLeft)}
         </div>
         <div className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 font-bold text-amber-700">
-          <Trophy size={18} />
-          {score}
+          <Trophy size={18} /> {score}
         </div>
       </div>
 
       <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
-        <div 
-          className="bg-primary h-full transition-all duration-500 ease-out"
+        <div className="bg-primary h-full transition-all duration-500 ease-out"
           style={{ width: `${totalToGuess > 0 ? (currentProgress / totalToGuess) * 100 : 0}%` }}
         />
       </div>
 
       {status === 'playing' ? (
         <div className="flex flex-col gap-4">
+          
+          {/* NEW: Display the Target Name if guessing capitals */}
+          {gameMode === 'capital' && currentState && (
+            <div className="mb-2 flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 p-4">
+              <span className="mb-1 text-xs font-bold tracking-widest text-primary uppercase">Name the capital of</span>
+              <span className="text-center text-2xl font-extrabold text-[#2c3e50]">{currentState.properties.name}</span>
+            </div>
+          )}
+
           <div className="relative">
             <input
               ref={inputRef}
@@ -88,7 +87,7 @@ export default function GameUI() {
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type region name..."
+              placeholder={gameMode === 'capital' ? "Type capital name..." : "Type region name..."}
               className={cn(
                 "w-full px-6 py-4 bg-gray-50 border-2 outline-none rounded-2xl text-lg font-medium transition-all",
                 lastGuessCorrect === false ? "border-red-400 bg-red-50 shake" : "border-transparent focus:border-primary focus:bg-white"
@@ -100,30 +99,20 @@ export default function GameUI() {
               </p>
             )}
           </div>
-          <button
-            onClick={skipState}
-            className="mt-2 flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700"
-          >
-            <SkipForward size={18} />
-            Skip Region
+          <button onClick={skipState} className="mt-2 flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700">
+            <SkipForward size={18} /> Skip
           </button>
         </div>
       ) : null}
 
-      {/* Gameplay Navigation (Quit) */}
       <div className="flex justify-center border-t border-gray-100 pt-4">
-        <button
-          onClick={handleQuit}
-          className="flex items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-red-500"
-        >
+        <button onClick={handleQuit} className="flex items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-red-500">
           <XCircle size={16} /> Quit Game
         </button>
       </div>
       
       <style jsx>{`
-        .shake {
-          animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-        }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
           10%, 90% { transform: translate3d(-1px, 0, 0); }
           20%, 80% { transform: translate3d(2px, 0, 0); }

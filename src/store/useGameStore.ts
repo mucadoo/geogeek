@@ -5,6 +5,7 @@ import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
 export type Difficulty = 'easy' | 'medium' | 'hard';
+export type GameMode = 'name' | 'capital';
 
 export interface StateFeature {
   id: string;
@@ -18,6 +19,8 @@ export interface StateFeature {
 interface GameState {
   status: GameStatus;
   difficulty: Difficulty;
+  gameMode: GameMode;
+  capitalMap: Record<string, string>;
   score: number;
   timeLeft: number;
   currentState: StateFeature | null;
@@ -28,7 +31,14 @@ interface GameState {
   lastGuessCorrect: boolean | null;
   totalToGuess: number;
   
-  startGame: (states: StateFeature[], validNames: string[], duration: number, difficulty: Difficulty) => void;
+  startGame: (
+    states: StateFeature[], 
+    validNames: string[], 
+    duration: number, 
+    difficulty: Difficulty,
+    gameMode?: GameMode,
+    capitalMap?: Record<string, string>
+  ) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
   tick: () => void;
@@ -38,12 +48,14 @@ interface GameState {
 
 const INITIAL_TIME = 300;
 
+// Upgraded to strip out punctuation (.,-) so "st. paul" and "st paul" both work
 const normalizeString = (str: string | null | undefined) => {
   if (!str) return "";
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/[.,-]/g, "")
     .trim();
 };
 
@@ -57,49 +69,31 @@ export const getFeedback = (score: number, total: number): string => {
 };
 
 const ALIASES: Record<string, string[]> = {
-  "sardegna": ["sardinia"],
-  "sicilia": ["sicily"],
-  "toscana": ["tuscany"],
-  "piemonte": ["piedmont"],
-  "lombardia": ["lombardy"],
-  "puglia": ["apulia"],
-  "valle d'aosta": ["aosta valley", "aosta"],
-  "trentino-alto adige": ["south tyrol", "trentino"],
-  "provence-alpes-cote d'azur": ["cote dazur", "paca", "provence"],
-  "distrito federal": ["df"],
-  "friuli-venezia giulia": ["friuli"],
-  "emilia-romagna": ["emilia", "romagna"],
-  "corse": ["corsica"],
-  "bretagne":["brittany"],
-  "bourgogne-franche-comte":["bourgogne", "burgundy", "franche-comte"],
-  "centre-val de loire": ["centre", "val de loire"],
-  "nouvelle-aquitaine": ["aquitaine"],
-  "grand est":["alsace-champagne-ardenne-lorraine"],
-  "hauts-de-france":["nord-pas-de-calais-picardie"],
-  "washington dc": ["dc", "district of columbia"],
-  "australian capital territory": ["act"],
-  "northern territory": ["nt"],
-  "newfoundland and labrador": ["newfoundland", "labrador"],
-  "british columbia": ["bc"],
-  "prince edward island": ["pei"],
-  "northwest territories": ["nwt"]
+  // Region Aliases
+  "washington dc":["dc", "district of columbia"],
+  "czechia": ["czech republic"],
+  "united kingdom":["uk", "great britain"],
+  // Capital Aliases
+  "saint paul": ["st paul"],
+  "kyiv": ["kiev"],
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'idle',
   difficulty: 'medium',
+  gameMode: 'name',
+  capitalMap: {},
   score: 0,
   timeLeft: INITIAL_TIME,
   currentState: null,
   remainingStates: [],
-  missedStates:[],
+  missedStates: [],
   correctlyGuessedIds:[],
   userInput: '',
   lastGuessCorrect: null,
   totalToGuess: 0,
 
-  startGame: (states, validNames, duration, difficulty) => {
-    // Data is pre-normalized, just filter by name
+  startGame: (states, validNames, duration, difficulty, gameMode = 'name', capitalMap = {}) => {
     const filtered = states.filter(s => {
       if (!s.properties.name) return false;
       return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
@@ -107,9 +101,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const shuffled = [...filtered].sort(() => Math.random() - 0.5);
     const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
+    
     set({
       status: 'playing',
       difficulty,
+      gameMode,
+      capitalMap,
       score: 0,
       timeLeft: Math.floor(duration * difficultyMultiplier),
       remainingStates: shuffled.slice(1),
@@ -125,19 +122,23 @@ export const useGameStore = create<GameState>((set, get) => ({
   setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null }),
 
   submitGuess: (guess) => {
-    const { currentState, remainingStates, score, correctlyGuessedIds } = get();
+    const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap } = get();
     if (!currentState) return false;
 
-    const normalizedGuess = normalizeString(guess);
-    const targetName = currentState.properties.name;
-    const normalizedTarget = normalizeString(targetName);
+    const regionName = currentState.properties.name;
     
-    const targetAliases = ALIASES[normalizedTarget] || [];
+    // Check if we are guessing the region or its capital
+    const targetAnswer = gameMode === 'capital' ? (capitalMap[regionName] || regionName) : regionName;
 
-    if (
-      normalizedGuess === normalizedTarget || 
-      targetAliases.includes(normalizedGuess)
-    ) {
+    const normalizedGuess = normalizeString(guess);
+    const normalizedTarget = normalizeString(targetAnswer);
+    const targetAliases = ALIASES[normalizedTarget] ||[];
+
+    // Check guess against target and aliases
+    const isCorrect = normalizedGuess === normalizedTarget || 
+                      targetAliases.some(alias => normalizeString(alias) === normalizedGuess);
+
+    if (isCorrect) {
       const newCorrectIds = [...correctlyGuessedIds, currentState.id];
       if (remainingStates.length === 0) {
         set({ status: 'finished', score: score + 1, currentState: null, userInput: '', lastGuessCorrect: true, correctlyGuessedIds: newCorrectIds });

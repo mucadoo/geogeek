@@ -1,4 +1,4 @@
-import { Map, Trophy, Play } from 'lucide-react';
+import { Map, Trophy, Play, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -10,6 +10,30 @@ const games = [
     icon: Map,
     href: '/games/us-states',
     color: 'bg-blue-500',
+  },
+  {
+    id: 'us-capitals',
+    title: 'US Capitals Quiz',
+    description: 'Can you name the capital of every US State?',
+    icon: MapPin,
+    href: '/games/us-capitals',
+    color: 'bg-indigo-500',
+  },
+  {
+    id: 'sa-countries',
+    title: 'South America',
+    description: 'Test your knowledge of South American territory!',
+    icon: Map,
+    href: '/games/south-america-countries',
+    color: 'bg-green-600',
+  },
+  {
+    id: 'sa-capitals',
+    title: 'SA Capitals',
+    description: 'Guess the capitals of South American countries.',
+    icon: MapPin,
+    href: '/games/south-america-capitals',
+    color: 'bg-emerald-600',
   },
   {
     id: 'brazil-states',
