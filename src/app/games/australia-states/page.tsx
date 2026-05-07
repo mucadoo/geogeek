@@ -12,6 +12,7 @@ import * as d3 from 'd3';
 import { AUSTRALIA_STATES, GAME_DURATIONS } from '@/config/gameConstants';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { FeatureCollection } from 'geojson';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -27,7 +28,8 @@ export default function AustraliaStatesGame() {
   const handleStartGame = () => {
     if (mapData) {
       const firstKey = Object.keys(mapData.objects)[0];
-      const states = (feature(mapData, mapData.objects[firstKey]) as any).features as StateFeature[];
+      const geo = feature(mapData, mapData.objects[firstKey]) as unknown as FeatureCollection;
+      const states = geo.features as unknown as StateFeature[];
       startGame(states, AUSTRALIA_STATES, GAME_DURATIONS.AUSTRALIA_STATES, difficulty);
     }
   };

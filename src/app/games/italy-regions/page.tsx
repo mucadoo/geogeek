@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useItalyMapData } from '@/hooks/useRegionMapData';
 import { useGameStore, StateFeature, getFeedback } from '@/store/useGameStore';
@@ -10,6 +10,7 @@ import { feature } from 'topojson-client';
 import { Trophy, RefreshCw, Play, ArrowLeft } from 'lucide-react';
 import * as d3 from 'd3';
 import { ITALY_REGIONS, GAME_DURATIONS }  from '@/config/gameConstants';
+import { FeatureCollection, Feature } from 'geojson';
 
 export default function ItalyRegionsGame() {
   const { data: mapData, status: mapStatus } = useItalyMapData();
@@ -20,9 +21,9 @@ export default function ItalyRegionsGame() {
 
   const handleStartGame = () => {
     if (mapData) {
-      // Dynamically find the first key (usually "default" or "it-all")
       const firstKey = Object.keys(mapData.objects)[0];
-      const states = (feature(mapData, mapData.objects[firstKey]) as any).features as StateFeature[];
+      const geo = feature(mapData, mapData.objects[firstKey]) as unknown as FeatureCollection;
+      const states = geo.features as unknown as StateFeature[];
       startGame(states, ITALY_REGIONS, GAME_DURATIONS.ITALY_REGIONS, difficulty);
     }
   };
@@ -31,10 +32,23 @@ export default function ItalyRegionsGame() {
     return () => resetGame();
   }, [resetGame]);
 
-  const projection = d3.geoMercator()
-    .center([12.5, 41.8])
-    .scale(2000)
-    .translate([960 / 2, 600 / 2]);
+  const projection = useMemo(() => {
+    if (!mapData) return d3.geoMercator();
+
+    const firstKey = Object.keys(mapData.objects)[0];
+    const geojson = feature(mapData, mapData.objects[firstKey]) as unknown as FeatureCollection;
+
+    const regionsOnly: FeatureCollection = {
+      type: "FeatureCollection",
+      features: geojson.features.filter((f: Feature) =>
+        f.geometry && (f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon")
+      )
+    };
+
+    return d3.geoIdentity()
+      .reflectY(true)
+      .fitExtent([[20, 20], [940, 580]], regionsOnly as unknown as d3.GeoPermissibleObjects);
+  }, [mapData]);
 
   if (mapStatus === 'pending') {
     return (

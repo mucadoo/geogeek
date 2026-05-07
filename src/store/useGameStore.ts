@@ -56,12 +56,18 @@ export const getFeedback = (score: number, total: number): string => {
 };
 
 const ALIASES: Record<string, string[]> = {
-  "provence-alpes-cote d'azur": ["cote dazur", "paca", "provence"],
+  "sardegna": ["sardinia"],
+  "sicilia": ["sicily"],
+  "toscana": ["tuscany"],
+  "piemonte": ["piedmont"],
+  "lombardia": ["lombardy"],
+  "puglia": ["apulia"],
+  "valle d'aosta": ["aosta valley", "aosta"],
   "trentino-alto adige": ["south tyrol", "trentino"],
+  "provence-alpes-cote d'azur": ["cote dazur", "paca", "provence"],
   "distrito federal": ["df"],
   "friuli-venezia giulia": ["friuli"],
   "emilia-romagna": ["emilia", "romagna"],
-  "valle d'aosta":["aosta", "aosta valley"],
   "corse": ["corsica"],
   "bretagne":["brittany"],
   "bourgogne-franche-comte":["bourgogne", "burgundy", "franche-comte"],
@@ -96,7 +102,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       .map(s => {
         // Highcharts maps sometimes put the name in 'name' or 'Name' 
         // or a specific property like 'woe-name'
-        const name = s.properties?.name || (s.properties as any)?.Name || (s.properties as any)?.['hc-a2'];
+        const properties = s.properties as Record<string, string>;
+        const name = properties.name || properties.Name || properties['hc-a2'] || "";
         
         return {
           ...s,

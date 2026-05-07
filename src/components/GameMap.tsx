@@ -4,12 +4,13 @@ import React, { useMemo } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
-import { useGameStore, StateFeature } from '@/store/useGameStore';
+import { Feature, FeatureCollection } from 'geojson';
+import { useGameStore } from '@/store/useGameStore';
 
 interface GameMapProps {
   mapData: Topology;
   highlightedStateId: string | null;
-  projection: d3.GeoProjection;
+  projection: d3.GeoProjection | d3.GeoIdentityTransform;
   objectName: string;
   validNames: string[];
   width?: number;
@@ -38,16 +39,12 @@ export default function GameMap({
 
   const pathGenerator = d3.geoPath().projection(projection);
 
-  const states = useMemo(() => {
+  // 1. Get ALL features for the background
+  const allFeatures = useMemo(() => {
     if (!mapData || !mapData.objects[objectName]) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const geo = feature(mapData, mapData.objects[objectName]) as any;
-    return (geo.features as StateFeature[]).filter(s => {
-      const stateName = s.properties?.name;
-      if (!stateName) return false;
-      return validNames.some(name => normalizeString(stateName) === normalizeString(name));
-    });
-  }, [mapData, objectName, validNames]);
+    const geo = feature(mapData, mapData.objects[objectName]) as FeatureCollection;
+    return geo.features as Feature[];
+  }, [mapData, objectName]);
 
   return (
     <div className="w-full h-full flex items-center justify-center p-4">
@@ -56,21 +53,41 @@ export default function GameMap({
         className="w-full h-full max-h-[600px] outline-none"
       >
         <g>
-          {states.map((state, index) => {
-            const stateId = state.id ? String(state.id) : state.properties?.name;
+          {allFeatures.map((feat: Feature, i: number) => {
+            // Highcharts can store names in several different property keys
+            const properties = feat.properties as Record<string, string> || {};
+            const rawName = 
+              properties.name || 
+              properties.Name || 
+              properties.NAME || 
+              properties['woe-name'] || 
+              "";
+              
+            const stateId = feat.id ? String(feat.id) : rawName;
+            
+            // Logic to determine if this feature is one of the target regions
+            const isQuizRegion = validNames.some(vn => 
+              normalizeString(vn) === normalizeString(rawName)
+            );
+
             const isHighlighted = highlightedStateId === stateId;
             const isCorrect = correctlyGuessedIds.includes(stateId);
-            const pathData = pathGenerator(state as d3.GeoPermissibleObjects);
+            const pathData = pathGenerator(feat as unknown as d3.GeoPermissibleObjects);
 
             if (!pathData) return null;
 
-            let fillColor = "var(--color-map-fill)";
-            if (isHighlighted) fillColor = "var(--color-danger)";
-            else if (isCorrect) fillColor = "#10b981"; // emerald-500
+            // COLOR LOGIC:
+            // We want all of Italy to be the same color at the start.
+            // If it's a quiz region, use --map-fill. 
+            // If it's not (like a neighboring country border), make it very light/transparent.
+            let fillColor = "#f3f4f6"; 
+            if (isQuizRegion) fillColor = "var(--color-map-fill)"; 
+            if (isCorrect) fillColor = "#10b981"; // Green
+            if (isHighlighted) fillColor = "var(--color-danger)"; // Red
 
             return (
               <path
-                key={stateId || index}
+                key={stateId || i}
                 d={pathData}
                 fill={fillColor}
                 stroke="var(--color-map-stroke)"

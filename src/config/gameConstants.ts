@@ -35,10 +35,10 @@ export const BRAZIL_STATES = [
 ];
 
 export const ITALY_REGIONS = [
-  "Abruzzo", "Valle d'Aosta", "Aosta Valley", "Puglia", "Apulia", "Basilicata", "Calabria", "Campania", 
-  "Emilia-Romagna", "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Lombardy", "Marche", 
-  "Molise", "Piemonte", "Piedmont", "Sardegna", "Sardinia", "Sicilia", "Sicily", "Toscana", "Tuscany", 
-  "Trentino-Alto Adige", "Trentino-South Tyrol", "Umbria", "Veneto"
+  "Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", 
+  "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", 
+  "Molise", "Piemonte", "Puglia", "Sardegna", "Sicilia", "Toscana", 
+  "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"
 ];
 
 export const FRANCE_REGIONS = [
