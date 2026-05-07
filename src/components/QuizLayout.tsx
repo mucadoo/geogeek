@@ -42,6 +42,8 @@ export default function QuizLayout({
     totalToGuess, timeLeft, tick
   } = useGameStore();
   
+  const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
+
   // Handle Timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -56,7 +58,7 @@ export default function QuizLayout({
       const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects[objectKey]) as any).features as StateFeature[];
-      startGame(states, validNames, duration, 'medium', gameMode, capitalMap);
+      startGame(states, validNames, duration, difficulty, gameMode, capitalMap);
     }
   };
 
@@ -148,9 +150,24 @@ export default function QuizLayout({
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#2c3e50]/20 p-4 backdrop-blur-sm">
            {gameStatus === 'idle' ? (
               <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center shadow-2xl">
-                 <h1 className="text-3xl font-bold mb-4">{title}</h1>
-                 <p className="text-gray-500 mb-8">{description}</p>
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all">START GAME</button>
+                 <Link href="/games" className="absolute top-6 left-6 text-gray-400 transition-colors hover:text-primary">
+                  <ArrowLeft size={24} />
+                 </Link>
+                 <div className="bg-primary/10 text-primary mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl">
+                   <Trophy size={40} />
+                 </div>
+                 <h1 className="mb-4 text-3xl font-bold text-gray-800">{title}</h1>
+                 <p className="mb-8 text-gray-600">{description}</p>
+                 
+                 <div className="mb-8 flex justify-center gap-2">
+                   {(['easy', 'medium', 'hard'] as const).map((d) => (
+                     <button key={d} onClick={() => setDifficulty(d)} className={cn("px-4 py-2 rounded-lg font-bold capitalize transition-all", difficulty === d ? "bg-primary text-white shadow-md" : "bg-gray-50 text-gray-500 hover:bg-gray-100")}>
+                       {d}
+                     </button>
+                   ))}
+                 </div>
+                 
+                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg">START GAME</button>
               </div>
            ) : (
               <div className="w-full max-w-lg rounded-3xl bg-white p-10 text-center shadow-2xl">

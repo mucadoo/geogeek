@@ -24,12 +24,11 @@ export default function Header() {
   // Determine if the current route should be fullscreen
   const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
 
+  // If in a game session (or game screen), hide the header entirely
+  if (isFullscreen) return null;
+
   return (
-    <header className={cn(
-      "w-full z-50 flex h-[90px] items-center transition-all duration-300",
-      // If fullscreen, fix it to the top and let clicks pass through the invisible parts
-      isFullscreen ? "fixed top-0 left-0 pointer-events-none" : "relative mx-auto max-w-[1400px]"
-    )}>
+    <header className="relative mx-auto flex h-[90px] w-full max-w-[1400px] items-center">
       {/* The inner div restores pointer-events so the logo and buttons are still clickable! */}
       <div className="pointer-events-auto mx-auto flex w-full max-w-[1400px] items-center justify-between px-4">
         <Link href="/" className="transition-opacity hover:opacity-80">
