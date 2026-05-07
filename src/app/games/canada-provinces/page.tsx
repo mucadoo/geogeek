@@ -8,19 +8,19 @@ import GameUI from '@/components/GameUI';
 import { feature } from 'topojson-client';
 import { Trophy, RefreshCw, Play } from 'lucide-react';
 import * as d3 from 'd3';
-import { CANADA_PROVINCES } from '@/config/gameConstants';
+import { CANADA_PROVINCES, GAME_DURATIONS }  from '@/config/gameConstants';
 
 export default function CanadaProvincesGame() {
   const { data: mapData, status: mapStatus } = useCanadaMapData();
   const { 
-    status: gameStatus, startGame, resetGame, currentState, score, missedStates 
+    status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
 
   const handleStartGame = () => {
     if (mapData) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const provinces = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
-      startGame(provinces, CANADA_PROVINCES);
+      startGame(provinces, CANADA_PROVINCES, GAME_DURATIONS.CANADA_PROVINCES);
     }
   };
 
@@ -78,23 +78,21 @@ export default function CanadaProvincesGame() {
                     <Trophy size={64} className="text-amber-500 mx-auto mb-4" />
                     <h2 className="text-3xl font-bold text-gray-800 mb-2">Great Job, Eh?</h2>
                     <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> provinces correctly.</p>
-                    
-                    {missedStates.length > 0 && (
-                      <div className="mb-8 text-left">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Provinces you missed:</h3>
+                    {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).length > 0 && (
+                      <div className="mt-4 text-left">
+                        <h3 className="font-semibold text-gray-700 mb-2">Skipped Provinces:</h3>
                         <div className="flex flex-wrap gap-2">
-                          {missedStates.map(state => (
-                            <span key={state.id} className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold border border-red-100">
+                          {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).map(state => (
+                            <span key={state.id} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">
                               {state.properties.name}
                             </span>
                           ))}
                         </div>
                       </div>
                     )}
-
                     <button
                       onClick={handleStartGame}
-                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all mt-6"
                     >
                       <RefreshCw size={20} />
                       PLAY AGAIN

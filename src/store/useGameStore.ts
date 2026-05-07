@@ -25,7 +25,7 @@ interface GameState {
   totalToGuess: number;
   
   // Actions
-  startGame: (states: StateFeature[], validNames: string[]) => void;
+  startGame: (states: StateFeature[], validNames: string[], duration: number) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
   tick: () => void;
@@ -56,7 +56,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastGuessCorrect: null,
   totalToGuess: 0,
 
-  startGame: (states, validNames) => {
+  startGame: (states, validNames, duration) => {
     const filtered = states.filter(s => {
       const stateName = s.properties?.name;
       if (!stateName) return false;
@@ -66,7 +66,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       status: 'playing',
       score: 0,
-      timeLeft: INITIAL_TIME,
+      timeLeft: duration,
       remainingStates: shuffled.slice(1),
       currentState: shuffled[0] || null,
       missedStates: [],
@@ -110,17 +110,24 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   skipState: () => {
     const { currentState, remainingStates, missedStates } = get();
-    const newMissed = currentState ? [...missedStates, currentState] : missedStates;
     
-    if (remainingStates.length === 0) {
-      set({ status: 'finished', currentState: null, userInput: '', missedStates: newMissed, lastGuessCorrect: null });
+    if (!currentState) return;
+    
+    // Add current state to the end of the remaining states queue
+    const updatedRemaining = [...remainingStates, currentState];
+    
+    // Only track skip if it wasn't previously added (to avoid duplicates, though we filter later)
+    const newMissed = [...new Set([...missedStates, currentState])];
+    
+    if (updatedRemaining.length === 0) {
+      set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, missedStates: newMissed });
     } else {
       set({
-        currentState: remainingStates[0],
-        remainingStates: remainingStates.slice(1),
+        currentState: updatedRemaining[0],
+        remainingStates: updatedRemaining.slice(1),
         userInput: '',
-        missedStates: newMissed,
         lastGuessCorrect: null,
+        missedStates: newMissed,
       });
     }
   },

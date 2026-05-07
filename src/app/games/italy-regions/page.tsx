@@ -8,20 +8,19 @@ import GameUI from '@/components/GameUI';
 import { feature } from 'topojson-client';
 import { Trophy, RefreshCw, Play } from 'lucide-react';
 import * as d3 from 'd3';
-import { ITALY_REGIONS } from '@/config/gameConstants';
+import { ITALY_REGIONS, GAME_DURATIONS }  from '@/config/gameConstants';
 
 export default function ItalyRegionsGame() {
   const { data: mapData, status: mapStatus } = useItalyMapData();
   const { 
-    status: gameStatus, startGame, resetGame, currentState, score, missedStates 
+    status: gameStatus, startGame, resetGame, currentState, score, missedStates, correctlyGuessedIds 
   } = useGameStore();
 
   const handleStartGame = () => {
     if (mapData) {
-      // Highcharts uses 'default' as object name
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const regions = (feature(mapData, mapData.objects.default) as any).features as StateFeature[];
-      startGame(regions, ITALY_REGIONS);
+      const states = (feature(mapData, mapData.objects.states) as any).features as StateFeature[];
+      startGame(states, ITALY_REGIONS, GAME_DURATIONS.ITALY_REGIONS);
     }
   };
 
@@ -29,9 +28,8 @@ export default function ItalyRegionsGame() {
     return () => resetGame();
   }, [resetGame]);
 
-  const projection = d3.geoMercator()
-    .center([12.5, 42])
-    .scale(2200)
+  const projection = d3.geoAlbersUsa()
+    .scale(1200)
     .translate([960 / 2, 600 / 2]);
 
   if (mapStatus === 'pending') {
@@ -46,6 +44,7 @@ export default function ItalyRegionsGame() {
   return (
     <main className="max-w-[1400px] mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Map */}
         <div className="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px] flex items-center justify-center relative">
           {gameStatus === 'idle' ? (
             <div className="text-center p-12 max-w-md">
@@ -54,7 +53,7 @@ export default function ItalyRegionsGame() {
               </div>
               <h1 className="text-3xl font-bold text-gray-800 mb-4">Italy Regions Quiz</h1>
               <p className="text-gray-600 mb-8">
-                Do you know the 20 regions of Italy? From Piedmont to Sicily, test your knowledge of the &quot;Bel Paese&quot;!
+                How many Italian regions can you name? Test your knowledge!
               </p>
               <button
                 onClick={handleStartGame}
@@ -70,32 +69,29 @@ export default function ItalyRegionsGame() {
                 mapData={mapData} 
                 highlightedStateId={currentState?.id || null} 
                 projection={projection}
-                objectName="default"
+                objectName="states"
                 validNames={ITALY_REGIONS}
               />
               {gameStatus === 'finished' && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 p-4">
                   <div className="text-center p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-y-auto max-h-full">
                     <Trophy size={64} className="text-amber-500 mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Ben Fatto!</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Well Done!</h2>
                     <p className="text-gray-600 mb-6">You guessed <span className="font-bold text-primary text-xl">{score}</span> regions correctly.</p>
-                    
-                    {missedStates.length > 0 && (
-                      <div className="mb-8 text-left">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Regions you missed:</h3>
+                    {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).length > 0 && (
+                      <div className="mt-4 text-left">
                         <div className="flex flex-wrap gap-2">
-                          {missedStates.map(state => (
-                            <span key={state.id} className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold border border-red-100">
+                          {missedStates.filter(ms => !correctlyGuessedIds.includes(ms.id)).map(state => (
+                            <span key={state.id} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">
                               {state.properties.name}
                             </span>
                           ))}
                         </div>
                       </div>
                     )}
-
                     <button
                       onClick={handleStartGame}
-                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all mt-6"
                     >
                       <RefreshCw size={20} />
                       PLAY AGAIN
@@ -107,6 +103,7 @@ export default function ItalyRegionsGame() {
           )}
         </div>
 
+        {/* Right Column: UI */}
         <div className="lg:col-span-4 lg:sticky lg:top-8">
           <GameUI />
         </div>
