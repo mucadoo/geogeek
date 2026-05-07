@@ -9,6 +9,8 @@ import { Link, routing } from '@/i18n/routing';
 import { countryService } from '@/lib/countryService';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
 
+type RankingCategorySlug = 'most-populous-countries' | 'less-populous-countries' | 'larger-countries' | 'smaller-countries' | 'most-populated-countries' | 'less-populated-countries' | 'highest-hdi' | 'lowest-hdi';
+
 export function generateStaticParams() {
   const params: { locale: string; slug: string }[] = [];
   routing.locales.forEach(locale => {
@@ -44,8 +46,9 @@ export default async function RankingDetail({ params }: { params: Promise<{ loca
         <Link href="/rankings" className="hover:text-primary absolute top-1/2 left-0 -translate-y-1/2 p-2 text-gray-500 transition-colors">
           <ArrowLeft size={24} strokeWidth={1.5} />
         </Link>
-        <h1 className="text-[32px] font-medium tracking-tight text-[#2c3e50]">{t(`categories.${slug}`)}</h1>
+        <h1 className="text-[32px] font-medium tracking-tight text-[#2c3e50]">{t(`categories.${slug as RankingCategorySlug}`)}</h1>
       </div>
+
 
       <div className="mx-auto max-w-[800px] rounded-3xl border border-gray-100 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
         <Table>

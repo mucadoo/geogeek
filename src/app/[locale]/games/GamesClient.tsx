@@ -173,7 +173,7 @@ export default function GamesClient() {
                 {/* Gamified Top Banner */}
                 <div className="flex items-center justify-between border-b border-gray-50 bg-gray-50/50 px-6 py-3">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    {t(`categories.${game.category}`)} • {t('itemsCount', { count: game.count })}
+                    {t(`categories.${game.category}` as `categories.${GameCategory}`)} • {t('itemsCount', { count: game.count })}
                   </div>
                   <div className="flex gap-0.5" title={`${t('difficulty')}: ${game.difficulty}/3`}>
                     {[1, 2, 3].map((star) => (
