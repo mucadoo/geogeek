@@ -1,13 +1,14 @@
 'use client';
 
 import * as d3 from 'd3';
-import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import NProgress from 'nprogress';
 import React, { useMemo } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
 import { NUMERIC_TO_CONTINENT, NUMERIC_TO_ALPHA2, CONTINENT_VIEWS } from '@/config/mapConstants';
+import { useRouter } from '@/i18n/routing';
 import { useMapStore } from '@/store/useMapStore';
 
 interface CountryFeature {
@@ -93,7 +94,7 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
               if (selectedContinent) {
                 if (alpha2) {
                   NProgress.start();
-                  router.push(`/country/${alpha2}`);
+                  router.push(`/country/${alpha2}` as any);
                 }
               } else {
                 const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
