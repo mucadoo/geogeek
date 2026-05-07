@@ -17,8 +17,6 @@ interface GameMapProps {
   height?: number;
 }
 
-// ... (keep normalizeString)
-
 const normalizeString = (str: string | null | undefined) => {
   if (!str) return "";
   return str
@@ -42,11 +40,18 @@ export default function GameMap({
 
   // 1. Get ALL features for the background
   const allFeatures = useMemo(() => {
-    // Data is pre-normalized to have a "regions" object
-    if (!mapData || !mapData.objects.regions) return [];
-    const geo = feature(mapData, mapData.objects.regions) as FeatureCollection;
+    if (!mapData) return[];
+    
+    // Check for "regions" (Normalized Country maps) OR "countries" (World map)
+    const objectKey = mapData.objects.regions 
+      ? 'regions' 
+      : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
+
+    if (!mapData.objects[objectKey]) return[];
+
+    const geo = feature(mapData, mapData.objects[objectKey]) as FeatureCollection;
     return geo.features as Feature[];
-  }, [mapData]);
+  },[mapData]);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
@@ -57,7 +62,7 @@ export default function GameMap({
         <g>
           {allFeatures.map((feat: Feature, i: number) => {
             const stateId = String(feat.id);
-            const stateName = (feat.properties as { name: string }).name;
+            const stateName = (feat.properties as { name: string }).name || "";
               
             // Logic to determine if this feature is one of the target regions
             const isQuizRegion = validNames.some(vn => 
@@ -71,8 +76,6 @@ export default function GameMap({
             if (!pathData) return null;
 
             // COLOR LOGIC:
-            // If it's a quiz region, use --map-fill. 
-            // If it's not (like a neighboring country border), make it very light/transparent.
             let fillColor = "#f3f4f6"; 
             if (isQuizRegion) fillColor = "var(--color-map-fill)"; 
             if (isCorrect) fillColor = "#10b981"; // Green
