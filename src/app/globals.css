@@ -23,8 +23,6 @@
 
 body {
   background-color: var(--background);
-  background-image: radial-gradient(#d3dbd6 1.5px, transparent 1.5px) !important;
-  background-size: 20px 20px !important;
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
   overflow-x: hidden;
