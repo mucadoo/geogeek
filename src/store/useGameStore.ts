@@ -60,12 +60,13 @@ const normalizeString = (str: string | null | undefined) => {
 };
 
 export const getFeedback = (score: number, total: number): string => {
-  if (total === 0) return "Keep practicing!";
+  if (total === 0) return "practice";
   const percentage = (score / total) * 100;
-  if (percentage === 100) return "Perfect! You're a geography master!";
-  if (percentage > 80) return "Amazing job! Almost perfect!";
-  if (percentage > 50) return "Good work! You know your way around!";
-  return "Keep practicing, you'll get there!";
+  if (percentage === 100) return "perfect";
+  if (percentage > 80) return "amazing";
+  if (percentage > 50) return "great";
+  if (percentage > 20) return "good";
+  return "practice";
 };
 
 const ALIASES: Record<string, string[]> = {

@@ -1,0 +1,159 @@
+{
+  "HomePage": {
+    "title": "Sobre nós",
+    "description": "Bem-vindo ao {brand}! Aqui respiramos geografia. Criado com a intenção de ensinar uma geografia mais interativa, o GeoGeek possui um mapa de exploradores que permitirá ao usuário ter um melhor conhecimento do território político mundial, além de curiosidades e rankings geográficos. Não perca tempo e comece a explorar!",
+    "cta": "Explorar o Mapa"
+  },
+  "Header": {
+    "games": "Jogos",
+    "map": "Mapa",
+    "explorer": "Explorador",
+    "rankings": "Rankings"
+  },
+  "Map": {
+    "loading": "Carregando Explorador...",
+    "returnToWorld": "Voltar para o Mundo"
+  },
+  "Games": {
+    "title": "Centro Geográfico",
+    "subtitle": "Escolha seu Desafio",
+    "description": "Conquiste seu lugar como mestre geógrafo. Selecione um jogo abaixo, corra contra o tempo e tente obter uma pontuação perfeita!",
+    "searchPlaceholder": "Pesquisar jogos...",
+    "categories": {
+      "all": "Tudo",
+      "continents": "Continentes",
+      "regions": "Regiões",
+      "capitals": "Capitais"
+    },
+    "itemsCount": "{count} itens",
+    "difficulty": "Dificuldade",
+    "startQuiz": "INICIAR QUIZ",
+    "noGamesFound": "Nenhum jogo encontrado",
+    "noGamesDescription": "Tente ajustar sua pesquisa ou filtros de categoria.",
+    "clearFilters": "Limpar todos os filtros",
+    "gameData": {
+      "us-states": {
+        "title": "Estados dos EUA",
+        "description": "Quão bem você conhece os Estados Unidos?"
+      },
+      "us-capitals": {
+        "title": "Capitais dos EUA",
+        "description": "Você consegue nomear a capital de cada estado dos EUA?"
+      },
+      "sa-countries": {
+        "title": "América do Sul",
+        "description": "Teste seu conhecimento do território sul-americano!"
+      },
+      "sa-capitals": {
+        "title": "Capitais da AS",
+        "description": "Adivinhe as capitais dos países da América do Sul."
+      },
+      "brazil-states": {
+        "title": "Estados do Brasil",
+        "description": "Você consegue nomear todos os estados do território brasileiro?"
+      },
+      "italy-regions": {
+        "title": "Regiões da Itália",
+        "description": "Explore as regiões da Itália, do Piemonte à Sicília."
+      },
+      "france-regions": {
+        "title": "Regiões da França",
+        "description": "Da Bretanha à Córsega, teste seu conhecimento!"
+      },
+      "canada-provinces": {
+        "title": "Províncias do Canadá",
+        "description": "Quantas províncias e territórios canadenses você conhece?"
+      },
+      "australia-states": {
+        "title": "Estados da Austrália",
+        "description": "Teste seu conhecimento da terra lá embaixo!"
+      }
+    }
+  },
+  "Rankings": {
+    "title": "Rankings Globais",
+    "table": {
+      "rank": "Posição",
+      "country": "País",
+      "value": "Valor",
+      "population": "População",
+      "area": "Área (km²)",
+      "density": "Densidade Pop. (/km²)",
+      "hdi": "Pontuação IDH",
+      "na": "N/D"
+    },
+    "categories": {
+      "most-populous-countries": "Países mais populosos",
+      "less-populous-countries": "Países menos populosos",
+      "larger-countries": "Países maiores",
+      "smaller-countries": "Países menores",
+      "most-populated-countries": "Países mais povoados",
+      "less-populated-countries": "Países menos povoados",
+      "highest-hdi": "IDH mais alto",
+      "lowest-hdi": "IDH mais baixo"
+    }
+  },
+  "CountryDetails": {
+    "summary": "Resumo",
+    "information": "Informações",
+    "labels": {
+      "capital": "Capital",
+      "largestCity": "Maior Cidade",
+      "languages": "Idiomas",
+      "demonym": "Gentílico",
+      "government": "Governo",
+      "area": "Área",
+      "population": "População",
+      "gdp": "PIB",
+      "hdi": "IDH",
+      "currency": "Moeda",
+      "timeZone": "Fuso Horário",
+      "callingCode": "Código de discagem",
+      "isoCode": "Código ISO"
+    }
+  },
+  "Quiz": {
+    "score": "Pontuação",
+    "timeLeft": "Tempo Restante",
+    "difficulty": {
+      "easy": "Fácil",
+      "medium": "Médio",
+      "hard": "Difícil"
+    },
+    "start": "INICIAR JOGO",
+    "playAgain": "JOGAR NOVAMENTE",
+    "menu": "Menu",
+    "skip": "Pular",
+    "quit": "Sair",
+    "typeCapital": "Digite a capital...",
+    "typeRegion": "Digite a região...",
+    "tryAgain": "Tente novamente",
+    "target": "Alvo: {name}",
+    "feedback": {
+      "perfect": "Perfeito!",
+      "amazing": "Incrível!",
+      "great": "Bom trabalho!",
+      "good": "Bom esforço!",
+      "practice": "Continue praticando!"
+    }
+  },
+  "RegionNames": {
+    "Alabama": "Alabama", "Alaska": "Alasca", "Arizona": "Arizona", "Arkansas": "Arkansas", "California": "Califórnia", "Colorado": "Colorado", "Connecticut": "Connecticut", "Delaware": "Delaware", "Florida": "Flórida", "Georgia": "Geórgia", "Hawaii": "Havaí", "Idaho": "Idaho", "Illinois": "Illinois", "Indiana": "Indiana", "Iowa": "Iowa", "Kansas": "Kansas", "Kentucky": "Kentucky", "Louisiana": "Luisiana", "Maine": "Maine", "Maryland": "Maryland", "Massachusetts": "Massachusetts", "Michigan": "Michigan", "Minnesota": "Minnesota", "Mississippi": "Mississippi", "Missouri": "Missouri", "Montana": "Montana", "Nebraska": "Nebraska", "Nevada": "Nevada", "New Hampshire": "Nova Hampshire", "New Jersey": "Nova Jersey", "New Mexico": "Novo México", "New York": "Nova York", "North Carolina": "Carolina do Norte", "North Dakota": "Dakota do Norte", "Ohio": "Ohio", "Oklahoma": "Oklahoma", "Oregon": "Oregon", "Pennsylvania": "Pensilvânia", "Rhode Island": "Rhode Island", "South Carolina": "Carolina do Sul", "South Dakota": "Dakota do Sul", "Tennessee": "Tennessee", "Texas": "Texas", "Utah": "Utah", "Vermont": "Vermont", "Virginia": "Virgínia", "Washington": "Washington", "West Virginia": "Virgínia Ocidental", "Wisconsin": "Wisconsin", "Wyoming": "Wyoming",
+    "Acre": "Acre", "Alagoas": "Alagoas", "Amapá": "Amapá", "Amazonas": "Amazonas", "Bahia": "Bahia", "Ceará": "Ceará", "Distrito Federal": "Distrito Federal", "DF": "Distrito Federal", "Espírito Santo": "Espírito Santo", "Goiás": "Goiás", "Maranhão": "Maranhão", "Mato Grosso": "Mato Grosso", "Mato Grosso do Sul": "Mato Grosso do Sul", "Minas Gerais": "Minas Gerais", "Pará": "Pará", "Paraíba": "Paraíba", "Paraná": "Paraná", "Pernambuco": "Pernambuco", "Piauí": "Piauí", "Rio de Janeiro": "Rio de Janeiro", "Rio Grande do Norte": "Rio Grande do Norte", "Rio Grande do Sul": "Rio Grande do Sul", "Rondônia": "Rondônia", "Roraima": "Roraima", "Santa Catarina": "Santa Catarina", "São Paulo": "São Paulo", "Sergipe": "Sergipe", "Tocantins": "Tocantins",
+    "Abruzzo": "Abruzos", "Basilicata": "Basilicata", "Calabria": "Calábria", "Campania": "Campânia", "Emilia-Romagna": "Emília-Romanha", "Friuli-Venezia Giulia": "Friuli-Veneza Júlia", "Lazio": "Lácio", "Liguria": "Ligúria", "Lombardia": "Lombardia", "Marche": "Marcas", "Molise": "Molise", "Piemonte": "Piemonte", "Puglia": "Apúlia", "Sardegna": "Sardenha", "Sicilia": "Sicília", "Toscana": "Toscana", "Trentino-Alto Adige": "Trentino-Alto Ádige", "Umbria": "Úmbria", "Valle d'Aosta": "Vale de Aosta", "Veneto": "Vêneto",
+    "Auvergne-Rhône-Alpes": "Auvérnia-Ródano-Alpes", "Bourgogne-Franche-Comté": "Borgonha-Franco-Condado", "Bretagne": "Bretanha", "Brittany": "Bretanha", "Centre-Val de Loire": "Centro-Vale do Loire", "Corse": "Córsega", "Corsica": "Córsega", "Grand Est": "Grande Leste", "Hauts-de-France": "Altos da França", "Île-de-France": "Ilha de França", "Normandie": "Normandia", "Normandy": "Normandia", "Nouvelle-Aquitaine": "Nova Aquitânia", "Occitanie": "Occitânia", "Pays de la Loire": "País do Loire", "Provence-Alpes-Côte d'Azur": "Provença-Alpes-Costa Azul", "Guadeloupe": "Guadalupe", "Guyane": "Guiana Francesa", "French Guiana": "Guiana Francesa", "La Réunion": "Reunião", "Reunion": "Reunião", "Martinique": "Martinica", "Mayotte": "Maiote",
+    "Alberta": "Alberta", "British Columbia": "Colúmbia Britânica", "Manitoba": "Manitoba", "New Brunswick": "Novo Brunswick", "Newfoundland and Labrador": "Terra Nova e Labrador", "Nova Scotia": "Nova Escocia", "Ontario": "Ontário", "Prince Edward Island": "Ilha do Príncipe Eduardo", "Quebec": "Quebec", "Saskatchewan": "Saskatchewan", "Northwest Territories": "Territórios do Noroeste", "Nunavut": "Nunavut", "Yukon": "Yukon",
+    "New South Wales": "Nova Gales do Sul", "Queensland": "Queensland", "South Australia": "Austrália Meridional", "Tasmania": "Tasmânia", "Victoria": "Vitória", "Western Australia": "Austrália Ocidental", "Australian Capital Territory": "Território da Capital Australiana", "Northern Territory": "Território do Norte",
+    "Argentina": "Argentina", "Bolivia": "Bolívia", "Brazil": "Brasil", "Chile": "Chile", "Colombia": "Colômbia", "Ecuador": "Equador", "Guyana": "Guiana", "Paraguay": "Paraguai", "Peru": "Peru", "Suriname": "Suriname", "Uruguay": "Uruguai", "Venezuela": "Venezuela"
+  },
+  "Common": {
+    "unknown": "Desconhecido",
+    "loading": "Carregando...",
+    "back": "Voltar",
+    "na": "N/D"
+  },
+  "Metadata": {
+    "title": "GeoGeek - Explore o geógrafo dentro de você",
+    "description": "Explorador geográfico interativo e rankings"
+  }
+}

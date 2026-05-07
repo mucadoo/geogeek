@@ -1,8 +1,8 @@
 'use client';
 
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, Timer, Play, ArrowLeft, RefreshCw } from 'lucide-react';
-import Link from 'next/link';
+import { Trophy, Timer, ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { feature } from 'topojson-client';
@@ -10,6 +10,7 @@ import { Topology } from 'topojson-specification';
 
 import GameMap from '@/components/GameMap';
 import GameUI from '@/components/GameUI';
+import { Link } from '@/i18n/routing';
 import { useGameStore, StateFeature, getFeedback, GameMode } from '@/store/useGameStore';
 
 function cn(...inputs: ClassValue[]) {
@@ -37,6 +38,7 @@ export default function QuizLayout({
   title, description, mapData, mapStatus, projection, validNames, duration, gameMode = 'name', capitalMap = {},
   showOnlyValid = false, capitalCoordinates = {}
 }: QuizLayoutProps) {
+  const t = useTranslations('Quiz');
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
     totalToGuess, timeLeft, tick
@@ -162,19 +164,19 @@ export default function QuizLayout({
                  <div className="mb-8 flex justify-center gap-2">
                    {(['easy', 'medium', 'hard'] as const).map((d) => (
                      <button key={d} onClick={() => setDifficulty(d)} className={cn("px-4 py-2 rounded-lg font-bold capitalize transition-all", difficulty === d ? "bg-primary text-white shadow-md" : "bg-gray-50 text-gray-500 hover:bg-gray-100")}>
-                       {d}
+                       {t(`difficulty.${d}`)}
                      </button>
                    ))}
                  </div>
                  
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg">START GAME</button>
+                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg">{t('start')}</button>
               </div>
            ) : (
               <div className="w-full max-w-lg rounded-3xl bg-white p-10 text-center shadow-2xl">
                  <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
-                 <h2 className="text-3xl font-bold mb-6">{getFeedback(score, totalToGuess)}</h2>
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl text-white font-bold mb-4">PLAY AGAIN</button>
-                 <button onClick={resetGame} className="text-gray-400 font-bold">Menu</button>
+                 <h2 className="text-3xl font-bold mb-6">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
+                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl text-white font-bold mb-4">{t('playAgain')}</button>
+                 <button onClick={resetGame} className="text-gray-400 font-bold">{t('menu')}</button>
               </div>
            )}
         </div>

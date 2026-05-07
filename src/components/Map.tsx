@@ -2,6 +2,7 @@
 
 import * as d3 from 'd3';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo } from 'react';
 
 import MapPolygons from './MapPolygons';
@@ -10,6 +11,7 @@ import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { useMapStore } from '@/store/useMapStore';
 
 export default function Map() {
+  const t = useTranslations('Map');
   const { data: mapData, status } = useWorldMapData();
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
@@ -73,7 +75,7 @@ export default function Map() {
       {status === 'pending' && (
         <div className="absolute inset-0 flex animate-pulse flex-col items-center justify-center gap-4">
           <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-          <p className="font-medium text-gray-500">Loading Explorer...</p>
+          <p className="font-medium text-gray-500">{t('loading')}</p>
         </div>
       )}
 
@@ -100,12 +102,12 @@ export default function Map() {
           {selectedContinent && (
             <button
               onClick={resetMap}
-              title="Return to World"
+              title={t('returnToWorld')}
               className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-white p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
             >
               <Image 
                 src="/media/back_icon.svg" 
-                alt="Return to World" 
+                alt={t('returnToWorld')} 
                 width={32} 
                 height={32} 
                 className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"

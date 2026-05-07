@@ -2,6 +2,7 @@
 
 import { clsx, type ClassValue } from 'clsx';
 import { SkipForward, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useRef, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -10,11 +11,13 @@ import { useGameStore } from '@/store/useGameStore';
 function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
 
 export default function GameUI() {
+  const t = useTranslations('Quiz');
+  const tRegions = useTranslations('RegionNames');
   const { 
     userInput, lastGuessCorrect, currentState, gameMode,
     setUserInput, submitGuess, skipState, resetGame 
   } = useGameStore();
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { inputRef.current?.focus(); }, [currentState]);
@@ -23,14 +26,23 @@ export default function GameUI() {
     if (e.key === 'Enter') submitGuess(userInput);
   };
 
+  const getLocalizedName = (name: string) => {
+    try {
+      return tRegions(name);
+    } catch {
+      return name;
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4">
-      
+
       {gameMode === 'capital' && currentState && (
         <div className="animate-in slide-in-from-bottom-2 rounded-xl bg-[#2c3e50] px-6 py-2 text-sm font-bold text-white shadow-xl">
-          Target: {currentState.properties.name}
+          {t('target', { name: getLocalizedName(currentState.properties.name) })}
         </div>
       )}
+...
 
       <div className="flex w-full items-center gap-3">
         <div className="relative flex-grow">
@@ -40,21 +52,21 @@ export default function GameUI() {
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={gameMode === 'capital' ? "Type capital..." : "Type region..."}
+            placeholder={gameMode === 'capital' ? t('typeCapital') : t('typeRegion')}
             className={cn(
               "w-full rounded-2xl border-2 bg-white/90 px-8 py-5 text-xl font-bold shadow-2xl outline-none backdrop-blur-md transition-all placeholder:text-gray-300",
               lastGuessCorrect === false ? "border-red-400 bg-red-50 text-red-600 shake" : "border-transparent focus:border-primary"
             )}
           />
           {lastGuessCorrect === false && (
-            <span className="absolute -bottom-6 left-6 text-xs font-bold text-red-500 uppercase">Try again</span>
+            <span className="absolute -bottom-6 left-6 text-xs font-bold text-red-500 uppercase">{t('tryAgain')}</span>
           )}
         </div>
 
         <button 
           onClick={skipState}
           className="group flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 text-gray-400 shadow-xl backdrop-blur-md transition-all hover:bg-white hover:text-primary"
-          title="Skip"
+          title={t('skip')}
         >
           <SkipForward size={28} />
         </button>
@@ -62,7 +74,7 @@ export default function GameUI() {
         <button 
           onClick={resetGame}
           className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 text-gray-400 shadow-xl backdrop-blur-md transition-all hover:bg-red-50 hover:text-red-500"
-          title="Quit"
+          title={t('quit')}
         >
           <XCircle size={28} />
         </button>
