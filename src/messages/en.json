@@ -1,8 +1,22 @@
 {
   "HomePage": {
-    "title": "About us",
-    "description": "Welcome to {brand}! Here we breathe geography. Created with the intention of teaching a more interactive geography, GeoGeek has an explorers map that will allow the user to have a better knowledge of the world political territory, besides curiosity and geographical rankings. Do not waste time and start to explore!",
-    "cta": "Explore the Map"
+    "heroTitle": "Master the World",
+    "heroSubtitle": "Dive into an interactive atlas. Play geography games, challenge your knowledge, and explore global rankings.",
+    "cta": "START EXPLORING",
+    "cards": {
+      "map": {
+        "title": "World Explorer",
+        "desc": "Interactive global discovery"
+      },
+      "games": {
+        "title": "Geography Hub",
+        "desc": "Test your regional knowledge"
+      },
+      "rankings": {
+        "title": "Global Rankings",
+        "desc": "View country statistics"
+      }
+    }
   },
   "Header": {
     "games": "Games",

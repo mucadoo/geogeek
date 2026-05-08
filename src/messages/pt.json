@@ -1,8 +1,22 @@
 {
   "HomePage": {
-    "title": "Sobre nós",
-    "description": "Bem-vindo ao {brand}! Aqui respiramos geografia. Criado com a intenção de ensinar uma geografia mais interativa, o GeoGeek possui um mapa de exploradores que permitirá ao usuário ter um melhor conhecimento do território político mundial, além de curiosidades e rankings geográficos. Não perca tempo e comece a explorar!",
-    "cta": "Explorar o Mapa"
+    "heroTitle": "Domine o Mundo",
+    "heroSubtitle": "Mergulhe em um atlas interativo. Jogue jogos de geografia, desafie seus conhecimentos e explore rankings globais.",
+    "cta": "COMEÇAR A EXPLORAR",
+    "cards": {
+      "map": {
+        "title": "Explorador Mundial",
+        "desc": "Descoberta global interativa"
+      },
+      "games": {
+        "title": "Centro Geográfico",
+        "desc": "Teste seus conhecimentos regionais"
+      },
+      "rankings": {
+        "title": "Rankings Globais",
+        "desc": "Veja estatísticas dos países"
+      }
+    }
   },
   "Header": {
     "games": "Jogos",
