@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
-import { routing } from '@/i18n/routing';
 import { CONTINENT_VIEWS } from '@/config/mapConstants';
+import { routing } from '@/i18n/routing';
 
 export const dynamic = "force-static";
 

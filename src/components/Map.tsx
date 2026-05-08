@@ -2,19 +2,19 @@
 
 import * as d3 from 'd3';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { feature } from 'topojson-client';
 
 import MapPolygons from './MapPolygons';
 import MapSidebar from './MapSidebar';
 
-import { useWorldMapData } from '@/hooks/useWorldMapData';
-import { useCountrySubMap } from '@/hooks/useRegionMapData';
-import { useMapStore } from '@/store/useMapStore';
 import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
+import { useCountrySubMap } from '@/hooks/useRegionMapData';
+import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { countryService } from '@/lib/countryService';
+import { useMapStore } from '@/store/useMapStore';
 
 interface MapProps {
   slug?: string;

@@ -1,10 +1,10 @@
-import { setRequestLocale } from 'next-intl/server';
 import { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
 
 import Map from '@/components/Map';
-import { routing } from '@/i18n/routing';
 import { CONTINENT_VIEWS } from '@/config/mapConstants';
+import { routing } from '@/i18n/routing';
 import { countryService } from '@/lib/countryService';
 
 export function generateStaticParams() {

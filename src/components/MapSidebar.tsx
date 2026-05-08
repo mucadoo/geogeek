@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import React from 'react';
 
 interface MapSidebarProps {
   type: 'continent' | 'country';

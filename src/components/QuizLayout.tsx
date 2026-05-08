@@ -10,8 +10,8 @@ import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
 import DifficultyTicket from '@/components/DifficultyTicket';
-import GameMap from '@/components/GameMap';
 import { GameHUD } from '@/components/GameHUD';
+import GameMap from '@/components/GameMap';
 import { RegionCounter } from '@/components/RegionCounter';
 import { Link } from '@/i18n/routing';
 import { useGameStore, StateFeature, getFeedback, GameMode } from '@/store/useGameStore';

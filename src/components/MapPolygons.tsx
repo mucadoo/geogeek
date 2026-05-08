@@ -37,12 +37,15 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
 
   const geographies = useMemo(() => {
     if (!mapData) return[];
-    const countries = feature(mapData, mapData.objects.countries as any) as any;
-    return countries.features as d3.GeoPermissibleObjects[];
+    // Dynamically find the first available object key if 'countries' is not present (common in sub-map data)
+    const objectKey = mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0];
+    const geoObject = (mapData.objects as any)[objectKey];
+    const features = feature(mapData, geoObject) as any;
+    return features.features as d3.GeoPermissibleObjects[];
   }, [mapData]);
 
   const continentGeographies = useMemo(() => {
-    if (!mapData) return [];
+    if (!mapData || !mapData.objects.countries) return [];
     
     return Object.keys(CONTINENT_VIEWS).map((continentName) => {
       const geometries = (mapData.objects.countries as any).geometries.filter((geo: any) => {
@@ -102,8 +105,8 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
           const countryName = geo.properties?.name || "Unknown";
           
           const isContinentMode = exploreMode === 'continent';
-          
-          let isClickable = !activeCountryIso || isSubMap;
+
+          const isClickable = !activeCountryIso || isSubMap;
           let isVisible = true;
           if (!isSubMap) {
             if (isContinentMode && selectedContinent && continent !== selectedContinent) isVisible = false;
