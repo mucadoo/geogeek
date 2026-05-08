@@ -200,15 +200,15 @@ export default function QuizLayout({
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--background)]/80 p-4 backdrop-blur-sm">
            {gameStatus === 'idle' ? (
-              <div className="w-full max-w-md rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border border-[var(--card-border)] relative">
+              <div className="w-full max-w-md rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative">
                  <Link href="/games" className="absolute top-6 left-6 text-slate-400 transition-colors hover:text-primary">
                   <ArrowLeft size={24} />
                  </Link>
-                 <div className="bg-primary/10 text-primary mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl">
+                 <div className="bg-[var(--primary)]/10 text-[var(--primary)] mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl">
                    <Trophy size={40} />
                  </div>
-                 <h1 className="mb-4 text-3xl font-bold text-[var(--foreground)]">{title}</h1>
-                 <p className="mb-8 text-slate-500">{description}</p>
+                 <h1 className="mb-4 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
+                 <p className="mb-8 font-game-mono text-slate-500">{description}</p>
                  
                  <div className="mb-8 flex flex-col items-center gap-6">
                     <div className="flex gap-4">
@@ -233,19 +233,19 @@ export default function QuizLayout({
                     </div>
                  </div>
                  
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg tracking-widest">{t('start')}</button>
+                 <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">{t('start')}</button>
               </div>
            ) : (
-              <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border border-[var(--card-border)]">
+              <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)]">
                  <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
                  {isNewHighScore && (
                     <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-slate-900 shadow-lg uppercase tracking-wider inline-block">
                       New High Score!
                     </div>
                   )}
-                 <h2 className="text-3xl font-bold mb-6 text-[var(--foreground)]">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl text-white font-bold mb-4 tracking-widest">{t('playAgain')}</button>
-                 <button onClick={resetGame} className="text-slate-500 font-bold tracking-widest">{t('menu')}</button>
+                 <h2 className="mb-6 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
+                 <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>
+                 <button onClick={resetGame} className="text-slate-500 font-game-heading uppercase tracking-widest">{t('menu')}</button>
               </div>
            )}
         </div>

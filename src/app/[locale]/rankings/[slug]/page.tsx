@@ -43,14 +43,13 @@ export default async function RankingDetail({ params }: { params: Promise<{ loca
     <main className="container-custom animate-in fade-in mt-10 mb-20 flex-grow duration-1000">
       
       <div className="relative mx-auto mb-12 w-full max-w-[800px] text-center">
-        <Link href="/rankings" className="hover:text-primary absolute top-1/2 left-0 -translate-y-1/2 p-2 text-gray-500 transition-colors">
+        <Link href="/rankings" className="hover:text-[var(--primary)] absolute top-1/2 left-0 -translate-y-1/2 p-2 text-slate-500 transition-colors">
           <ArrowLeft size={24} strokeWidth={1.5} />
         </Link>
-        <h1 className="text-[32px] font-medium tracking-tight text-[#2c3e50]">{t(`categories.${slug as RankingCategorySlug}`)}</h1>
+        <h1 className="text-5xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`categories.${slug as RankingCategorySlug}`)}</h1>
       </div>
 
-
-      <div className="mx-auto max-w-[800px] rounded-3xl border border-gray-100 bg-white p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+      <div className="mx-auto max-w-[800px] game-card shadow-none p-8">
         <Table>
           <TableHeader>
             <TableRow>

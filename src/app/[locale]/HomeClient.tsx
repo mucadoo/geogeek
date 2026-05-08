@@ -22,13 +22,13 @@ export default function HomeClient() {
         {/* 1. Interactive Search Pill */}
         <button 
           onClick={openSearch}
-          className="group flex items-center gap-3 px-6 py-3 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-[var(--card-border)] hover:border-primary transition-all shadow-sm"
+          className="group flex items-center gap-3 px-6 py-3 rounded-full bg-[var(--card-bg)]/80 backdrop-blur-md border border-[var(--card-border)] hover:border-primary transition-all shadow-sm"
         >
            <Search size={18} className="text-slate-500 group-hover:text-primary transition-colors" />
            <span className="text-sm font-game-mono text-slate-500 group-hover:text-[var(--foreground)] transition-colors">
              Search countries, regions, or games...
            </span>
-           <kbd className="ml-2 font-game-mono bg-slate-200/70 dark:bg-slate-700/70 rounded-md px-2 py-1 text-[10px] text-slate-500 font-bold uppercase tracking-widest border border-slate-300 dark:border-slate-600">
+           <kbd className="ml-2 font-game-mono bg-[var(--input-bg)] rounded-md px-2 py-1 text-[10px] text-slate-500 font-bold uppercase tracking-widest border border-[var(--card-border)]">
              ⌘K
            </kbd>
         </button>
@@ -38,7 +38,7 @@ export default function HomeClient() {
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-game-heading tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-[var(--primary)] via-[#00d2ff] to-[var(--accent)] drop-shadow-sm uppercase leading-none pb-2">
             {t('heroTitle')}
           </h1>
-          <p className="text-lg md:text-xl font-game-mono text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+          <p className="text-lg md:text-xl font-game-mono text-[var(--foreground)] opacity-70 leading-relaxed max-w-2xl">
             {t('heroSubtitle')}
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function HomeClient() {
 
         {/* 4. Quick Action Glass Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-12 md:mt-16">
-          <Link href="/map" className="game-card flex flex-col items-center text-center gap-4 bg-white/40 dark:bg-[#1c1f1c]/50 backdrop-blur-md hover:-translate-y-2 transition-all duration-300 border border-[var(--card-border)] hover:border-primary group">
+          <Link href="/map" className="game-card flex flex-col items-center text-center gap-4 hover:-translate-y-2 transition-all duration-300 hover:border-primary group">
              <div className="p-4 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] group-hover:scale-110 transition-transform">
                 <Globe size={32} />
              </div>
@@ -64,7 +64,7 @@ export default function HomeClient() {
              </div>
           </Link>
 
-          <Link href="/games" className="game-card flex flex-col items-center text-center gap-4 bg-white/40 dark:bg-[#1c1f1c]/50 backdrop-blur-md hover:-translate-y-2 transition-all duration-300 border border-[var(--card-border)] hover:border-primary group">
+          <Link href="/games" className="game-card flex flex-col items-center text-center gap-4 hover:-translate-y-2 transition-all duration-300 hover:border-primary group">
              <div className="p-4 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] group-hover:scale-110 transition-transform">
                 <Gamepad2 size={32} />
              </div>
@@ -74,7 +74,7 @@ export default function HomeClient() {
              </div>
           </Link>
 
-          <Link href="/rankings" className="game-card flex flex-col items-center text-center gap-4 bg-white/40 dark:bg-[#1c1f1c]/50 backdrop-blur-md hover:-translate-y-2 transition-all duration-300 border border-[var(--card-border)] hover:border-primary group">
+          <Link href="/rankings" className="game-card flex flex-col items-center text-center gap-4 hover:-translate-y-2 transition-all duration-300 hover:border-primary group">
              <div className="p-4 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] group-hover:scale-110 transition-transform">
                 <Trophy size={32} />
              </div>

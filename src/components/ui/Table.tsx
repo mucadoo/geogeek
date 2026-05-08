@@ -12,7 +12,7 @@ export const Table = ({ className, ...props }: React.TableHTMLAttributes<HTMLTab
 );
 
 export const TableHeader = ({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) => (
-  <thead className={cn('border-b-2 border-gray-100', className)} {...props} />
+  <thead className={cn('border-b-2 border-[var(--card-border)]', className)} {...props} />
 );
 
 export const TableBody = ({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) => (
@@ -20,13 +20,13 @@ export const TableBody = ({ className, ...props }: React.HTMLAttributes<HTMLTabl
 );
 
 export const TableRow = ({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) => (
-  <tr className={cn('border-b border-gray-100/50 transition-colors hover:bg-gray-50/50', className)} {...props} />
+  <tr className={cn('border-b border-[var(--card-border)] transition-colors hover:bg-[var(--primary)]/5', className)} {...props} />
 );
 
 export const TableHead = ({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) => (
-  <th className={cn('pb-4 pt-2 text-left align-middle font-bold text-[12px] text-gray-400 uppercase tracking-widest', className)} {...props} />
+  <th className={cn('pb-4 pt-2 text-left align-middle font-game-heading text-xl text-slate-500 tracking-wider', className)} {...props} />
 );
 
 export const TableCell = ({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) => (
-  <td className={cn('py-4 align-middle text-[15px]', className)} {...props} />
+  <td className={cn('py-4 align-middle font-game-mono text-[var(--foreground)]', className)} {...props} />
 );

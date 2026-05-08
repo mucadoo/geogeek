@@ -40,30 +40,33 @@ export default function SearchPalette() {
 
   return (
     <Command.Dialog open={open} onOpenChange={setOpen} label="Global Search" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden bg-white rounded-2xl shadow-2xl border border-gray-100">
-        <Command.Input placeholder="Search countries or games..." className="w-full px-4 py-4 text-lg border-b border-gray-100 outline-none" />
+      <div className="w-full max-w-lg overflow-hidden bg-[var(--card-bg)] rounded-2xl shadow-2xl border border-[var(--card-border)]">
+        <Command.Input 
+            placeholder="Search countries or games..." 
+            className="w-full px-4 py-4 text-lg bg-transparent text-[var(--foreground)] font-game-mono border-b border-[var(--card-border)] outline-none placeholder:text-slate-500" 
+        />
         <Command.List className="max-h-[300px] overflow-y-auto p-2">
-          <Command.Empty>No results found.</Command.Empty>
+          <Command.Empty className="p-4 font-game-mono text-slate-500">No results found.</Command.Empty>
           
-          <Command.Group heading="Countries">
+          <Command.Group heading="Countries" className="font-game-heading text-lg tracking-widest text-slate-500 px-2 py-2">
             {countries.map((c) => (
               <Command.Item
                 key={c.ISO_code}
                 onSelect={() => handleSelect(`/map/${c.ISO_code.toLowerCase()}`)}
-                className="px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-100 aria-selected:bg-primary/10"
+                className="px-4 py-2 cursor-pointer rounded-lg font-game-mono text-[var(--foreground)] aria-selected:bg-[var(--primary)]/10"
               >
                 {getLocalizedCountryName(c.ISO_code, locale)}
               </Command.Item>
             ))}
           </Command.Group>
 
-          <Command.Group heading="Games">
+          <Command.Group heading="Games" className="font-game-heading text-lg tracking-widest text-slate-500 px-2 py-2">
             {/* Hardcoded based on GamesClient.tsx list */}
             {['us-states', 'us-capitals', 'sa-countries', 'sa-capitals', 'brazil-states', 'italy-regions', 'france-regions', 'canada-provinces', 'australia-states'].map((key) => (
               <Command.Item
                 key={key}
                 onSelect={() => handleSelect(`/games/${key}`)}
-                className="px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-100 aria-selected:bg-primary/10"
+                className="px-4 py-2 cursor-pointer rounded-lg font-game-mono text-[var(--foreground)] aria-selected:bg-[var(--primary)]/10"
               >
                 {t(`gameData.${key}.title`)}
               </Command.Item>
