@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f1f5f3; 
+  --background: #f8faf9;
   --foreground: #2c3e50;
-  --primary: #00a8b5;    
-  --accent: #ffcd42;     
-  --danger: #ff5a5f;     
-  --map-fill: #dbe5df;
-  --map-stroke: #adb5bd;
+  --primary: #00a8b5;
+  --accent: #ffcd42;
+  --danger: #ff5a5f;
+  --map-fill: #ffffff;
+  --map-stroke: #e2e8f0;
 }
 
 .dark {
@@ -25,15 +25,27 @@
   --color-danger: var(--danger);
   --color-map-fill: var(--map-fill);
   --color-map-stroke: var(--map-stroke);
-  --font-inter: var(--font-inter);
+  --font-sans: var(--font-inter), sans-serif;
+  --font-heading: var(--font-bebas), sans-serif;
+  --font-mono: var(--font-mono), monospace;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
   transition: background-color 0.3s, color 0.3s;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+code {
+  font-family: var(--font-mono);
 }
 
 /* Force remove the black accessibility box when clicking paths */

@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Inter, Bebas_Neue, JetBrains_Mono } from "next/font/google";
 import { notFound } from 'next/navigation';
 import { AbstractIntlMessages } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
@@ -17,6 +17,17 @@ import "../globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const bebas = Bebas_Neue({
+  weight: "400",
+  variable: "--font-bebas",
+  subsets: ["latin"],
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -87,8 +98,8 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${inter.variable}`} suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col antialiased">
+    <html lang={locale} className={`${inter.variable} ${bebas.variable} ${mono.variable}`} suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col antialiased font-sans">
         <NextTopLoader color="#00a8b5" showSpinner={false} height={3} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Providers messages={messages} locale={locale}>

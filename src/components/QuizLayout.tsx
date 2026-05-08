@@ -9,7 +9,10 @@ import { twMerge } from 'tailwind-merge';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
+import DifficultyTicket from '@/components/DifficultyTicket';
 import GameMap from '@/components/GameMap';
+import { GameHUD } from '@/components/GameHUD';
+import { RegionCounter } from '@/components/RegionCounter';
 import GameUI from '@/components/GameUI';
 import { Link } from '@/i18n/routing';
 import { useGameStore, StateFeature, getFeedback, GameMode } from '@/store/useGameStore';
@@ -108,52 +111,34 @@ export default function QuizLayout({
         )}
       </div>
 
-      {/* LAYER 2: HUD - TOP BAR (Stats & Progress) */}
+      {/* LAYER 2: HUD - TOP & SIDES */}
       {gameStatus === 'playing' && (
-        <div className="pointer-events-none absolute top-24 left-0 right-0 z-10 px-6 md:top-6 md:px-10">
-          <div className="mx-auto flex max-w-[1400px] items-start justify-between">
-            
-            {/* Top Left: Game Info & Progress */}
-            <div className="pointer-events-auto flex flex-col gap-3">
-              <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-xl backdrop-blur-md">
-                <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">{title}</h2>
-                <div className="mt-2 flex items-center gap-4">
-                   <div className="flex items-center gap-2 font-black text-[#2c3e50]">
-                      <span className="text-2xl">{score}</span>
-                      <span className="text-gray-300">/</span>
-                      <span className="text-lg text-gray-400">{totalToGuess}</span>
-                   </div>
-                   <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-100">
-                      <div className="bg-primary h-full transition-all duration-500" style={{ width: `${totalToGuess > 0 ? (score/totalToGuess)*100 : 0}%` }} />
-                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Top Right: Timer */}
-            <div className="pointer-events-auto">
-               <div className={cn(
-                 "flex items-center gap-3 rounded-2xl border px-6 py-4 shadow-xl backdrop-blur-md transition-colors",
-                 timeLeft < 30 ? "bg-red-50 border-red-100 text-red-500" : "bg-white/80 border-gray-100 text-primary"
-               )}>
-                  <Timer size={24} className={timeLeft < 30 ? "animate-pulse" : ""} />
-                  <span className="text-3xl font-black tabular-nums">{formatTime(timeLeft)}</span>
-               </div>
-            </div>
+        <>
+          <GameHUD score={score} total={totalToGuess} timeLeft={timeLeft} />
+          
+          <div className="absolute top-24 left-10 hidden xl:flex flex-col gap-6">
+            <RegionCounter label="North" count={0} total={10} />
+            <RegionCounter label="South" count={0} total={10} />
           </div>
-        </div>
+          <div className="absolute top-24 right-10 hidden xl:flex flex-col gap-6">
+            <RegionCounter label="East" count={0} total={10} />
+            <RegionCounter label="West" count={0} total={10} />
+          </div>
+        </>
       )}
 
-      {/* LAYER 3: HUD - BOTTOM CENTER (The Input Area) */}
+      {/* LAYER 3: HUD - BOTTOM CENTER (Redesigned Input) */}
       {gameStatus === 'playing' && (
         <div className="pointer-events-none absolute bottom-8 left-0 right-0 z-10 px-6 md:bottom-12">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-6">
-            
-            {/* The Actual Input Component */}
-            <div className="pointer-events-auto w-full">
-               <GameUI />
+          <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
+            <div className="pointer-events-auto w-full bg-white rounded-full p-2 flex items-center shadow-2xl border border-slate-100">
+               <input className="flex-grow bg-transparent px-6 py-3 outline-none font-mono text-slate-700" placeholder="Type name..." />
+               <button className="bg-primary text-white px-8 py-3 rounded-full font-heading uppercase tracking-wider shadow-lg hover:bg-teal-600 transition-colors">Guess</button>
             </div>
-
+            <div className="flex gap-2">
+              <button className="bg-accent text-[#2c3e50] px-6 py-2 rounded-xl font-heading uppercase text-sm shadow-md hover:bg-yellow-400 transition-colors">Get Hint</button>
+              <button className="bg-white text-slate-500 px-6 py-2 rounded-xl font-heading uppercase text-sm shadow-md hover:bg-slate-50 transition-colors">Skip</button>
+            </div>
           </div>
         </div>
       )}
@@ -172,12 +157,27 @@ export default function QuizLayout({
                  <h1 className="mb-4 text-3xl font-bold text-gray-800">{title}</h1>
                  <p className="mb-8 text-gray-600">{description}</p>
                  
-                 <div className="mb-8 flex justify-center gap-2">
-                   {(['easy', 'medium', 'hard'] as const).map((d) => (
-                     <button key={d} onClick={() => setDifficulty(d)} className={cn("px-4 py-2 rounded-lg font-bold capitalize transition-all", difficulty === d ? "bg-primary text-white shadow-md" : "bg-gray-50 text-gray-500 hover:bg-gray-100")}>
-                       {t(`difficulty.${d}`)}
-                     </button>
-                   ))}
+                 <div className="mb-8 flex flex-col items-center gap-6">
+                    <div className="flex gap-4">
+                      <DifficultyTicket 
+                        title="Easy" 
+                        description="10 minutes • 5 hints" 
+                        isSelected={difficulty === 'easy'} 
+                        onClick={() => setDifficulty('easy')} 
+                      />
+                      <DifficultyTicket 
+                        title="Medium" 
+                        description="5 minutes • 2 hints" 
+                        isSelected={difficulty === 'medium'} 
+                        onClick={() => setDifficulty('medium')} 
+                      />
+                      <DifficultyTicket 
+                        title="Hard" 
+                        description="2 minutes • 0 hints" 
+                        isSelected={difficulty === 'hard'} 
+                        onClick={() => setDifficulty('hard')} 
+                      />
+                    </div>
                  </div>
                  
                  <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg">{t('start')}</button>

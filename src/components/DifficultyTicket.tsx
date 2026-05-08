@@ -1,0 +1,40 @@
+import React from 'react';
+
+interface DifficultyTicketProps {
+  title: string;
+  description: string;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+export default function DifficultyTicket({ title, description, isSelected, onClick }: DifficultyTicketProps) {
+  return (
+    <div className="flex flex-col items-center gap-2 cursor-pointer group" onClick={onClick}>
+      {/* Floating Checkmark */}
+      <div className={`transition-all duration-300 ${isSelected ? 'opacity-100 -translate-y-1' : 'opacity-0 -translate-y-4'}`}>
+        <div className="bg-primary text-white rounded-full p-1">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Perforated Ticket */}
+      <div 
+        className={`relative w-48 h-20 bg-white border-2 border-dashed flex items-center justify-center
+          ${isSelected ? 'border-primary' : 'border-slate-300'}
+          [mask-image:radial-gradient(circle_at_0%_50%,transparent_10px,black_10px),radial-gradient(circle_at_100%_50%,transparent_10px,black_10px)]
+        `}
+      >
+        <span className="font-heading text-2xl uppercase tracking-wider text-slate-800">
+          {title}
+        </span>
+      </div>
+
+      {/* Description */}
+      <span className="font-mono text-xs text-slate-500 uppercase tracking-tight">
+        {description}
+      </span>
+    </div>
+  );
+}
