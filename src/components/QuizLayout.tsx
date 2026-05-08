@@ -13,7 +13,6 @@ import DifficultyTicket from '@/components/DifficultyTicket';
 import GameMap from '@/components/GameMap';
 import { GameHUD } from '@/components/GameHUD';
 import { RegionCounter } from '@/components/RegionCounter';
-import GameUI from '@/components/GameUI';
 import { Link } from '@/i18n/routing';
 import { useGameStore, StateFeature, getFeedback, GameMode } from '@/store/useGameStore';
 
@@ -32,10 +31,8 @@ interface QuizLayoutProps {
   duration: number;
   gameMode?: GameMode;
   capitalMap?: Record<string, string>;
-  
-  // NEW PROPS
   showOnlyValid?: boolean;
-  capitalCoordinates?: Record<string, [number, number]>;
+  capitalCoordinates?: Record<string,[number, number]>;
 }
 
 export default function QuizLayout({
@@ -44,6 +41,7 @@ export default function QuizLayout({
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
   const tRegions = useTranslations('RegionNames');
+  
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
     totalToGuess, timeLeft, tick, isNewHighScore,
@@ -70,7 +68,6 @@ export default function QuizLayout({
 
   const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
-  // Handle Timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (gameStatus === 'playing') interval = setInterval(() => tick(), 1000);
@@ -84,14 +81,8 @@ export default function QuizLayout({
       const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects[objectKey]) as any).features as StateFeature[];
-      startGame(states, validNames, duration, difficulty, 'QUIZ_KEY', gameMode, capitalMap); // Added QUIZ_KEY
+      startGame(states, validNames, duration, difficulty, 'QUIZ_KEY', gameMode, capitalMap);
     }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (mapStatus === 'pending') {
@@ -105,7 +96,7 @@ export default function QuizLayout({
   return (
     <main className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-[#f8faf9]">
       
-      {/* LAYER 1: THE FULLSCREEN MAP (No padding, maximum scale) */}
+      {/* LAYER 1: THE FULLSCREEN MAP */}
       <div className="absolute inset-0 z-0 h-full w-full">
         {mapData && (
           <GameMap 
@@ -137,7 +128,7 @@ export default function QuizLayout({
         </>
       )}
 
-      {/* LAYER 3: HUD - BOTTOM CENTER (Redesigned Input) */}
+      {/* LAYER 3: HUD - BOTTOM CENTER UI W/ ACTIONS*/}
       {gameStatus === 'playing' && (
         <div className="pointer-events-none absolute bottom-8 left-0 right-0 z-10 px-6 md:bottom-12">
           <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
@@ -207,54 +198,54 @@ export default function QuizLayout({
 
       {/* OVERLAYS (Start and Finish Screens) */}
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#2c3e50]/20 p-4 backdrop-blur-sm">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--background)]/80 p-4 backdrop-blur-sm">
            {gameStatus === 'idle' ? (
-              <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center shadow-2xl">
-                 <Link href="/games" className="absolute top-6 left-6 text-gray-400 transition-colors hover:text-primary">
+              <div className="w-full max-w-md rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border border-[var(--card-border)] relative">
+                 <Link href="/games" className="absolute top-6 left-6 text-slate-400 transition-colors hover:text-primary">
                   <ArrowLeft size={24} />
                  </Link>
                  <div className="bg-primary/10 text-primary mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl">
                    <Trophy size={40} />
                  </div>
-                 <h1 className="mb-4 text-3xl font-bold text-gray-800">{title}</h1>
-                 <p className="mb-8 text-gray-600">{description}</p>
+                 <h1 className="mb-4 text-3xl font-bold text-[var(--foreground)]">{title}</h1>
+                 <p className="mb-8 text-slate-500">{description}</p>
                  
                  <div className="mb-8 flex flex-col items-center gap-6">
                     <div className="flex gap-4">
                       <DifficultyTicket 
                         title="Easy" 
-                        description="10 minutes • 5 hints" 
+                        description="10 min • 5 hints" 
                         isSelected={difficulty === 'easy'} 
                         onClick={() => setDifficulty('easy')} 
                       />
                       <DifficultyTicket 
                         title="Medium" 
-                        description="5 minutes • 2 hints" 
+                        description="5 min • 2 hints" 
                         isSelected={difficulty === 'medium'} 
                         onClick={() => setDifficulty('medium')} 
                       />
                       <DifficultyTicket 
                         title="Hard" 
-                        description="2 minutes • 0 hints" 
+                        description="2 min • 0 hints" 
                         isSelected={difficulty === 'hard'} 
                         onClick={() => setDifficulty('hard')} 
                       />
                     </div>
                  </div>
                  
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg">{t('start')}</button>
+                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl font-bold text-white text-lg hover:scale-105 transition-all shadow-lg tracking-widest">{t('start')}</button>
               </div>
            ) : (
-              <div className="w-full max-w-lg rounded-3xl bg-white p-10 text-center shadow-2xl">
+              <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border border-[var(--card-border)]">
                  <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
                  {isNewHighScore && (
-                    <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-white shadow-lg uppercase tracking-wider inline-block">
+                    <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-slate-900 shadow-lg uppercase tracking-wider inline-block">
                       New High Score!
                     </div>
                   )}
-                 <h2 className="text-3xl font-bold mb-6">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
-                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl text-white font-bold mb-4">{t('playAgain')}</button>
-                 <button onClick={resetGame} className="text-gray-400 font-bold">{t('menu')}</button>
+                 <h2 className="text-3xl font-bold mb-6 text-[var(--foreground)]">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
+                 <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl text-white font-bold mb-4 tracking-widest">{t('playAgain')}</button>
+                 <button onClick={resetGame} className="text-slate-500 font-bold tracking-widest">{t('menu')}</button>
               </div>
            )}
         </div>

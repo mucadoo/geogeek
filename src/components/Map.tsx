@@ -19,6 +19,14 @@ interface MapProps {
   slug?: string;
 }
 
+// Linear interpolator prevents the "swoop out" effect and flies directly to the target zoom
+const linearZoomInterpolator = (a: d3.ZoomView, b: d3.ZoomView) => {
+  const x = d3.interpolateNumber(a[0], b[0]);
+  const y = d3.interpolateNumber(a[1], b[1]);
+  const k = d3.interpolateNumber(a[2], b[2]);
+  return (t: number) => [x(t), y(t), k(t)] as d3.ZoomView;
+};
+
 export default function Map({ slug }: MapProps) {
   const t = useTranslations('Map');
   const router = useRouter();
@@ -27,33 +35,27 @@ export default function Map({ slug }: MapProps) {
   const gRef = useRef<SVGGElement>(null);
   const [activeCountry, setActiveCountry] = useState<any>(null);
   
-  // Create mapping from Alpha2 to Numeric ID
   const ALPHA2_TO_NUMERIC = useMemo(() => {
     return Object.fromEntries(
       Object.entries(NUMERIC_TO_ALPHA2).map(([num, alpha]) => [alpha.toUpperCase(), num])
     );
-  }, []);
+  },[]);
 
   const { 
-    position, 
-    selectedContinent, tooltip, setTooltip,
-    resetMap, handleContinentClick
+    position, selectedContinent, tooltip, setTooltip,
+    exploreMode, setExploreMode, resetMap, handleContinentClick
   } = useMapStore();
 
   const width = 800;
   const height = 450;
 
   const projection = useMemo(() => {
-    return d3.geoMercator()
-      .scale(120)
-      .translate([width / 2, height / 2 + 50]);
-  }, []);
+    return d3.geoMercator().scale(120).translate([width / 2, height / 2 + 50]);
+  },[]);
 
-  // Set the isolated country ID synchronously if available through the URL to instantly drop the other geometries
   const isCountrySlug = slug && slug.length === 2;
   const targetIso = activeCountry?.ISO_code?.toLowerCase() || (isCountrySlug ? slug.toLowerCase() : undefined);
 
-  // Sync URL slug with Store on mount
   useEffect(() => {
     async function initView() {
       if (!slug) {
@@ -64,7 +66,6 @@ export default function Map({ slug }: MapProps) {
 
       const continentName = slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
       
-      // Try as continent
       const view = CONTINENT_VIEWS[continentName as keyof typeof CONTINENT_VIEWS];
       if (view) {
         handleContinentClick(continentName, view);
@@ -72,11 +73,9 @@ export default function Map({ slug }: MapProps) {
         return;
       }
 
-      // Try as country
       const country = await countryService.getCountryByIso(slug.toUpperCase());
       if (country) {
         setActiveCountry(country);
-        // Zooming logic will be triggered by re-rendering with new country state
       }
     }
     initView();
@@ -87,13 +86,12 @@ export default function Map({ slug }: MapProps) {
 
     const svg = d3.select(svgRef.current);
     const g = d3.select(gRef.current);
-
-    // Track if zoom has been applied to this DOM element already
     const isInitialized = !!svg.property('__zoom');
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
       .touchable(true)
+      .interpolate(linearZoomInterpolator) // Apply custom seamless interpolator
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
@@ -101,10 +99,9 @@ export default function Map({ slug }: MapProps) {
     svg.call(zoom);
     svg.on('dblclick.zoom', null);
 
-    // If freshly mounted, apply the previous zoom transform instantly to prevent jumping
     if (!isInitialized) {
       const [lng, lat] = position.coordinates;
-      const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
+      const [x, y] = projection([lng, lat]) ||[width / 2, height / 2];
       const initialTransform = d3.zoomIdentity
           .translate(width / 2, height / 2)
           .scale(position.zoom)
@@ -112,11 +109,8 @@ export default function Map({ slug }: MapProps) {
       svg.call(zoom.transform, initialTransform);
     }
 
-    // If a country is active, focus on it gracefully
     if (activeCountry && mapData) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
-      
-      // Convert TopoJSON to GeoJSON
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
       const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
       
@@ -124,18 +118,14 @@ export default function Map({ slug }: MapProps) {
         const path = d3.geoPath().projection(projection);
         const [[x0, y0], [x1, y1]] = path.bounds(featureData);
         
-        // Calculate dimensions of the country
         const dx = x1 - x0;
         const dy = y1 - y0;
         const x = (x0 + x1) / 2;
         const y = (y0 + y1) / 2;
         
-        // Target is the left 60% of the screen
         const targetWidth = width * 0.6;
         const scale = Math.min(8, 0.8 / Math.max(dx / targetWidth, dy / height));
-        
-        // Calculate translation to center the country in the target area
-        const translate = [
+        const translate =[
           (targetWidth / 2) - scale * x,
           (height / 2) - scale * y
         ];
@@ -145,9 +135,8 @@ export default function Map({ slug }: MapProps) {
       }
     }
 
-    // Otherwise, gently transition toward the desired position
     if (isInitialized && !activeCountry) {
-      const [lng, lat] = position.coordinates;
+      const[lng, lat] = position.coordinates;
       const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
       
       svg.transition()
@@ -161,7 +150,7 @@ export default function Map({ slug }: MapProps) {
         );
     }
 
-  }, [position, projection, activeCountry, mapData, ALPHA2_TO_NUMERIC]);
+  },[position, projection, activeCountry, mapData, ALPHA2_TO_NUMERIC]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
@@ -182,6 +171,25 @@ export default function Map({ slug }: MapProps) {
 
       {status === 'success' && (
         <React.Fragment>
+          
+          {/* View Toggles on World Map */}
+          {!selectedContinent && !activeCountry && (
+            <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 flex gap-2 rounded-full border border-gray-100 bg-white/90 p-1.5 shadow-xl backdrop-blur-md">
+              <button 
+                onClick={() => setExploreMode('continent')}
+                className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'continent' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+              >
+                Continents
+              </button>
+              <button 
+                onClick={() => setExploreMode('country')}
+                className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'country' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+              >
+                Countries
+              </button>
+            </div>
+          )}
+
           <div
             className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-gray-100 bg-white/95 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-gray-800 shadow-xl backdrop-blur transition-opacity duration-150"
             style={{ left: tooltip.x, top: tooltip.y, opacity: tooltip.show ? 1 : 0 }}
@@ -196,7 +204,7 @@ export default function Map({ slug }: MapProps) {
             className="h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none"
           >
             <g ref={gRef}>
-              <MapPolygons mapData={mapData} projection={projection} activeCountryIso={activeCountry?.ISO_code?.toLowerCase()} />
+              <MapPolygons mapData={mapData} projection={projection} activeCountryIso={targetIso} />
             </g>
           </svg>
 
