@@ -5,7 +5,7 @@ import {routing} from './i18n/routing';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const {pathname} = request.nextUrl;
 
   // 1. Exclude public files and API routes (handled by matcher)

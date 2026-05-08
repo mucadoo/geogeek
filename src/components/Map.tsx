@@ -11,6 +11,7 @@ import MapPolygons from './MapPolygons';
 import MapSidebar from './MapSidebar';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
+import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useMapStore } from '@/store/useMapStore';
 import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { countryService } from '@/lib/countryService';
@@ -34,6 +35,9 @@ export default function Map({ slug }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [activeCountry, setActiveCountry] = useState<any>(null);
+  const [activeRegion, setActiveRegion] = useState<string | null>(null);
+
+  const slugParts = Array.isArray(slug) ? slug : (slug ? slug.split('/') : []);
   
   const ALPHA2_TO_NUMERIC = useMemo(() => {
     return Object.fromEntries(
@@ -46,8 +50,15 @@ export default function Map({ slug }: MapProps) {
     exploreMode, setExploreMode, resetMap, handleContinentClick
   } = useMapStore();
 
+  const { data: subMapData } = useCountrySubMap(activeCountry?.ISO_code || null);
+  
+  const isSubMap = !!(activeCountry && subMapData);
+  const renderMapData = isSubMap ? subMapData : mapData;
+
   const handleBackClick = () => {
-    if (activeCountry) {
+    if (activeRegion) {
+      router.push(`/map/${slugParts[0]}`);
+    } else if (activeCountry) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
       const continent = NUMERIC_TO_CONTINENT[numericId];
       if (continent) {
@@ -68,29 +79,38 @@ export default function Map({ slug }: MapProps) {
     return d3.geoMercator().scale(120).translate([width / 2, height / 2 + 50]);
   },[]);
 
-  const isCountrySlug = slug && slug.length === 2;
-  const targetIso = activeCountry?.ISO_code?.toLowerCase() || (isCountrySlug ? slug.toLowerCase() : undefined);
+  const targetIso = activeCountry?.ISO_code?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
 
   useEffect(() => {
     async function initView() {
-      if (!slug) {
+      if (slugParts.length === 0) {
         resetMap();
         setActiveCountry(null);
+        setActiveRegion(null);
         return;
       }
 
-      const continentName = slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-      
+      const firstPart = slugParts[0];
+      const secondPart = slugParts[1];
+
+      // Handle Continent
+      const continentName = firstPart.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
       const view = CONTINENT_VIEWS[continentName as keyof typeof CONTINENT_VIEWS];
+      
       if (view) {
         handleContinentClick(continentName, view);
         setActiveCountry(null);
+        setActiveRegion(null);
         return;
       }
 
-      const country = await countryService.getCountryByIso(slug.toUpperCase());
-      if (country) {
-        setActiveCountry(country);
+      // Handle Country
+      if (firstPart.length === 2) {
+        const country = await countryService.getCountryByIso(firstPart.toUpperCase());
+        if (country) {
+          setActiveCountry(country);
+          setActiveRegion(secondPart || null);
+        }
       }
     }
     initView();
@@ -106,9 +126,17 @@ export default function Map({ slug }: MapProps) {
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
       .touchable(true)
-      .interpolate(linearZoomInterpolator) // Apply custom seamless interpolator
+      .interpolate(linearZoomInterpolator)
+      .on('start', () => {
+        svg.attr('shape-rendering', 'optimizeSpeed');
+        g.style('pointer-events', 'none');
+      })
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
+      })
+      .on('end', () => {
+        svg.attr('shape-rendering', 'geometricPrecision');
+        g.style('pointer-events', 'auto');
       });
 
     svg.call(zoom);
@@ -218,8 +246,34 @@ export default function Map({ slug }: MapProps) {
             preserveAspectRatio="xMidYMid meet"
             className="h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none"
           >
-            <g ref={gRef}>
-              <MapPolygons mapData={mapData} projection={projection} activeCountryIso={targetIso} />
+            <g ref={gRef} className="will-change-transform">
+              {renderMapData && (
+                <MapPolygons 
+                  mapData={renderMapData} 
+                  projection={projection} 
+                  activeCountryIso={targetIso} 
+                  isSubMap={isSubMap} 
+                />
+              )}
+              {activeCountry?.capitalCoordinates && (
+                <g>
+                  <circle 
+                    cx={projection(activeCountry.capitalCoordinates)?.[0]} 
+                    cy={projection(activeCountry.capitalCoordinates)?.[1]} 
+                    r={4} 
+                    fill="var(--primary)" 
+                    stroke="white" 
+                    strokeWidth={1} 
+                  />
+                  <text 
+                    x={(projection(activeCountry.capitalCoordinates)?.[0] || 0) + 8} 
+                    y={(projection(activeCountry.capitalCoordinates)?.[1] || 0) + 4} 
+                    className="font-game-mono text-xs fill-[var(--foreground)]"
+                  >
+                    {activeCountry.capital}
+                  </text>
+                </g>
+              )}
             </g>
           </svg>
 

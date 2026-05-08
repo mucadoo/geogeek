@@ -101,3 +101,26 @@ export const useAustraliaMapData = () => {
     gcTime: Infinity,
   });
 };
+
+export const useCountrySubMap = (isoCode: string | null) => {
+  return useQuery({
+    queryKey: ['sub-map', isoCode],
+    queryFn: async () => {
+      if (!isoCode) return null;
+      let url = '';
+      switch (isoCode.toLowerCase()) {
+        case 'us': url = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'; break;
+        case 'br': url = 'https://code.highcharts.com/mapdata/countries/br/br-all.topo.json'; break;
+        case 'it': url = 'https://code.highcharts.com/mapdata/countries/it/it-all.topo.json'; break;
+        case 'fr': url = 'https://code.highcharts.com/mapdata/countries/fr/fr-all.topo.json'; break;
+        case 'ca': url = 'https://code.highcharts.com/mapdata/countries/ca/ca-all.topo.json'; break;
+        case 'au': url = 'https://code.highcharts.com/mapdata/countries/au/au-all.topo.json'; break;
+        default: return null;
+      }
+      return await fetchAndNormalizeMapData(url);
+    },
+    enabled: !!isoCode,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+};

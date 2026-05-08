@@ -21,9 +21,10 @@ interface MapPolygonsProps {
   mapData: Topology;
   projection: d3.GeoProjection;
   activeCountryIso?: string;
+  isSubMap?: boolean;
 }
 
-export default function MapPolygons({ mapData, projection, activeCountryIso }: MapPolygonsProps) {
+export default function MapPolygons({ mapData, projection, activeCountryIso, isSubMap = false }: MapPolygonsProps) {
   const router = useRouter();
   const { 
     selectedContinent, hoveredContinent, hoveredCountry, 
@@ -58,7 +59,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso }: M
 
   return (
     <g className="map-geographies">
-      {exploreMode === 'continent' && !selectedContinent ? (
+      {exploreMode === 'continent' && !selectedContinent && !isSubMap ? (
         continentGeographies.map((continentData) => {
           const continent = continentData.continent;
           const isHovered = hoveredContinent === continent;
@@ -87,10 +88,8 @@ export default function MapPolygons({ mapData, projection, activeCountryIso }: M
                 setTooltip({ ...tooltip, show: false });
               }}
               onClick={() => {
-                const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
-                if (view) {
-                  handleContinentClick(continent, view);
-                }
+                const continentSlug = continent.toLowerCase().replace(/\s+/g, '-');
+                router.push('/map/' + continentSlug as any);
               }}
             />
           );
@@ -104,21 +103,12 @@ export default function MapPolygons({ mapData, projection, activeCountryIso }: M
           
           const isContinentMode = exploreMode === 'continent';
           
-          // Define clickability rules based on Mode
-          let isClickable = false;
-          if (!activeCountryIso) {
-            if (isContinentMode) {
-              if (!selectedContinent) isClickable = continent !== 'Other';
-              else isClickable = continent === selectedContinent;
-            } else {
-              isClickable = continent !== 'Other';
-            }
-          }
-
-          // Define visibility rules (Fading them out instead of unmounting)
+          let isClickable = !activeCountryIso || isSubMap;
           let isVisible = true;
-          if (isContinentMode && selectedContinent && continent !== selectedContinent) isVisible = false;
-          if (activeCountryIso && alpha2?.toUpperCase() !== activeCountryIso.toUpperCase()) isVisible = false;
+          if (!isSubMap) {
+            if (isContinentMode && selectedContinent && continent !== selectedContinent) isVisible = false;
+            if (activeCountryIso && alpha2?.toUpperCase() !== activeCountryIso.toUpperCase()) isVisible = false;
+          }
 
           const isHovered = (isContinentMode && !selectedContinent) 
             ? hoveredContinent === continent 
@@ -138,39 +128,22 @@ export default function MapPolygons({ mapData, projection, activeCountryIso }: M
               stroke="var(--map-stroke)"
               strokeWidth={isVisible ? 0.5 : 0}
               className={`transition-all duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-              role={isClickable ? 'button' : undefined}
-              tabIndex={isClickable ? 0 : undefined}
-              aria-label={selectedContinent || !isContinentMode ? countryName : continent}
               onMouseEnter={(e) => {
                 if (!isClickable) return;
-                if (!isContinentMode || selectedContinent) {
-                  setHoveredCountry(numericId);
-                  setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
-                } else {
-                  setHoveredContinent(continent);
-                  setTooltip({ show: true, content: continent, x: e.clientX, y: e.clientY });
-                }
+                setHoveredCountry(numericId);
+                setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
               }}
               onMouseLeave={() => {
                 setHoveredCountry(null);
-                setHoveredContinent(null);
                 setTooltip({ ...tooltip, show: false });
               }}
-              onClick={(e: React.MouseEvent) => {
+              onClick={() => {
                 if (!isClickable) return;
-                
-                if (!isContinentMode || selectedContinent) {
-                  if (alpha2) {
-                    NProgress.start();
-                    router.push(`/map/${alpha2.toLowerCase()}` as any);
-                  }
-                } else {
-                  const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
-                  if (view) {
-                    handleContinentClick(continent, view);
-                    setHoveredCountry(numericId); 
-                    setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
-                  }
+                if (isSubMap && activeCountryIso) {
+                  router.push(`/map/${activeCountryIso}/${numericId}` as any);
+                } else if (alpha2) {
+                  NProgress.start();
+                  router.push(`/map/${alpha2.toLowerCase()}` as any);
                 }
               }}
             />
