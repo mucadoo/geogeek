@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 
-import { Link, usePathname, useRouter } from '@/i18n/routing';
+import { Link, usePathname, useRouter, routing } from '@/i18n/routing';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,11 +44,25 @@ export default function Header() {
   if (isFullscreen) return null;
 
   const onLanguageChange = (newLocale: string) => {
-    // Set cookie for automatic language detection preference with 1-year expiration
+    // Set cookie with 1-year expiration
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
+
+    const path = window.location.pathname;
+    const locales = routing.locales;
     
-    // Perform an immediate route transition
-    router.replace(pathname, { locale: newLocale });
+    // Check if the current path starts with a locale prefix
+    const isPrefixed = locales.some(locale => path.startsWith(`/${locale}/`) || path === `/${locale}`);
+
+    if (isPrefixed) {
+      // Logic B (Prefixed URL): Replace prefix with new locale
+      const segments = path.split('/');
+      segments[1] = newLocale;
+      const newPath = segments.join('/');
+      window.location.href = `${newPath}${window.location.search}${window.location.hash}`;
+    } else {
+      // Logic A (Clean URL): Reload current path to trigger middleware rewrite
+      window.location.reload();
+    }
   };
 
   return (
