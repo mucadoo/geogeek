@@ -25,7 +25,8 @@
     "rankings": "Classements"
   },
   "Map": {
-    "loading": "Chargement de l'explorateur...",
+    "loading": "Chargement...",
+    "returnToContinent": "Retour au continent",
     "returnToWorld": "Retour au monde"
   },
   "Games": {

@@ -26,6 +26,7 @@
   },
   "Map": {
     "loading": "Loading Explorer...",
+    "returnToContinent": "Return to Continent",
     "returnToWorld": "Return to World"
   },
   "Games": {

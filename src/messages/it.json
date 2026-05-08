@@ -26,6 +26,7 @@
   },
   "Map": {
     "loading": "Caricamento Esploratore...",
+    "returnToContinent": "Torna al continente",
     "returnToWorld": "Torna al mondo"
   },
   "Games": {

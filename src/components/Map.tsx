@@ -129,14 +129,12 @@ export default function Map({ slug }: MapProps) {
       .interpolate(linearZoomInterpolator)
       .on('start', () => {
         svg.attr('shape-rendering', 'optimizeSpeed');
-        g.style('pointer-events', 'none');
       })
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       })
       .on('end', () => {
         svg.attr('shape-rendering', 'geometricPrecision');
-        g.style('pointer-events', 'auto');
       });
 
     svg.call(zoom);
