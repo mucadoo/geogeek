@@ -73,6 +73,9 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
             stroke="var(--color-map-stroke)"
             strokeWidth={0.5}
             className={`transition-colors duration-200 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+            role={isClickable ? 'button' : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+            aria-label={selectedContinent ? countryName : continent}
             onMouseEnter={(e) => {
               if (!isClickable) return;
               if (selectedContinent) {
@@ -87,6 +90,20 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
               if (selectedContinent) setHoveredCountry(null);
               else setHoveredContinent(null);
               setTooltip({ ...tooltip, show: false });
+            }}
+            onKeyDown={(e) => {
+              if (!isClickable || e.key !== 'Enter') return;
+              if (selectedContinent) {
+                if (alpha2) {
+                  NProgress.start();
+                  router.push(`/country/${alpha2}` as any);
+                }
+              } else {
+                const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
+                if (view) {
+                  handleContinentClick(continent, view);
+                }
+              }
             }}
             onClick={(e: React.MouseEvent) => {
               if (!isClickable) return;

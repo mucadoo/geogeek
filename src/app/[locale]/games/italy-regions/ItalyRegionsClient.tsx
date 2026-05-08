@@ -8,7 +8,7 @@ export default function ItalyRegionsClient() {
   return (
     <BaseGameClient
       useMapData={useItalyMapData}
-      regionNames={ITALY_REGIONS}
+      configKey="ITALY_REGIONS"
       gameKey="italy-regions"
       duration={GAME_DURATIONS.ITALY_REGIONS}
       projectionConfig={{ type: 'fit' }}

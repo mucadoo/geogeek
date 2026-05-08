@@ -8,7 +8,7 @@ export default function USStatesClient() {
   return (
     <BaseGameClient
       useMapData={useUSMapData}
-      regionNames={US_STATES}
+      configKey="US_STATES"
       gameKey="us-states"
       duration={GAME_DURATIONS.US_STATES}
       projectionConfig={{

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface Tooltip {
   show: boolean;
@@ -18,6 +19,8 @@ interface MapState {
   hoveredContinent: string | null;
   hoveredCountry: string | null;
   tooltip: Tooltip;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
   setPosition: (position: MapPosition) => void;
   setSelectedContinent: (continent: string | null) => void;
   setHoveredContinent: (continent: string | null) => void;
@@ -27,32 +30,48 @@ interface MapState {
   resetMap: () => void;
 }
 
-export const useMapStore = create<MapState>((set) => ({
-  position: { coordinates: [0, 20], zoom: 1 },
-  selectedContinent: null,
-  hoveredContinent: null,
-  hoveredCountry: null,
-  tooltip: { show: false, content: '', x: 0, y: 0 },
-  setPosition: (position) => set({ position }),
-  setSelectedContinent: (selectedContinent) => set({ selectedContinent }),
-  setHoveredContinent: (hoveredContinent) => set({ hoveredContinent }),
-  setHoveredCountry: (hoveredCountry) => set({ hoveredCountry }),
-  setTooltip: (tooltip) => set({ tooltip }),
-  
-  handleContinentClick: (name, view) =>
-    set({
-      selectedContinent: name,
-      position: view,
-      hoveredContinent: null, // Clear the continent hover state
-      // We intentionally don't clear the tooltip here so it smoothly transitions to the country
-    }),
-    
-  resetMap: () =>
-    set((state) => ({
-      selectedContinent: null,
+export const useMapStore = create<MapState>()(
+  persist(
+    (set) => ({
       position: { coordinates: [0, 20], zoom: 1 },
+      selectedContinent: null,
       hoveredContinent: null,
       hoveredCountry: null,
-      tooltip: { ...state.tooltip, show: false }, // Hide tooltip cleanly on reset
-    })),
-}));
+      tooltip: { show: false, content: '', x: 0, y: 0 },
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
+      setPosition: (position) => set({ position }),
+      setSelectedContinent: (selectedContinent) => set({ selectedContinent }),
+      setHoveredContinent: (hoveredContinent) => set({ hoveredContinent }),
+      setHoveredCountry: (hoveredCountry) => set({ hoveredCountry }),
+      setTooltip: (tooltip) => set({ tooltip }),
+
+      handleContinentClick: (name, view) =>
+        set({
+          selectedContinent: name,
+          position: view,
+          hoveredContinent: null,
+        }),
+
+      resetMap: () =>
+        set((state) => ({
+          selectedContinent: null,
+          position: { coordinates: [0, 20], zoom: 1 },
+          hoveredContinent: null,
+          hoveredCountry: null,
+          tooltip: { ...state.tooltip, show: false },
+        })),
+    }),
+    {
+      name: 'map-storage',
+      storage: createJSONStorage(() => sessionStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+      partialize: (state) => ({
+        position: state.position,
+        selectedContinent: state.selectedContinent,
+      }),
+    }
+  )
+);

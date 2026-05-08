@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { create } from 'zustand';
 
+import { ALIASES } from '@/config/aliases';
 import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
@@ -19,6 +20,7 @@ export interface StateFeature {
 interface GameState {
   status: GameStatus;
   difficulty: Difficulty;
+  strictMode: boolean;
   gameMode: GameMode;
   capitalMap: Record<string, string>;
   score: number;
@@ -43,12 +45,12 @@ interface GameState {
   skipState: () => void;
   tick: () => void;
   setUserInput: (input: string) => void;
+  setStrictMode: (enabled: boolean) => void;
   resetGame: () => void;
 }
 
 const INITIAL_TIME = 300;
 
-// Upgraded to strip out punctuation (.,-) so "st. paul" and "st paul" both work
 const normalizeString = (str: string | null | undefined) => {
   if (!str) return "";
   return str
@@ -57,6 +59,28 @@ const normalizeString = (str: string | null | undefined) => {
     .toLowerCase()
     .replace(/[.,-]/g, "")
     .trim();
+};
+
+const getLevenshteinDistance = (a: string, b: string): number => {
+  const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
+};
+
+const isFuzzyMatch = (guess: string, target: string): boolean => {
+  if (guess.length <= 5) return guess === target;
+  return getLevenshteinDistance(guess, target) <= 1;
 };
 
 export const getFeedback = (score: number, total: number): string => {
@@ -69,19 +93,10 @@ export const getFeedback = (score: number, total: number): string => {
   return "practice";
 };
 
-const ALIASES: Record<string, string[]> = {
-  // Region Aliases
-  "washington dc":["dc", "district of columbia"],
-  "czechia": ["czech republic"],
-  "united kingdom":["uk", "great britain"],
-  // Capital Aliases
-  "saint paul": ["st paul"],
-  "kyiv": ["kiev"],
-};
-
 export const useGameStore = create<GameState>((set, get) => ({
   status: 'idle',
   difficulty: 'medium',
+  strictMode: false,
   gameMode: 'name',
   capitalMap: {},
   score: 0,
@@ -106,6 +121,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       status: 'playing',
       difficulty,
+      strictMode: difficulty === 'hard',
       gameMode,
       capitalMap,
       score: 0,
@@ -121,23 +137,25 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   
   setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null }),
+  setStrictMode: (strictMode) => set({ strictMode }),
 
   submitGuess: (guess) => {
-    const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap } = get();
+    const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode } = get();
     if (!currentState) return false;
 
     const regionName = currentState.properties.name;
-    
-    // Check if we are guessing the region or its capital
     const targetAnswer = gameMode === 'capital' ? (capitalMap[regionName] || regionName) : regionName;
 
     const normalizedGuess = normalizeString(guess);
     const normalizedTarget = normalizeString(targetAnswer);
-    const targetAliases = ALIASES[normalizedTarget] ||[];
+    const targetAliases = (ALIASES[normalizedTarget] || []).map(normalizeString);
 
-    // Check guess against target and aliases
-    const isCorrect = normalizedGuess === normalizedTarget || 
-                      targetAliases.some(alias => normalizeString(alias) === normalizedGuess);
+    const checkMatch = (target: string) => {
+      if (strictMode) return normalizedGuess === target;
+      return normalizedGuess === target || isFuzzyMatch(normalizedGuess, target);
+    };
+
+    const isCorrect = checkMatch(normalizedTarget) || targetAliases.some(checkMatch);
 
     if (isCorrect) {
       const newCorrectIds = [...correctlyGuessedIds, currentState.id];

@@ -8,7 +8,7 @@ export default function SouthAmericaCountriesClient() {
   return (
     <BaseGameClient
       useMapData={useWorldMapData}
-      regionNames={SOUTH_AMERICA_COUNTRIES}
+      configKey="SOUTH_AMERICA_COUNTRIES"
       gameKey="sa-countries"
       duration={SOUTH_AMERICA_COUNTRIES.length * TIME_PER_STATE_SECONDS}
       projectionConfig={{

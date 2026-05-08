@@ -8,7 +8,7 @@ export default function AustraliaStatesClient() {
   return (
     <BaseGameClient
       useMapData={useAustraliaMapData}
-      regionNames={AUSTRALIA_STATES}
+      configKey="AUSTRALIA_STATES"
       gameKey="australia-states"
       duration={GAME_DURATIONS.AUSTRALIA_STATES}
       projectionConfig={{

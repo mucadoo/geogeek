@@ -39,11 +39,14 @@ export default function Map() {
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
+      .touchable(true)
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
     svg.call(zoom);
+    // Prevent default browser zoom on double tap
+    svg.on('dblclick.zoom', null);
 
     // Initial position or when store position changes (e.g. from continent click)
     // We need to convert [lng, lat] to [x, y] and then to D3 transform
@@ -92,7 +95,7 @@ export default function Map() {
             ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
             preserveAspectRatio="xMidYMid meet"
-            className="h-full w-full outline-none cursor-grab active:cursor-grabbing"
+            className="h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none"
           >
             <g ref={gRef}>
               <MapPolygons mapData={mapData} projection={projection} />

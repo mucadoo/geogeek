@@ -8,7 +8,7 @@ export default function CanadaProvincesClient() {
   return (
     <BaseGameClient
       useMapData={useCanadaMapData}
-      regionNames={CANADA_PROVINCES}
+      configKey="CANADA_PROVINCES"
       gameKey="canada-provinces"
       duration={GAME_DURATIONS.CANADA_PROVINCES}
       projectionConfig={{ type: 'fit' }}

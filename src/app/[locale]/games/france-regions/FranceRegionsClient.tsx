@@ -8,7 +8,7 @@ export default function FranceRegionsClient() {
   return (
     <BaseGameClient
       useMapData={useFranceMapData}
-      regionNames={FRANCE_REGIONS}
+      configKey="FRANCE_REGIONS"
       gameKey="france-regions"
       duration={GAME_DURATIONS.FRANCE_REGIONS}
       projectionConfig={{ type: 'fit' }}

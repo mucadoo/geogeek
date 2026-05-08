@@ -8,7 +8,7 @@ export default function BrazilStatesClient() {
   return (
     <BaseGameClient
       useMapData={useBrazilMapData}
-      regionNames={BRAZIL_STATES}
+      configKey="BRAZIL_STATES"
       gameKey="brazil-states"
       duration={GAME_DURATIONS.BRAZIL_STATES}
       projectionConfig={{
