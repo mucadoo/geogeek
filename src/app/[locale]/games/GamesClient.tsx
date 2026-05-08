@@ -114,10 +114,10 @@ export default function GamesClient() {
   return (
     <main className="container-custom animate-in fade-in flex-grow py-12 duration-1000">
       <header className="mb-12 text-center">
-        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-game-mono font-bold text-primary">
+        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-game-mono font-bold text-primary uppercase tracking-widest">
           <Sparkles size={16} /> {t('subtitle')}
         </div>
-        <h1 className="mb-4 text-5xl font-game-heading tracking-widest text-[var(--foreground)]">
+        <h1 className="mb-4 text-5xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">
           {t('title')}
         </h1>
         <p className="mx-auto max-w-2xl text-lg font-game-mono text-gray-500 dark:text-gray-400">
@@ -125,13 +125,13 @@ export default function GamesClient() {
         </p>
       </header>
 
-      <div className="mx-auto mb-10 flex w-full max-w-5xl flex-col items-center justify-between gap-6 game-card p-4 md:flex-row shadow-none">
+      <div className="mx-auto mb-10 flex w-full max-w-5xl flex-col items-center justify-between gap-6 game-card border-2 border-dashed border-[var(--card-border)] p-4 md:flex-row shadow-none">
         <div className="flex w-full flex-wrap gap-2 md:w-auto">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`flex-1 rounded-full px-6 py-2.5 text-sm font-game-heading tracking-wider transition-all md:flex-none ${
+              className={`flex-1 rounded-full px-6 py-2.5 text-sm font-game-heading tracking-widest uppercase transition-all md:flex-none ${
                 activeCategory === cat
                   ? 'bg-primary text-white shadow-md'
                   : 'bg-[var(--input-bg)] text-slate-500 hover:text-[var(--foreground)]'
@@ -160,12 +160,11 @@ export default function GamesClient() {
         {filteredGames.length > 0 ? (
           filteredGames.map((game) => {
             const Icon = game.icon;
-            const pb = highScores[game.id];
             return (
               <Link 
                 key={game.id} 
                 href={game.href as any}
-                className="game-card group flex flex-col hover:border-primary transition-all hover:shadow-lg"
+                className="game-card group flex flex-col border-2 border-dashed border-[var(--card-border)] hover:border-primary transition-all shadow-none"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-1.5 text-[10px] font-game-mono font-bold text-slate-400 uppercase tracking-wider">
@@ -182,7 +181,7 @@ export default function GamesClient() {
                   <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg transition-transform group-hover:rotate-6">
                     <Icon size={32} />
                   </div>
-                  <h2 className="mb-2 text-2xl font-game-heading tracking-widest text-[var(--foreground)]">{t(`gameData.${game.id}.title`)}</h2>
+                  <h2 className="mb-2 text-2xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`gameData.${game.id}.title`)}</h2>
                   <p className="mb-8 flex-grow leading-relaxed font-game-mono text-slate-500 dark:text-slate-400">
                     {t(`gameData.${game.id}.description`)}
                   </p>
@@ -202,11 +201,11 @@ export default function GamesClient() {
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--card-bg)] border-2 border-dashed border-[var(--card-border)] text-slate-400">
               <Search size={32} />
             </div>
-            <h3 className="mb-2 text-xl font-game-heading text-[var(--foreground)]">{t('noGamesFound')}</h3>
+            <h3 className="mb-2 text-xl font-game-heading uppercase text-[var(--foreground)]">{t('noGamesFound')}</h3>
             <p className="font-game-mono text-slate-500">{t('noGamesDescription')}</p>
             <button 
               onClick={() => { setSearchQuery(''); setActiveCategory(GameCategory.ALL); }}
-              className="mt-6 font-game-heading text-primary hover:underline"
+              className="mt-6 font-game-heading text-primary uppercase tracking-widest hover:underline"
             >
               {t('clearFilters')}
             </button>

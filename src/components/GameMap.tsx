@@ -44,18 +44,16 @@ export default function GameMap({
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-full max-h-[600px] w-full outline-none bg-slate-50">
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-full max-h-[600px] w-full outline-none bg-[var(--ocean-bg)]">
         <defs>
           <pattern id="ocean-dots" width="20" height="20" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1" fill="#cbd5e1" />
+            <circle cx="2" cy="2" r="1" className="fill-black dark:fill-white opacity-10" />
           </pattern>
         </defs>
         
-        {/* Ocean Background with Pattern */}
         <rect width="100%" height="100%" fill="url(#ocean-dots)" />
         
-        {/* Ocean Labels */}
-        <text x="50%" y="50%" textAnchor="middle" className="font-mono text-8xl font-black uppercase text-slate-200 select-none pointer-events-none opacity-50">
+        <text x="50%" y="50%" textAnchor="middle" className="font-mono text-8xl font-black uppercase fill-[var(--map-stroke)] select-none pointer-events-none opacity-10">
           Atlantic Ocean
         </text>
 
@@ -73,9 +71,9 @@ export default function GameMap({
 
             if (!pathData) return null;
 
-            let fillColor = "#ffffff"; 
-            if (isCorrect) fillColor = "#00a8b5"; 
-            if (isHighlighted && gameMode !== 'capital') fillColor = "#ff5a5f";
+            let fillColor = "var(--map-fill)"; 
+            if (isCorrect) fillColor = "var(--color-primary)"; 
+            if (isHighlighted && gameMode !== 'capital') fillColor = "var(--color-danger)";
 
             const isIncorrect = lastGuessCorrect === false && isHighlighted;
             const isSkipped = lastSkippedState?.id === stateId;
@@ -86,7 +84,7 @@ export default function GameMap({
                 key={stateId || i} 
                 d={pathData} 
                 fill={fillColor} 
-                stroke="#e2e8f0" 
+                stroke="var(--map-stroke)" 
                 strokeWidth={0.5} 
                 className={`transition-colors duration-300 ${animationClass}`}
               />
@@ -118,7 +116,7 @@ export default function GameMap({
               return (
                 <g key={`pin-${stateId}`}>
                   <circle cx={coords[0]} cy={coords[1]} r={14} fill="none" stroke="var(--color-danger)" strokeWidth={2} className="animate-ping" style={{ transformOrigin: `${coords[0]}px ${coords[1]}px` }} />
-                  <circle cx={coords[0]} cy={coords[1]} r={6} fill="var(--color-danger)" stroke="white" strokeWidth={2} />
+                  <circle cx={coords[0]} cy={coords[1]} r={6} fill="var(--color-danger)" stroke="white" strokeWidth={3} className="drop-shadow-lg" />
                 </g>
               );
             })}

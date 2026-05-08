@@ -50,6 +50,8 @@ export default function Header() {
 
   if (status === 'playing') return null;
 
+  const isMapPage = pathname === '/map';
+
   const onLanguageChange = (newLocale: string) => {
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
 
@@ -69,8 +71,14 @@ export default function Header() {
   };
 
   return (
-    <header className="relative mx-auto flex h-[90px] w-full max-w-[1400px] items-center">
-      <div className="pointer-events-auto mx-auto flex w-full max-w-[1400px] items-center justify-between px-4">
+    <header className={cn(
+      "z-50 w-full flex h-[90px] items-center",
+      isMapPage ? "fixed top-0 left-0" : "relative mx-auto max-w-[1400px]"
+    )}>
+      <div className={cn(
+        "mx-auto flex w-full items-center justify-between px-4",
+        isMapPage ? "max-w-none backdrop-blur-md bg-white/50 dark:bg-black/50 py-4 shadow-sm" : "max-w-[1400px]"
+      )}>
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Image 
             src="/media/logo.png" 
@@ -115,7 +123,7 @@ export default function Header() {
                 className="flex items-center justify-center p-2.5 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-full text-[#2c3e50]/75 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm"
                 aria-label="Toggle theme"
               >
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                {theme === 'dark' ? <Sun size={18} className="text-[var(--color-accent)]" /> : <Moon size={18} className="text-[var(--color-primary)]" />}
               </button>
             )}
 

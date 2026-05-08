@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8faf9;
+  --background: #f0f4f2;
   --foreground: #2c3e50;
   --card-bg: #ffffff;
   --card-border: #e2e8f0;
@@ -11,18 +11,20 @@
   --accent: #ffcd42;
   --danger: #ff5a5f;
   --map-fill: #ffffff;
-  --map-stroke: #e2e8f0;
+  --map-stroke: #94a3b8;
+  --ocean-bg: #d1dbd7;
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card-bg: #1e293b;
+  --background: #141614;
+  --foreground: #e2e8f0;
+  --card-bg: #1c1f1c;
   --card-border: #334155;
-  --input-bg: #0f172a;
-  --hud-bg: rgba(30, 41, 59, 0.8);
-  --map-fill: #1e293b;
-  --map-stroke: #334155;
+  --input-bg: #141614;
+  --hud-bg: rgba(28, 31, 28, 0.8);
+  --map-fill: #2d332d;
+  --map-stroke: #4a524a;
+  --ocean-bg: #0d0f0d;
 }
 
 @theme inline {
@@ -37,6 +39,7 @@
   --color-danger: var(--danger);
   --color-map-fill: var(--map-fill);
   --color-map-stroke: var(--map-stroke);
+  --color-ocean-bg: var(--ocean-bg);
   --font-sans: var(--font-inter), sans-serif;
   --font-heading: var(--font-bebas), sans-serif;
   --font-mono: var(--font-mono), monospace;
@@ -70,6 +73,16 @@ body {
 @layer components {
   .btn-primary {
     @apply bg-primary text-white px-8 py-3 rounded-full font-game-heading tracking-wider text-sm hover:bg-teal-600 transition-all active:scale-95;
+  }
+  
+  /* Apply Bebas Neue (font-game-heading) to all buttons and headers */
+  button, h1, h2, h3, h4, h5, h6 {
+    @apply font-game-heading;
+  }
+
+  /* Apply JetBrains Mono (font-game-mono) to table data and counters */
+  td, .counter, .stat-value {
+    @apply font-game-mono;
   }
   
   .table-cell {
