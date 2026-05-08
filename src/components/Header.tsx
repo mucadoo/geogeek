@@ -44,8 +44,10 @@ export default function Header() {
   if (isFullscreen) return null;
 
   const onLanguageChange = (newLocale: string) => {
-    // Set cookie for automatic language detection preference
-    document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/`;
+    // Set cookie for automatic language detection preference with 1-year expiration
+    document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
+    
+    // Perform an immediate route transition
     router.replace(pathname, { locale: newLocale });
   };
 

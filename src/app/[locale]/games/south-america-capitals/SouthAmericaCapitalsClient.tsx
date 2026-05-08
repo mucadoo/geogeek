@@ -11,26 +11,20 @@ export default function SouthAmericaCapitalsClient() {
   const { data: config } = useGameConfig();
   const tRegions = useTranslations('RegionNames');
 
-  const { localizedValidNames, localizedCapitalMap } = useMemo(() => {
-    if (!config) return { localizedValidNames: [], localizedCapitalMap: {} };
+  useMemo(() => {
+    if (!config) return;
     
     const countries = config.SOUTH_AMERICA_COUNTRIES || [];
     const capitals = config.SOUTH_AMERICA_CAPITALS || {};
-    
-    const names = [...countries];
-    const capMap = { ...capitals };
     
     countries.forEach((name: string) => {
       try {
         const localized = tRegions(name);
         if (localized !== name) {
-          names.push(localized);
-          capMap[localized] = capitals[name];
+          // Names and map are localized, but not used in current implementation
         }
       } catch { /* ignore */ }
     });
-    
-    return { localizedValidNames: names, localizedCapitalMap: capMap };
   }, [config, tRegions]);
 
   return (

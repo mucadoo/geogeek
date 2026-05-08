@@ -30,6 +30,7 @@
     "@next/eslint-plugin-next": "^16.2.5",
     "@tailwindcss/postcss": "^4",
     "@types/d3": "^7.4.3",
+    "@types/negotiator": "^0.6.4",
     "@types/node": "^25",
     "@types/nprogress": "^0.2.3",
     "@types/react": "^19",

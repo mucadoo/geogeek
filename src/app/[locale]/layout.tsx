@@ -27,9 +27,35 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 
   const messages = (await import(`../../messages/${locale}.json`)).default as AbstractIntlMessages & { Metadata: { title: string; description: string } };
   
+  const baseUrl = 'https://geogeek.com';
+  
+  const alternates: Record<string, string> = {};
+  routing.locales.forEach(l => {
+    alternates[l] = `${baseUrl}${l === routing.defaultLocale ? '' : `/${l}`}`;
+  });
+
   return {
     title: messages.Metadata.title,
     description: messages.Metadata.description,
+    robots: { index: true, follow: true },
+    alternates: {
+      canonical: `${baseUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}`,
+      languages: alternates,
+    },
+    openGraph: {
+      title: messages.Metadata.title,
+      description: messages.Metadata.description,
+      url: `${baseUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}`,
+      siteName: 'GeoGeek',
+      images: [
+        {
+          url: '/media/logo.png',
+          width: 800,
+          height: 600,
+        },
+      ],
+      type: 'website',
+    },
   };
 }
 

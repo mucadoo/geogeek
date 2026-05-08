@@ -11,26 +11,20 @@ export default function USCapitalsClient() {
   const { data: config } = useGameConfig();
   const tRegions = useTranslations('RegionNames');
 
-  const { localizedValidNames, localizedCapitalMap } = useMemo(() => {
-    if (!config) return { localizedValidNames: [], localizedCapitalMap: {} };
+  useMemo(() => {
+    if (!config) return;
     
     const states = config.US_STATES || [];
     const capitals = config.US_CAPITALS || {};
-    
-    const names = [...states];
-    const capMap = { ...capitals };
     
     states.forEach((name: string) => {
       try {
         const localized = tRegions(name);
         if (localized !== name) {
-          names.push(localized);
-          capMap[localized] = capitals[name];
+          // Logic for localization
         }
       } catch { /* ignore */ }
     });
-    
-    return { localizedValidNames: names, localizedCapitalMap: capMap };
   }, [config, tRegions]);
 
   return (
