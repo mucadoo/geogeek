@@ -46,6 +46,21 @@ export default function Map({ slug }: MapProps) {
     exploreMode, setExploreMode, resetMap, handleContinentClick
   } = useMapStore();
 
+  const handleBackClick = () => {
+    if (activeCountry) {
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
+      const continent = NUMERIC_TO_CONTINENT[numericId];
+      if (continent) {
+        const continentSlug = continent.toLowerCase().replace(/\s+/g, '-');
+        router.push('/map/' + continentSlug);
+      } else {
+        router.push('/map');
+      }
+    } else if (selectedContinent) {
+      router.push('/map');
+    }
+  };
+
   const width = 800;
   const height = 450;
 
@@ -210,13 +225,13 @@ export default function Map({ slug }: MapProps) {
 
           {(selectedContinent || activeCountry) && (
             <button
-              onClick={() => router.push('/map')}
-              title={t('returnToWorld')}
+              onClick={handleBackClick}
+              title={activeCountry ? t('returnToContinent') : t('returnToWorld')}
               className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-white p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
             >
               <Image 
                 src="/media/back_icon.svg" 
-                alt={t('returnToWorld')} 
+                alt={activeCountry ? t('returnToContinent') : t('returnToWorld')} 
                 width={32} 
                 height={32} 
                 className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"

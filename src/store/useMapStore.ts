@@ -29,10 +29,10 @@ interface MapState {
   setTooltip: (tooltip: Tooltip) => void;
   setExploreMode: (mode: 'continent' | 'country') => void;
   handleContinentClick: (name: string, view: MapPosition) => void;
+  clearActiveCountry: () => void;
   resetMap: () => void;
-}
-
-export const useMapStore = create<MapState>()(
+  }
+  export const useMapStore = create<MapState>()(
   persist(
     (set) => ({
       position: { coordinates: [0, 20], zoom: 1 },
@@ -54,7 +54,13 @@ export const useMapStore = create<MapState>()(
         set({
           selectedContinent: name,
           position: view,
+          exploreMode: 'continent',
           hoveredContinent: null,
+          hoveredCountry: null,
+        }),
+
+      clearActiveCountry: () =>
+        set({
           hoveredCountry: null,
         }),
 
@@ -67,6 +73,7 @@ export const useMapStore = create<MapState>()(
           tooltip: { ...state.tooltip, show: false },
         })),
     }),
+
     {
       name: 'map-storage',
       storage: createJSONStorage(() => sessionStorage),

@@ -3,7 +3,7 @@
 import * as d3 from 'd3';
 import NProgress from 'nprogress';
 import React, { useMemo } from 'react';
-import { feature } from 'topojson-client';
+import { feature, merge } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
 import { NUMERIC_TO_CONTINENT, NUMERIC_TO_ALPHA2, CONTINENT_VIEWS } from '@/config/mapConstants';
@@ -40,88 +40,143 @@ export default function MapPolygons({ mapData, projection, activeCountryIso }: M
     return countries.features as d3.GeoPermissibleObjects[];
   }, [mapData]);
 
+  const continentGeographies = useMemo(() => {
+    if (!mapData) return [];
+    
+    return Object.keys(CONTINENT_VIEWS).map((continentName) => {
+      const geometries = (mapData.objects.countries as any).geometries.filter((geo: any) => {
+        const id = String(geo.id).padStart(3, '0');
+        return NUMERIC_TO_CONTINENT[id] === continentName;
+      });
+
+      return {
+        continent: continentName,
+        feature: merge(mapData, geometries)
+      };
+    });
+  }, [mapData]);
+
   return (
     <g className="map-geographies">
-      {(geographies as unknown as CountryFeature[]).map((geo, index) => {
-        const numericId = geo.id ? String(geo.id).padStart(3, '0') : `geo-${index}`;
-        const continent = NUMERIC_TO_CONTINENT[numericId] || 'Other';
-        const alpha2 = NUMERIC_TO_ALPHA2[numericId];
-        const countryName = geo.properties?.name || "Unknown";
-        
-        const isContinentMode = exploreMode === 'continent';
-        
-        // Define clickability rules based on Mode
-        let isClickable = false;
-        if (!activeCountryIso) {
-          if (isContinentMode) {
-            if (!selectedContinent) isClickable = continent !== 'Other';
-            else isClickable = continent === selectedContinent;
-          } else {
-            isClickable = continent !== 'Other';
-          }
-        }
+      {exploreMode === 'continent' && !selectedContinent ? (
+        continentGeographies.map((continentData) => {
+          const continent = continentData.continent;
+          const isHovered = hoveredContinent === continent;
+          const fillColor = isHovered ? "var(--color-danger)" : "var(--map-fill)";
+          const pathData = pathGenerator(continentData.feature as any);
+          
+          if (!pathData) return null;
 
-        // Define visibility rules (Fading them out instead of unmounting)
-        let isVisible = true;
-        if (isContinentMode && selectedContinent && continent !== selectedContinent) isVisible = false;
-        if (activeCountryIso && alpha2?.toUpperCase() !== activeCountryIso.toUpperCase()) isVisible = false;
-
-        const isHovered = (isContinentMode && !selectedContinent) 
-          ? hoveredContinent === continent 
-          : hoveredCountry === numericId;
-
-        let fillColor = "var(--map-fill)"; 
-        if (isHovered && isClickable) fillColor = "var(--color-danger)";
-
-        const pathData = pathGenerator(geo);
-        if (!pathData) return null;
-
-        return (
-          <path
-            key={numericId}
-            d={pathData}
-            fill={fillColor}
-            stroke="var(--map-stroke)"
-            strokeWidth={isVisible ? 0.5 : 0}
-            className={`transition-all duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-            role={isClickable ? 'button' : undefined}
-            tabIndex={isClickable ? 0 : undefined}
-            aria-label={selectedContinent || !isContinentMode ? countryName : continent}
-            onMouseEnter={(e) => {
-              if (!isClickable) return;
-              if (!isContinentMode || selectedContinent) {
-                setHoveredCountry(numericId);
-                setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
-              } else {
+          return (
+            <path
+              key={continent}
+              d={pathData}
+              fill={fillColor}
+              stroke="var(--map-stroke)"
+              strokeWidth={0.5}
+              className="transition-all duration-700 outline-none cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={continent}
+              onMouseEnter={(e) => {
                 setHoveredContinent(continent);
                 setTooltip({ show: true, content: continent, x: e.clientX, y: e.clientY });
-              }
-            }}
-            onMouseLeave={() => {
-              setHoveredCountry(null);
-              setHoveredContinent(null);
-              setTooltip({ ...tooltip, show: false });
-            }}
-            onClick={(e: React.MouseEvent) => {
-              if (!isClickable) return;
-              
-              if (!isContinentMode || selectedContinent) {
-                if (alpha2) {
-                  NProgress.start();
-                  router.push(`/map/${alpha2.toLowerCase()}` as any);
-                }
-              } else {
+              }}
+              onMouseLeave={() => {
+                setHoveredContinent(null);
+                setTooltip({ ...tooltip, show: false });
+              }}
+              onClick={() => {
                 const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
                 if (view) {
                   handleContinentClick(continent, view);
-                  setHoveredCountry(numericId); 
-                  setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
                 }
-              }
-            }}
-          />
-        );
-      })}
+              }}
+            />
+          );
+        })
+      ) : (
+        (geographies as unknown as CountryFeature[]).map((geo, index) => {
+          const numericId = geo.id ? String(geo.id).padStart(3, '0') : `geo-${index}`;
+          const continent = NUMERIC_TO_CONTINENT[numericId] || 'Other';
+          const alpha2 = NUMERIC_TO_ALPHA2[numericId];
+          const countryName = geo.properties?.name || "Unknown";
+          
+          const isContinentMode = exploreMode === 'continent';
+          
+          // Define clickability rules based on Mode
+          let isClickable = false;
+          if (!activeCountryIso) {
+            if (isContinentMode) {
+              if (!selectedContinent) isClickable = continent !== 'Other';
+              else isClickable = continent === selectedContinent;
+            } else {
+              isClickable = continent !== 'Other';
+            }
+          }
+
+          // Define visibility rules (Fading them out instead of unmounting)
+          let isVisible = true;
+          if (isContinentMode && selectedContinent && continent !== selectedContinent) isVisible = false;
+          if (activeCountryIso && alpha2?.toUpperCase() !== activeCountryIso.toUpperCase()) isVisible = false;
+
+          const isHovered = (isContinentMode && !selectedContinent) 
+            ? hoveredContinent === continent 
+            : hoveredCountry === numericId;
+
+          let fillColor = "var(--map-fill)"; 
+          if (isHovered && isClickable) fillColor = "var(--color-danger)";
+
+          const pathData = pathGenerator(geo);
+          if (!pathData) return null;
+
+          return (
+            <path
+              key={numericId}
+              d={pathData}
+              fill={fillColor}
+              stroke="var(--map-stroke)"
+              strokeWidth={isVisible ? 0.5 : 0}
+              className={`transition-all duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              role={isClickable ? 'button' : undefined}
+              tabIndex={isClickable ? 0 : undefined}
+              aria-label={selectedContinent || !isContinentMode ? countryName : continent}
+              onMouseEnter={(e) => {
+                if (!isClickable) return;
+                if (!isContinentMode || selectedContinent) {
+                  setHoveredCountry(numericId);
+                  setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
+                } else {
+                  setHoveredContinent(continent);
+                  setTooltip({ show: true, content: continent, x: e.clientX, y: e.clientY });
+                }
+              }}
+              onMouseLeave={() => {
+                setHoveredCountry(null);
+                setHoveredContinent(null);
+                setTooltip({ ...tooltip, show: false });
+              }}
+              onClick={(e: React.MouseEvent) => {
+                if (!isClickable) return;
+                
+                if (!isContinentMode || selectedContinent) {
+                  if (alpha2) {
+                    NProgress.start();
+                    router.push(`/map/${alpha2.toLowerCase()}` as any);
+                  }
+                } else {
+                  const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
+                  if (view) {
+                    handleContinentClick(continent, view);
+                    setHoveredCountry(numericId); 
+                    setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
+                  }
+                }
+              }}
+            />
+          );
+        })
+      )}
     </g>
   );
 }
