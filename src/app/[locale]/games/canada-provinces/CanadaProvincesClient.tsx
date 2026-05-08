@@ -1,7 +1,6 @@
 'use client';
 
 import BaseGameClient from '@/components/BaseGameClient';
-import { CANADA_PROVINCES, GAME_DURATIONS } from '@/config/gameConstants';
 import { useCanadaMapData } from '@/hooks/useRegionMapData';
 
 export default function CanadaProvincesClient() {
@@ -9,8 +8,8 @@ export default function CanadaProvincesClient() {
     <BaseGameClient
       useMapData={useCanadaMapData}
       configKey="CANADA_PROVINCES"
+      durationKey="CANADA_PROVINCES_DURATION"
       gameKey="canada-provinces"
-      duration={GAME_DURATIONS.CANADA_PROVINCES}
       projectionConfig={{ type: 'fit' }}
     />
   );

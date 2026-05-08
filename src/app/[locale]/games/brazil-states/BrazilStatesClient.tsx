@@ -1,7 +1,6 @@
 'use client';
 
 import BaseGameClient from '@/components/BaseGameClient';
-import { BRAZIL_STATES, GAME_DURATIONS } from '@/config/gameConstants';
 import { useBrazilMapData } from '@/hooks/useRegionMapData';
 
 export default function BrazilStatesClient() {
@@ -9,8 +8,8 @@ export default function BrazilStatesClient() {
     <BaseGameClient
       useMapData={useBrazilMapData}
       configKey="BRAZIL_STATES"
+      durationKey="BRAZIL_STATES_DURATION"
       gameKey="brazil-states"
-      duration={GAME_DURATIONS.BRAZIL_STATES}
       projectionConfig={{
         type: 'mercator',
         center: [-55, -15],

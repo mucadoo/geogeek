@@ -1,7 +1,6 @@
 'use client';
 
 import BaseGameClient from '@/components/BaseGameClient';
-import { AUSTRALIA_STATES, GAME_DURATIONS } from '@/config/gameConstants';
 import { useAustraliaMapData } from '@/hooks/useRegionMapData';
 
 export default function AustraliaStatesClient() {
@@ -9,8 +8,8 @@ export default function AustraliaStatesClient() {
     <BaseGameClient
       useMapData={useAustraliaMapData}
       configKey="AUSTRALIA_STATES"
+      durationKey="AUSTRALIA_STATES_DURATION"
       gameKey="australia-states"
-      duration={GAME_DURATIONS.AUSTRALIA_STATES}
       projectionConfig={{
         type: 'mercator',
         center: [133, -25],

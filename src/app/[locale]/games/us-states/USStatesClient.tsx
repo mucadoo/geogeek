@@ -1,7 +1,6 @@
 'use client';
 
 import BaseGameClient from '@/components/BaseGameClient';
-import { US_STATES, GAME_DURATIONS } from '@/config/gameConstants';
 import { useUSMapData } from '@/hooks/useRegionMapData';
 
 export default function USStatesClient() {
@@ -9,8 +8,8 @@ export default function USStatesClient() {
     <BaseGameClient
       useMapData={useUSMapData}
       configKey="US_STATES"
+      durationKey="US_STATES_DURATION"
       gameKey="us-states"
-      duration={GAME_DURATIONS.US_STATES}
       projectionConfig={{
         type: 'albersUsa',
         scale: 1300,

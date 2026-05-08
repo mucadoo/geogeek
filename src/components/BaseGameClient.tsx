@@ -10,8 +10,9 @@ import { useGameConfig } from '@/hooks/useGameConfig';
 interface BaseGameClientProps {
   useMapData: () => { data: any; status: 'pending' | 'success' | 'error' };
   configKey: string;
+  duration?: number;
+  durationKey?: string;
   gameKey: string;
-  duration: number;
   projectionConfig: ProjectionConfig;
   showOnlyValid?: boolean;
 }
@@ -19,8 +20,9 @@ interface BaseGameClientProps {
 export default function BaseGameClient({
   useMapData,
   configKey,
-  gameKey,
   duration,
+  durationKey,
+  gameKey,
   projectionConfig,
   showOnlyValid,
 }: BaseGameClientProps) {
@@ -49,6 +51,8 @@ export default function BaseGameClient({
   if (mapStatus === 'pending' || configStatus === 'pending') {
     return <div>Loading...</div>;
   }
+  
+  const finalDuration = (durationKey && config?.[durationKey]) || duration || 300;
 
   return (
     <QuizLayout
@@ -58,7 +62,7 @@ export default function BaseGameClient({
       mapStatus={mapStatus}
       projection={projection}
       validNames={localizedValidNames}
-      duration={duration}
+      duration={finalDuration}
       showOnlyValid={showOnlyValid}
     />
   );

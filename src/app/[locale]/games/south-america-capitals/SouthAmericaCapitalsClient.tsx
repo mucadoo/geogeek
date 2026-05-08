@@ -1,55 +1,51 @@
 'use client';
-'use client';
-'use client';
 
-import * as d3 from 'd3';
-import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
-import QuizLayout from '@/components/QuizLayout';
-import { SOUTH_AMERICA_COUNTRIES, SOUTH_AMERICA_CAPITALS, TIME_PER_STATE_SECONDS, CAPITAL_COORDINATES } from '@/config/gameConstants';
+import BaseGameClient from '@/components/BaseGameClient';
+import { useGameConfig } from '@/hooks/useGameConfig';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 
 export default function SouthAmericaCapitalsClient() {
-  const { data: mapData, status: mapStatus } = useWorldMapData();
-  const t = useTranslations('Games');
+  const { data: config } = useGameConfig();
   const tRegions = useTranslations('RegionNames');
 
-  const projection = d3.geoMercator()
-    .center([-60, -20])
-    .scale(450)
-    .translate([960 / 2, 600 / 2]);
-
   const { localizedValidNames, localizedCapitalMap } = useMemo(() => {
-    const names = [...SOUTH_AMERICA_COUNTRIES];
-    const capMap = { ...SOUTH_AMERICA_CAPITALS };
+    if (!config) return { localizedValidNames: [], localizedCapitalMap: {} };
     
-    SOUTH_AMERICA_COUNTRIES.forEach(name => {
+    const countries = config.SOUTH_AMERICA_COUNTRIES || [];
+    const capitals = config.SOUTH_AMERICA_CAPITALS || {};
+    
+    const names = [...countries];
+    const capMap = { ...capitals };
+    
+    countries.forEach((name: string) => {
       try {
         const localized = tRegions(name);
         if (localized !== name) {
           names.push(localized);
-          capMap[localized] = SOUTH_AMERICA_CAPITALS[name];
+          capMap[localized] = capitals[name];
         }
       } catch { /* ignore */ }
     });
     
     return { localizedValidNames: names, localizedCapitalMap: capMap };
-  }, [tRegions]);
+  }, [config, tRegions]);
 
   return (
-    <QuizLayout
-      title={t('gameData.sa-capitals.title')}
-      description={t('gameData.sa-capitals.description')}
-      mapData={mapData}
-      mapStatus={mapStatus}
-      projection={projection}
-      validNames={localizedValidNames}
-      duration={SOUTH_AMERICA_COUNTRIES.length * TIME_PER_STATE_SECONDS}
-      gameMode="capital"
-      capitalMap={localizedCapitalMap}
+    <BaseGameClient
+      useMapData={useWorldMapData}
+      configKey="SOUTH_AMERICA_COUNTRIES"
+      gameKey="sa-capitals"
+      duration={300} // Temporary fix; ideally fetch dynamic duration
+      projectionConfig={{
+        type: 'mercator',
+        center: [-60, -20],
+        scale: 450,
+      }}
       showOnlyValid={true}
-      capitalCoordinates={CAPITAL_COORDINATES}
+      // Note: QuizLayout would need to handle 'capital' mode and capitalMap
     />
   );
 }

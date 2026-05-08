@@ -9,6 +9,7 @@
     "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", 
     "Wisconsin", "Wyoming"
   ],
+  "US_STATES_DURATION": 1000,
   "BRAZIL_STATES": [
     "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "DF",
     "Espírito Santo", "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", 
@@ -16,27 +17,32 @@
     "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", 
     "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
   ],
+  "BRAZIL_STATES_DURATION": 560,
   "ITALY_REGIONS": [
     "Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", 
     "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", 
     "Molise", "Piemonte", "Puglia", "Sardegna", "Sicilia", "Toscana", 
     "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"
   ],
+  "ITALY_REGIONS_DURATION": 560,
   "FRANCE_REGIONS": [
     "Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Bretagne", "Brittany", "Centre-Val de Loire", 
     "Corse", "Corsica", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandie", "Normandy", 
     "Nouvelle-Aquitaine", "Occitanie", "Pays de la Loire", "Provence-Alpes-Côte d'Azur",
     "Guadeloupe", "Guyane", "French Guiana", "La Réunion", "Reunion", "Martinique", "Mayotte"
   ],
+  "FRANCE_REGIONS_DURATION": 460,
   "CANADA_PROVINCES": [
     "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", 
     "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", 
     "Northwest Territories", "Nunavut", "Yukon"
   ],
+  "CANADA_PROVINCES_DURATION": 260,
   "AUSTRALIA_STATES": [
     "New South Wales", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia", 
     "Australian Capital Territory", "Northern Territory"
   ],
+  "AUSTRALIA_STATES_DURATION": 160,
   "US_CAPITALS": {
     "Alabama": "Montgomery", "Alaska": "Juneau", "Arizona": "Phoenix", "Arkansas": "Little Rock", "California": "Sacramento", "Colorado": "Denver", "Connecticut": "Hartford", "Delaware": "Dover", "Florida": "Tallahassee", "Georgia": "Atlanta", "Hawaii": "Honolulu", "Idaho": "Boise", "Illinois": "Springfield", "Indiana": "Indianapolis", "Iowa": "Des Moines", "Kansas": "Topeka", "Kentucky": "Frankfort", "Louisiana": "Baton Rouge", "Maine": "Augusta", "Maryland": "Annapolis", "Massachusetts": "Boston", "Michigan": "Lansing", "Minnesota": "St. Paul", "Mississippi": "Jackson", "Missouri": "Jefferson City", "Montana": "Helena", "Nebraska": "Lincoln", "Nevada": "Carson City", "New Hampshire": "Concord", "New Jersey": "Trenton", "New Mexico": "Santa Fe", "New York": "Albany", "North Carolina": "Raleigh", "North Dakota": "Bismarck", "Ohio": "Columbus", "Oklahoma": "Oklahoma City", "Oregon": "Salem", "Pennsylvania": "Harrisburg", "Rhode Island": "Providence", "South Carolina": "Columbia", "South Dakota": "Pierre", "Tennessee": "Nashville", "Texas": "Austin", "Utah": "Salt Lake City", "Vermont": "Montpelier", "Virginia": "Richmond", "Washington": "Olympia", "West Virginia": "Charleston", "Wisconsin": "Madison", "Wyoming": "Cheyenne"
   },

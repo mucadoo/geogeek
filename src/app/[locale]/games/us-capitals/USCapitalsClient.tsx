@@ -1,55 +1,48 @@
 'use client';
-'use client';
-'use client';
 
-import * as d3 from 'd3';
-import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
-import QuizLayout from '@/components/QuizLayout';
-import { US_STATES, US_CAPITALS, GAME_DURATIONS, CAPITAL_COORDINATES } from '@/config/gameConstants';
+import BaseGameClient from '@/components/BaseGameClient';
+import { useGameConfig } from '@/hooks/useGameConfig';
 import { useUSMapData } from '@/hooks/useRegionMapData';
 
 export default function USCapitalsClient() {
-  const { data: mapData, status: mapStatus } = useUSMapData();
-  const t = useTranslations('Games');
+  const { data: config } = useGameConfig();
   const tRegions = useTranslations('RegionNames');
 
-  const projection = useMemo(() => {
-    return d3.geoAlbersUsa()
-      .scale(1200)
-      .translate([960 / 2, 600 / 2]);
-  },[]);
-
   const { localizedValidNames, localizedCapitalMap } = useMemo(() => {
-    const names = [...US_STATES];
-    const capMap = { ...US_CAPITALS };
+    if (!config) return { localizedValidNames: [], localizedCapitalMap: {} };
     
-    US_STATES.forEach(name => {
+    const states = config.US_STATES || [];
+    const capitals = config.US_CAPITALS || {};
+    
+    const names = [...states];
+    const capMap = { ...capitals };
+    
+    states.forEach((name: string) => {
       try {
         const localized = tRegions(name);
         if (localized !== name) {
           names.push(localized);
-          capMap[localized] = US_CAPITALS[name];
+          capMap[localized] = capitals[name];
         }
       } catch { /* ignore */ }
     });
     
     return { localizedValidNames: names, localizedCapitalMap: capMap };
-  }, [tRegions]);
+  }, [config, tRegions]);
 
   return (
-    <QuizLayout
-      title={t('gameData.us-capitals.title')}
-      description={t('gameData.us-capitals.description')}
-      mapData={mapData}
-      mapStatus={mapStatus}
-      projection={projection}
-      validNames={localizedValidNames}
-      duration={GAME_DURATIONS.US_STATES}
-      gameMode="capital"
-      capitalMap={localizedCapitalMap}
-      capitalCoordinates={CAPITAL_COORDINATES}
+    <BaseGameClient
+      useMapData={useUSMapData}
+      configKey="US_STATES"
+      gameKey="us-capitals"
+      duration={300} // Temporary fix
+      projectionConfig={{
+        type: 'albersUsa',
+        scale: 1200,
+      }}
     />
   );
 }
