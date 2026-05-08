@@ -50,7 +50,7 @@ export default function Header() {
 
   if (status === 'playing') return null;
 
-  const isMapPage = pathname === '/map';
+  const isMapPage = pathname.startsWith('/map');
 
   const onLanguageChange = (newLocale: string) => {
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
@@ -76,8 +76,8 @@ export default function Header() {
       isMapPage ? "fixed top-0 left-0" : "relative mx-auto max-w-[1400px]"
     )}>
       <div className={cn(
-        "mx-auto flex w-full items-center justify-between px-4",
-        isMapPage ? "max-w-none backdrop-blur-md bg-white/50 dark:bg-black/50 py-4 shadow-sm" : "max-w-[1400px]"
+        "mx-auto flex w-full items-center justify-between px-4 transition-all duration-300",
+        isMapPage ? "max-w-none bg-transparent py-4" : "max-w-[1400px]"
       )}>
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Image 

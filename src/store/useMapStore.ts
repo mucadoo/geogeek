@@ -51,6 +51,7 @@ export const useMapStore = create<MapState>()(
           selectedContinent: name,
           position: view,
           hoveredContinent: null,
+          hoveredCountry: null,
         }),
 
       resetMap: () =>

@@ -3,23 +3,34 @@
 import * as d3 from 'd3';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { feature } from 'topojson-client';
 
 import MapPolygons from './MapPolygons';
+import MapSidebar from './MapSidebar';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { useMapStore } from '@/store/useMapStore';
+import { CONTINENT_VIEWS } from '@/config/mapConstants';
+import { countryService } from '@/lib/countryService';
 
-export default function Map() {
+interface MapProps {
+  slug?: string;
+}
+
+export default function Map({ slug }: MapProps) {
   const t = useTranslations('Map');
+  const router = useRouter();
   const { data: mapData, status } = useWorldMapData();
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
+  const [activeCountry, setActiveCountry] = useState<any>(null);
   
   const { 
     position, 
     selectedContinent, tooltip, setTooltip,
-    resetMap
+    resetMap, handleContinentClick
   } = useMapStore();
 
   const width = 800;
@@ -30,6 +41,35 @@ export default function Map() {
       .scale(120)
       .translate([width / 2, height / 2 + 50]);
   }, []);
+
+  // Sync URL slug with Store on mount
+  useEffect(() => {
+    async function initView() {
+      if (!slug) {
+        resetMap();
+        setActiveCountry(null);
+        return;
+      }
+
+      const continentName = slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      
+      // Try as continent
+      const view = CONTINENT_VIEWS[continentName as keyof typeof CONTINENT_VIEWS];
+      if (view) {
+        handleContinentClick(continentName, view);
+        setActiveCountry(null);
+        return;
+      }
+
+      // Try as country
+      const country = await countryService.getCountryByIso(slug.toUpperCase());
+      if (country) {
+        setActiveCountry(country);
+        // Zooming logic will be triggered by re-rendering with new country state
+      }
+    }
+    initView();
+  }, [slug, handleContinentClick, resetMap]);
 
   useEffect(() => {
     if (!svgRef.current || !gRef.current) return;
@@ -45,11 +85,29 @@ export default function Map() {
       });
 
     svg.call(zoom);
-    // Prevent default browser zoom on double tap
     svg.on('dblclick.zoom', null);
 
-    // Initial position or when store position changes (e.g. from continent click)
-    // We need to convert [lng, lat] to [x, y] and then to D3 transform
+    // If a country is active, focus on it
+    if (activeCountry && mapData) {
+      // Convert TopoJSON to GeoJSON
+      const world = feature(mapData as any, mapData.objects.countries as any) as any;
+      const featureData = world.features.find((f: any) => f.id === activeCountry.ISO_code);
+      
+      if (featureData) {
+        const path = d3.geoPath().projection(projection);
+        const [[x0, y0], [x1, y1]] = path.bounds(featureData);
+        
+        // Offset centering to the left 60%
+        const centerX = width * 0.3; 
+        const centerY = height / 2;
+        const scale = Math.min(8, 0.7 / Math.max((x1 - x0) / width, (y1 - y0) / height));
+        const translate = [centerX - scale * (x0 + x1) / 2, centerY - scale * (y0 + y1) / 2];
+
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+        return;
+      }
+    }
+
     const [lng, lat] = position.coordinates;
     const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
     
@@ -63,7 +121,7 @@ export default function Map() {
           .translate(-x, -y)
       );
 
-  }, [position, projection]);
+  }, [position, projection, activeCountry, mapData]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
@@ -102,9 +160,9 @@ export default function Map() {
             </g>
           </svg>
 
-          {selectedContinent && (
+          {(selectedContinent || activeCountry) && (
             <button
-              onClick={resetMap}
+              onClick={() => router.push('/map')}
               title={t('returnToWorld')}
               className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-white p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
             >
@@ -116,6 +174,10 @@ export default function Map() {
                 className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
               />
             </button>
+          )}
+
+          {activeCountry && (
+            <MapSidebar type="country" title={activeCountry.name} data={activeCountry} />
           )}
         </React.Fragment>
       )}

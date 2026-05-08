@@ -49,7 +49,7 @@ export default function SearchPalette() {
             {countries.map((c) => (
               <Command.Item
                 key={c.ISO_code}
-                onSelect={() => handleSelect(`/country/${c.ISO_code.toLowerCase()}`)}
+                onSelect={() => handleSelect(`/map/${c.ISO_code.toLowerCase()}`)}
                 className="px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-100 aria-selected:bg-primary/10"
               >
                 {getLocalizedCountryName(c.ISO_code, locale)}

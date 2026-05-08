@@ -156,6 +156,8 @@
   },
   "Metadata": {
     "title": "GeoGeek - Explore the geographer inside you",
-    "description": "Interactive geography explorer and rankings"
+    "description": "Interactive geography explorer and rankings",
+    "mapOf": "Map of {continent}",
+    "worldMapTitle": "World Map Explorer"
   }
 }

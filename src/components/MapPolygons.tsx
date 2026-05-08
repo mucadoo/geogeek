@@ -96,7 +96,7 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
               if (selectedContinent) {
                 if (alpha2) {
                   NProgress.start();
-                  router.push(`/country/${alpha2}` as any);
+                  router.push(`/map/${alpha2}` as any);
                 }
               } else {
                 const view = CONTINENT_VIEWS[continent as keyof typeof CONTINENT_VIEWS];
@@ -116,11 +116,11 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
                   if (document.startViewTransition) {
                     document.startViewTransition(() => {
                       NProgress.start();
-                      router.push(`/country/${alpha2.toLowerCase()}` as any);
+                      router.push(`/map/${alpha2.toLowerCase()}` as any);
                     });
                   } else {
                     NProgress.start();
-                    router.push(`/country/${alpha2.toLowerCase()}` as any);
+                    router.push(`/map/${alpha2.toLowerCase()}` as any);
                   }
                 }
               } else {
