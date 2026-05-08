@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { ALIASES } from '@/config/aliases';
 import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
@@ -22,9 +23,11 @@ interface GameState {
   difficulty: Difficulty;
   strictMode: boolean;
   gameMode: GameMode;
+  currentGameKey: string;
   capitalMap: Record<string, string>;
   score: number;
   timeLeft: number;
+  highScores: Record<string, number>;
   currentState: StateFeature | null;
   remainingStates: StateFeature[];
   missedStates: StateFeature[];
@@ -32,6 +35,7 @@ interface GameState {
   userInput: string;
   lastGuessCorrect: boolean | null;
   lastSkippedState: StateFeature | null;
+  isNewHighScore: boolean;
   totalToGuess: number;
   
   startGame: (
@@ -39,6 +43,7 @@ interface GameState {
     validNames: string[], 
     duration: number, 
     difficulty: Difficulty,
+    gameKey: string,
     gameMode?: GameMode,
     capitalMap?: Record<string, string>
   ) => void;
@@ -94,136 +99,167 @@ export const getFeedback = (score: number, total: number): string => {
   return "practice";
 };
 
-export const useGameStore = create<GameState>((set, get) => ({
-  status: 'idle',
-  difficulty: 'medium',
-  strictMode: false,
-  gameMode: 'name',
-  capitalMap: {},
-  score: 0,
-  timeLeft: INITIAL_TIME,
-  currentState: null,
-  remainingStates: [],
-  missedStates: [],
-  correctlyGuessedIds:[],
-  userInput: '',
-  lastGuessCorrect: null,
-  lastSkippedState: null,
-  totalToGuess: 0,
-
-  startGame: (states, validNames, duration, difficulty, gameMode = 'name', capitalMap = {}) => {
-    const filtered = states.filter(s => {
-      if (!s.properties.name) return false;
-      return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
-    });
-
-    const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-    const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
-    
-    set({
-      status: 'playing',
-      difficulty,
-      strictMode: difficulty === 'hard',
-      gameMode,
-      capitalMap,
+export const useGameStore = create<GameState>()(
+  persist(
+    (set, get) => ({
+      status: 'idle',
+      difficulty: 'medium',
+      strictMode: false,
+      gameMode: 'name',
+      currentGameKey: '',
+      capitalMap: {},
       score: 0,
-      timeLeft: Math.floor(duration * difficultyMultiplier),
-      remainingStates: shuffled.slice(1),
-      currentState: shuffled[0] || null,
+      timeLeft: INITIAL_TIME,
+      highScores: {},
+      currentState: null,
+      remainingStates: [],
       missedStates: [],
-      correctlyGuessedIds:[],
+      correctlyGuessedIds: [],
       userInput: '',
       lastGuessCorrect: null,
-      totalToGuess: filtered.length,
-    });
-  },
-  
-  setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
-  setStrictMode: (strictMode) => set({ strictMode }),
+      lastSkippedState: null,
+      isNewHighScore: false,
+      totalToGuess: 0,
 
-  submitGuess: (guess) => {
-    const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode } = get();
-    if (!currentState) return false;
-
-    const regionName = currentState.properties.name;
-    const targetAnswer = gameMode === 'capital' ? (capitalMap[regionName] || regionName) : regionName;
-
-    const normalizedGuess = normalizeString(guess);
-    const normalizedTarget = normalizeString(targetAnswer);
-    const targetAliases = (ALIASES[normalizedTarget] || []).map(normalizeString);
-
-    const checkMatch = (target: string) => {
-      if (strictMode) return normalizedGuess === target;
-      return normalizedGuess === target || isFuzzyMatch(normalizedGuess, target);
-    };
-
-    const isCorrect = checkMatch(normalizedTarget) || targetAliases.some(checkMatch);
-
-    if (isCorrect) {
-      const newCorrectIds = [...correctlyGuessedIds, currentState.id];
-      if (remainingStates.length === 0) {
-        set({ status: 'finished', score: score + 1, currentState: null, userInput: '', lastGuessCorrect: true, lastSkippedState: null, correctlyGuessedIds: newCorrectIds });
-      } else {
-        const nextState = remainingStates[0];
-        set({
-          score: score + 1,
-          currentState: nextState,
-          remainingStates: remainingStates.slice(1),
-          userInput: '',
-          lastGuessCorrect: true,
-          lastSkippedState: null,
-          correctlyGuessedIds: newCorrectIds,
+      startGame: (states, validNames, duration, difficulty, gameKey, gameMode = 'name', capitalMap = {}) => {
+        const filtered = states.filter(s => {
+          if (!s.properties.name) return false;
+          return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
         });
-      }
-      return true;
-    } else {
-      set({ lastGuessCorrect: false, lastSkippedState: null });
-      return false;
-    }
-  },
 
-  skipState: () => {
-    const { currentState, remainingStates, missedStates } = get();
-    if (!currentState) return;
-    
-    const updatedRemaining =[...remainingStates, currentState];
-    const newMissed = [...new Set([...missedStates, currentState])];
-    
-    if (updatedRemaining.length === 0) {
-      set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, lastSkippedState: null, missedStates: newMissed });
-    } else {
-      set({
-        currentState: updatedRemaining[0],
-        remainingStates: updatedRemaining.slice(1),
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
+        
+        set({
+          status: 'playing',
+          difficulty,
+          strictMode: difficulty === 'hard',
+          gameMode,
+          currentGameKey: gameKey,
+          capitalMap,
+          score: 0,
+          timeLeft: Math.floor(duration * difficultyMultiplier),
+          remainingStates: shuffled.slice(1),
+          currentState: shuffled[0] || null,
+          missedStates: [],
+          correctlyGuessedIds: [],
+          userInput: '',
+          lastGuessCorrect: null,
+          lastSkippedState: null,
+          isNewHighScore: false,
+          totalToGuess: filtered.length,
+        });
+      },
+      
+      setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
+      setStrictMode: (strictMode) => set({ strictMode }),
+
+      submitGuess: (guess) => {
+        const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode, currentGameKey, highScores } = get();
+        if (!currentState) return false;
+
+        const regionName = currentState.properties.name;
+        const targetAnswer = gameMode === 'capital' ? (capitalMap[regionName] || regionName) : regionName;
+
+        const normalizedGuess = normalizeString(guess);
+        const normalizedTarget = normalizeString(targetAnswer);
+        const targetAliases = (ALIASES[normalizedTarget] || []).map(normalizeString);
+
+        const checkMatch = (target: string) => {
+          if (strictMode) return normalizedGuess === target;
+          return normalizedGuess === target || isFuzzyMatch(normalizedGuess, target);
+        };
+
+        const isCorrect = checkMatch(normalizedTarget) || targetAliases.some(checkMatch);
+
+        if (isCorrect) {
+          const newCorrectIds = [...correctlyGuessedIds, currentState.id];
+          const newScore = score + 1;
+          const isFinished = remainingStates.length === 0;
+
+          if (isFinished) {
+            const oldHighScore = highScores[currentGameKey] || 0;
+            const isHighScore = newScore > oldHighScore;
+            set({ 
+              status: 'finished', 
+              score: newScore, 
+              currentState: null, 
+              userInput: '', 
+              lastGuessCorrect: true, 
+              lastSkippedState: null, 
+              correctlyGuessedIds: newCorrectIds,
+              highScores: isHighScore ? { ...highScores, [currentGameKey]: newScore } : highScores,
+              isNewHighScore: isHighScore
+            });
+          } else {
+            const nextState = remainingStates[0];
+            set({
+              score: newScore,
+              currentState: nextState,
+              remainingStates: remainingStates.slice(1),
+              userInput: '',
+              lastGuessCorrect: true,
+              lastSkippedState: null,
+              correctlyGuessedIds: newCorrectIds,
+            });
+          }
+          return true;
+        } else {
+          set({ lastGuessCorrect: false, lastSkippedState: null });
+          return false;
+        }
+      },
+
+      skipState: () => {
+        const { currentState, remainingStates, missedStates } = get();
+        if (!currentState) return;
+        
+        const updatedRemaining =[...remainingStates, currentState];
+        const newMissed = [...new Set([...missedStates, currentState])];
+        
+        if (updatedRemaining.length === 0) {
+          set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, lastSkippedState: null, missedStates: newMissed });
+        } else {
+          set({
+            currentState: updatedRemaining[0],
+            remainingStates: updatedRemaining.slice(1),
+            userInput: '',
+            lastGuessCorrect: null,
+            lastSkippedState: currentState,
+            missedStates: newMissed,
+          });
+        }
+      },
+
+      tick: () => {
+        const { timeLeft, status } = get();
+        if (status !== 'playing') return;
+        
+        if (timeLeft <= 1) {
+          set({ timeLeft: 0, status: 'finished' });
+        } else {
+          set({ timeLeft: timeLeft - 1 });
+        }
+      },
+
+      resetGame: () => set({
+        status: 'idle',
+        score: 0,
+        currentState: null,
+        remainingStates:[],
+        missedStates: [],
+        correctlyGuessedIds:[],
         userInput: '',
         lastGuessCorrect: null,
-        lastSkippedState: currentState,
-        missedStates: newMissed,
-      });
+        lastSkippedState: null,
+        totalToGuess: 0,
+        isNewHighScore: false
+      }),
+    }),
+    {
+      name: 'game-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ highScores: state.highScores }),
     }
-  },
-
-  tick: () => {
-    const { timeLeft, status } = get();
-    if (status !== 'playing') return;
-    
-    if (timeLeft <= 1) {
-      set({ timeLeft: 0, status: 'finished' });
-    } else {
-      set({ timeLeft: timeLeft - 1 });
-    }
-  },
-
-  resetGame: () => set({
-    status: 'idle',
-    score: 0,
-    currentState: null,
-    remainingStates:[],
-    missedStates: [],
-    correctlyGuessedIds:[],
-    userInput: '',
-    lastGuessCorrect: null,
-    lastSkippedState: null,
-    totalToGuess: 0,
-  }),
-}));
+  )
+);

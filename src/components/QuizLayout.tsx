@@ -42,7 +42,7 @@ export default function QuizLayout({
   const t = useTranslations('Quiz');
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
-    totalToGuess, timeLeft, tick
+    totalToGuess, timeLeft, tick, isNewHighScore
   } = useGameStore();
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function QuizLayout({
       const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects[objectKey]) as any).features as StateFeature[];
-      startGame(states, validNames, duration, difficulty, gameMode, capitalMap);
+      startGame(states, validNames, duration, difficulty, 'QUIZ_KEY', gameMode, capitalMap); // Added QUIZ_KEY
     }
   };
 
@@ -185,6 +185,11 @@ export default function QuizLayout({
            ) : (
               <div className="w-full max-w-lg rounded-3xl bg-white p-10 text-center shadow-2xl">
                  <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
+                 {isNewHighScore && (
+                    <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-white shadow-lg uppercase tracking-wider inline-block">
+                      New High Score!
+                    </div>
+                  )}
                  <h2 className="text-3xl font-bold mb-6">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
                  <button onClick={handleStartGame} className="bg-primary w-full py-4 rounded-2xl text-white font-bold mb-4">{t('playAgain')}</button>
                  <button onClick={resetGame} className="text-gray-400 font-bold">{t('menu')}</button>

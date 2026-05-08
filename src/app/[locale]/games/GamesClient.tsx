@@ -6,6 +6,7 @@ import React, { useState, useMemo } from 'react';
 
 import { Link } from '@/i18n/routing';
 import { GameCategory } from '@/types';
+import { useGameStore } from '@/store/useGameStore';
 
 const games = [
   {
@@ -97,6 +98,7 @@ export default function GamesClient() {
   const t = useTranslations('Games');
   const [activeCategory, setActiveCategory] = useState<GameCategory>(GameCategory.ALL);
   const [searchQuery, setSearchQuery] = useState('');
+  const { highScores } = useGameStore();
 
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
@@ -164,6 +166,7 @@ export default function GamesClient() {
         {filteredGames.length > 0 ? (
           filteredGames.map((game) => {
             const Icon = game.icon;
+            const pb = highScores[game.id];
             return (
               <Link 
                 key={game.id} 
@@ -175,6 +178,11 @@ export default function GamesClient() {
                   <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
                     {t(`categories.${game.category}` as `categories.${GameCategory}`)} • {t('itemsCount', { count: game.count })}
                   </div>
+                  {pb !== undefined && (
+                    <div className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                      PB: {pb}
+                    </div>
+                  )}
                   <div className="flex gap-0.5" title={`${t('difficulty')}: ${game.difficulty}/3`}>
                     {[1, 2, 3].map((star) => (
                       <Star 
