@@ -94,9 +94,12 @@
     }
   },
   "CountryDetails": {
-    "summary": "Riassunto",
+    "summary": "Riepilogo",
     "information": "Informazioni",
+    "neighboringCountries": "Paesi confinanti",
+    "viewOnMap": "Visualizza sulla mappa",
     "labels": {
+
       "capital": "Capitale",
       "largestCity": "Città più grande",
       "languages": "Lingue",

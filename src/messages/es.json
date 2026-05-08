@@ -96,6 +96,8 @@
   "CountryDetails": {
     "summary": "Resumen",
     "information": "Información",
+    "neighboringCountries": "Países Vecinos",
+    "viewOnMap": "Ver en el mapa",
     "labels": {
       "capital": "Capital",
       "largestCity": "Ciudad más grande",
