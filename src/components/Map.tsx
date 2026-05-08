@@ -49,6 +49,10 @@ export default function Map({ slug }: MapProps) {
       .translate([width / 2, height / 2 + 50]);
   }, []);
 
+  // Set the isolated country ID synchronously if available through the URL to instantly drop the other geometries
+  const isCountrySlug = slug && slug.length === 2;
+  const targetIso = activeCountry?.ISO_code?.toLowerCase() || (isCountrySlug ? slug.toLowerCase() : undefined);
+
   // Sync URL slug with Store on mount
   useEffect(() => {
     async function initView() {
@@ -84,6 +88,9 @@ export default function Map({ slug }: MapProps) {
     const svg = d3.select(svgRef.current);
     const g = d3.select(gRef.current);
 
+    // Track if zoom has been applied to this DOM element already
+    const isInitialized = !!svg.property('__zoom');
+
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
       .touchable(true)
@@ -94,7 +101,18 @@ export default function Map({ slug }: MapProps) {
     svg.call(zoom);
     svg.on('dblclick.zoom', null);
 
-    // If a country is active, focus on it
+    // If freshly mounted, apply the previous zoom transform instantly to prevent jumping
+    if (!isInitialized) {
+      const [lng, lat] = position.coordinates;
+      const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
+      const initialTransform = d3.zoomIdentity
+          .translate(width / 2, height / 2)
+          .scale(position.zoom)
+          .translate(-x, -y);
+      svg.call(zoom.transform, initialTransform);
+    }
+
+    // If a country is active, focus on it gracefully
     if (activeCountry && mapData) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
       
@@ -127,20 +145,23 @@ export default function Map({ slug }: MapProps) {
       }
     }
 
-    const [lng, lat] = position.coordinates;
-    const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
-    
-    svg.transition()
-      .duration(750)
-      .call(
-        zoom.transform,
-        d3.zoomIdentity
-          .translate(width / 2, height / 2)
-          .scale(position.zoom)
-          .translate(-x, -y)
-      );
+    // Otherwise, gently transition toward the desired position
+    if (isInitialized && !activeCountry) {
+      const [lng, lat] = position.coordinates;
+      const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
+      
+      svg.transition()
+        .duration(750)
+        .call(
+          zoom.transform,
+          d3.zoomIdentity
+            .translate(width / 2, height / 2)
+            .scale(position.zoom)
+            .translate(-x, -y)
+        );
+    }
 
-  }, [position, projection, activeCountry, mapData]);
+  }, [position, projection, activeCountry, mapData, ALPHA2_TO_NUMERIC]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });

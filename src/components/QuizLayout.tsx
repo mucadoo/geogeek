@@ -45,8 +45,17 @@ export default function QuizLayout({
   const t = useTranslations('Quiz');
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
-    totalToGuess, timeLeft, tick, isNewHighScore
+    totalToGuess, timeLeft, tick, isNewHighScore,
+    userInput, setUserInput, submitGuess, skipState, lastGuessCorrect
   } = useGameStore();
+
+  const getLocalizedName = (name: string) => {
+    try {
+      return tRegions(name);
+    } catch {
+      return name;
+    }
+  };
 
   useEffect(() => {
     if (gameStatus === 'finished' && score > 0 && score === totalToGuess) {
@@ -131,15 +140,67 @@ export default function QuizLayout({
       {gameStatus === 'playing' && (
         <div className="pointer-events-none absolute bottom-8 left-0 right-0 z-10 px-6 md:bottom-12">
           <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
-            <div className="pointer-events-auto w-full bg-[var(--card-bg)] rounded-full p-2 flex items-center shadow-2xl border border-[var(--card-border)]">
-               <input className="flex-grow bg-transparent px-6 py-3 outline-none font-game-mono text-[var(--foreground)] placeholder:text-slate-400" placeholder="Type name..." />
-               <button className="bg-primary text-white px-8 py-3 rounded-full font-game-heading uppercase tracking-wider shadow-lg hover:bg-teal-600 transition-colors">Guess</button>
+            
+            {/* Target Hint Display */}
+            {gameMode === 'capital' && currentState && (
+              <div className="pointer-events-auto animate-in slide-in-from-bottom-2 rounded-xl bg-[var(--foreground)] px-6 py-2 text-sm font-bold text-[var(--background)] shadow-xl">
+                {t('target', { name: getLocalizedName(currentState.properties.name) })}
+              </div>
+            )}
+
+            <div className={cn(
+              "pointer-events-auto w-full bg-[var(--card-bg)] rounded-full p-2 flex items-center shadow-2xl border transition-colors",
+              lastGuessCorrect === false ? "border-red-400 bg-red-50 shake" : "border-[var(--card-border)]"
+            )}>
+               <input 
+                 autoFocus
+                 value={userInput}
+                 onChange={(e) => setUserInput(e.target.value)}
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter') submitGuess(userInput);
+                 }}
+                 className={cn(
+                   "flex-grow bg-transparent px-6 py-3 outline-none font-game-mono text-[var(--foreground)] placeholder:text-slate-400",
+                   lastGuessCorrect === false ? "text-red-500 placeholder:text-red-300" : ""
+                 )} 
+                 placeholder={gameMode === 'capital' ? t('typeCapital') : t('typeRegion')} 
+               />
+               <button 
+                 onClick={() => submitGuess(userInput)}
+                 className="bg-primary text-white px-8 py-3 rounded-full font-game-heading uppercase tracking-wider shadow-lg hover:bg-teal-600 transition-colors"
+               >
+                 Guess
+               </button>
             </div>
-            <div className="flex gap-2">
-              <button className="bg-accent text-slate-900 px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-yellow-400 transition-colors">Get Hint</button>
-              <button className="bg-[var(--card-bg)] text-slate-500 px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Skip</button>
+            
+            {lastGuessCorrect === false && (
+              <span className="text-xs font-bold text-red-500 uppercase -mt-2 animate-pulse">{t('tryAgain')}</span>
+            )}
+
+            <div className="flex gap-2 pointer-events-auto">
+              <button 
+                onClick={resetGame}
+                className="bg-red-500 text-white px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-red-600 transition-colors"
+              >
+                Quit
+              </button>
+              <button 
+                onClick={skipState}
+                className="bg-[var(--card-bg)] text-slate-500 px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Skip
+              </button>
             </div>
           </div>
+          <style jsx>{`
+            .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+            @keyframes shake {
+              10%, 90% { transform: translate3d(-1px, 0, 0); }
+              20%, 80% { transform: translate3d(2px, 0, 0); }
+              30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+              40%, 60% { transform: translate3d(4px, 0, 0); }
+            }
+          `}</style>
         </div>
       )}
 
