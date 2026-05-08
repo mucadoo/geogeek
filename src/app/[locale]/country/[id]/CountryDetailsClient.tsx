@@ -72,6 +72,7 @@ export default function CountryDetailsClient({ country }: CountryDetailsClientPr
                   src={country.flagUrl} 
                   alt={`${countryName} flag`}
                   fill
+                  style={{ viewTransitionName: `country-${country.ISO_code.toLowerCase()}` }}
                   className="rounded object-cover shadow-sm"
                   onLoad={() => setIsImageLoaded(true)}
                 />

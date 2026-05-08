@@ -5,13 +5,10 @@ let cachedCountries: Country[] | null = null;
 async function fetchCountries(): Promise<Country[]> {
   if (cachedCountries) return cachedCountries;
 
-  const url = process.env.NEXT_PUBLIC_COUNTRIES_JSON_URL || 'https://mucadoo.github.io/country-info-scraper/countries.min.json';
-  const response = await fetch(url);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const response = await fetch(`${baseUrl}/api/countries`);
+  if (!response.ok) throw new Error('Failed to fetch country data');
   
-  if (!response.ok) {
-    throw new Error('Failed to fetch country data');
-  }
-
   cachedCountries = await response.json();
   return cachedCountries!;
 }

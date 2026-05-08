@@ -8,6 +8,7 @@ import Providers from "./providers";
 
 import AnimatedBackground from "@/components/AnimatedBackground"; 
 import Header from "@/components/Header";
+import SearchPalette from "@/components/SearchPalette";
 import { routing } from '@/i18n/routing';
 
 
@@ -90,6 +91,7 @@ export default async function RootLayout({
         <NextTopLoader color="#00a8b5" showSpinner={false} height={3} />
         <Providers messages={messages} locale={locale}>
           <AnimatedBackground /> 
+          <SearchPalette />
           <Header />
           {children}
         </Providers>
