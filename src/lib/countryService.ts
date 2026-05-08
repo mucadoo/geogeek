@@ -1,12 +1,19 @@
 import { Country, RankingType } from '@/types';
+import fallbackData from '../../public/data/fallback-countries.json';
 
 let cachedCountries: Country[] | null = null;
 
 async function fetchCountries(): Promise<Country[]> {
   if (cachedCountries) return cachedCountries;
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const response = await fetch(`${baseUrl}/api/countries`);
+  // During SSR/Build, use the imported fallback data
+  if (typeof window === 'undefined') {
+    cachedCountries = (fallbackData as unknown) as Country[];
+    return cachedCountries;
+  }
+
+  // At runtime, use the internal API proxy
+  const response = await fetch('/api/countries');
   if (!response.ok) throw new Error('Failed to fetch country data');
   
   cachedCountries = await response.json();
