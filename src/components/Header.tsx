@@ -49,8 +49,6 @@ export default function Header() {
 
   if (status === 'playing') return null;
 
-  const isMapPage = pathname.startsWith('/map');
-
   const onLanguageChange = (newLocale: string) => {
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
 
@@ -70,14 +68,8 @@ export default function Header() {
   };
 
   return (
-    <header className={cn(
-      "z-50 w-full flex h-[90px] items-center",
-      isMapPage ? "fixed top-0 left-0" : "relative mx-auto max-w-[1400px]"
-    )}>
-      <div className={cn(
-        "mx-auto flex w-full items-center justify-between px-4 transition-all duration-300",
-        isMapPage ? "max-w-none bg-transparent py-4" : "max-w-[1400px]"
-      )}>
+    <header className="z-50 w-full flex h-[90px] items-center relative mx-auto max-w-[1400px]">
+      <div className="mx-auto flex w-full items-center justify-between px-4 max-w-[1400px] transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Globe className="text-[var(--primary)]" size={32} strokeWidth={2.5} />
           <span className="font-game-heading text-3xl tracking-widest text-[var(--foreground)] uppercase mt-1">GeoGeek</span>
