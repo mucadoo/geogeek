@@ -31,6 +31,7 @@ interface GameState {
   correctlyGuessedIds: string[];
   userInput: string;
   lastGuessCorrect: boolean | null;
+  lastSkippedState: StateFeature | null;
   totalToGuess: number;
   
   startGame: (
@@ -107,6 +108,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   correctlyGuessedIds:[],
   userInput: '',
   lastGuessCorrect: null,
+  lastSkippedState: null,
   totalToGuess: 0,
 
   startGame: (states, validNames, duration, difficulty, gameMode = 'name', capitalMap = {}) => {
@@ -136,7 +138,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
   
-  setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null }),
+  setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
   setStrictMode: (strictMode) => set({ strictMode }),
 
   submitGuess: (guess) => {
@@ -160,7 +162,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (isCorrect) {
       const newCorrectIds = [...correctlyGuessedIds, currentState.id];
       if (remainingStates.length === 0) {
-        set({ status: 'finished', score: score + 1, currentState: null, userInput: '', lastGuessCorrect: true, correctlyGuessedIds: newCorrectIds });
+        set({ status: 'finished', score: score + 1, currentState: null, userInput: '', lastGuessCorrect: true, lastSkippedState: null, correctlyGuessedIds: newCorrectIds });
       } else {
         const nextState = remainingStates[0];
         set({
@@ -169,12 +171,13 @@ export const useGameStore = create<GameState>((set, get) => ({
           remainingStates: remainingStates.slice(1),
           userInput: '',
           lastGuessCorrect: true,
+          lastSkippedState: null,
           correctlyGuessedIds: newCorrectIds,
         });
       }
       return true;
     } else {
-      set({ lastGuessCorrect: false });
+      set({ lastGuessCorrect: false, lastSkippedState: null });
       return false;
     }
   },
@@ -187,13 +190,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     const newMissed = [...new Set([...missedStates, currentState])];
     
     if (updatedRemaining.length === 0) {
-      set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, missedStates: newMissed });
+      set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, lastSkippedState: null, missedStates: newMissed });
     } else {
       set({
         currentState: updatedRemaining[0],
         remainingStates: updatedRemaining.slice(1),
         userInput: '',
         lastGuessCorrect: null,
+        lastSkippedState: currentState,
         missedStates: newMissed,
       });
     }
@@ -219,6 +223,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     correctlyGuessedIds:[],
     userInput: '',
     lastGuessCorrect: null,
+    lastSkippedState: null,
     totalToGuess: 0,
   }),
 }));

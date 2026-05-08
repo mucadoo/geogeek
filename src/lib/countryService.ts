@@ -26,6 +26,20 @@ export const countryService = {
     return countries.find(c => c.ISO_code.toUpperCase() === isoCode.toUpperCase());
   },
 
+  getNeighbors: async (countryName: string): Promise<Country[]> => {
+    const countries = await fetchCountries();
+    const country = countries.find(c => c.name === countryName);
+    if (!country) return [];
+
+    // Simple heuristic: check if other countries are mentioned in the description
+    // This is a naive approach; a better one would require a structured borders API
+    const neighbors = countries.filter(c => 
+      c.name !== country.name && 
+      country.description.toLowerCase().includes(c.name.toLowerCase())
+    );
+    return neighbors;
+  },
+
   getRankings: async (type: RankingType): Promise<{ country: string; value: string | number; isoCode: string }[]> => {
     const countries = await fetchCountries();
 

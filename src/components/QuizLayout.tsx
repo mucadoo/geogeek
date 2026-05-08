@@ -4,6 +4,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { Trophy, Timer, ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { twMerge } from 'tailwind-merge';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
@@ -43,7 +44,17 @@ export default function QuizLayout({
     status: gameStatus, startGame, resetGame, currentState, score, 
     totalToGuess, timeLeft, tick
   } = useGameStore();
-  
+
+  useEffect(() => {
+    if (gameStatus === 'finished' && score > 0 && score === totalToGuess) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  }, [gameStatus, score, totalToGuess]);
+
   const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
   // Handle Timer

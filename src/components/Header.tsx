@@ -39,13 +39,13 @@ export default function Header() {
   const locale = useLocale();
   const router = useRouter();
   
-  // Determine if the current route should be fullscreen
   const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
 
-  // If in a game session (or game screen), hide the header entirely
   if (isFullscreen) return null;
 
   const onLanguageChange = (newLocale: string) => {
+    // Set cookie for automatic language detection preference
+    document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/`;
     router.replace(pathname, { locale: newLocale });
   };
 
