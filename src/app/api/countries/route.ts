@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
-import { unstable_cache } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
+
+import { unstable_cache } from 'next/cache';
+import { NextResponse } from 'next/server';
 
 const EXTERNAL_URL = 'https://mucadoo.github.io/country-info-scraper/countries.min.json';
 

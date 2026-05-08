@@ -10,6 +10,13 @@
   --map-stroke: #adb5bd;
 }
 
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --map-fill: #1e293b;
+  --map-stroke: #334155;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -26,6 +33,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Force remove the black accessibility box when clicking paths */

@@ -2,6 +2,7 @@
 
 import * as d3 from 'd3';
 import { usePathname } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import React, { useEffect, useRef } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
@@ -18,12 +19,13 @@ export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: mapData } = useWorldMapData();
   const pathname = usePathname();
+  const { theme } = useTheme();
   
   const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
 
   useEffect(() => {
     // DO NOT animate if we are on a fullscreen map page!
-    if (!mapData || !canvasRef.current || isFullscreen) return;
+    if (!mapData || !canvasRef.current || isFullscreen || !theme) return;
 
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on base
@@ -82,6 +84,8 @@ export default function AnimatedBackground() {
     let rotation = 0;
     let animationFrameId: number;
 
+    const isDark = theme === 'dark';
+
     const draw = () => {
       rotation += 0.1; // Base slow spin
 
@@ -105,29 +109,29 @@ export default function AnimatedBackground() {
 
       const path = d3.geoPath(projection, context);
 
-      // 1. Clear background (Match your CSS var--background)
-      context.fillStyle = '#f1f5f3';
+      // 1. Clear background
+      context.fillStyle = isDark ? '#0f172a' : '#f1f5f3';
       context.fillRect(0, 0, width, height);
 
       // 2. Draw Sphere Background (Ocean glow)
       context.beginPath();
       path({ type: 'Sphere' } as d3.GeoPermissibleObjects);
-      context.fillStyle = 'rgba(0, 168, 181, 0.02)';
+      context.fillStyle = isDark ? 'rgba(0, 168, 181, 0.01)' : 'rgba(0, 168, 181, 0.02)';
       context.fill();
 
       // 3. Draw Graticule (Grid Lines)
       context.beginPath();
       path(graticule as unknown as d3.GeoPermissibleObjects);
-      context.strokeStyle = 'rgba(0, 168, 181, 0.08)';
+      context.strokeStyle = isDark ? 'rgba(0, 168, 181, 0.04)' : 'rgba(0, 168, 181, 0.08)';
       context.lineWidth = 1;
       context.stroke();
 
       // 4. Draw Landmasses
       context.beginPath();
       path(land as unknown as d3.GeoPermissibleObjects);
-      context.fillStyle = 'rgba(44, 62, 80, 0.04)'; // Dark grey subtle land
+      context.fillStyle = isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(44, 62, 80, 0.04)'; 
       context.fill();
-      context.strokeStyle = 'rgba(0, 168, 181, 0.2)'; // Primary color borders
+      context.strokeStyle = isDark ? 'rgba(0, 168, 181, 0.1)' : 'rgba(0, 168, 181, 0.2)'; 
       context.lineWidth = 0.8;
       context.stroke();
 
@@ -136,29 +140,22 @@ export default function AnimatedBackground() {
         stream.progress += stream.speed;
 
         if (stream.progress >= 1) {
-          // Remove finished stream and spawn a new one
           streams.splice(index, 1);
           spawnStream();
         } else {
-          // Get the current coordinate along the great circle path
           const currentPos = stream.interpolate(stream.progress);
           
-          // Draw the tail (Line from origin to current position)
           context.beginPath();
           path({ type: 'LineString', coordinates: [stream.origin, currentPos] } as d3.GeoPermissibleObjects);
-          context.strokeStyle = `rgba(0, 168, 181, ${Math.max(0, 1 - stream.progress * 1.5)})`; // Fades out as it travels
+          context.strokeStyle = `rgba(0, 168, 181, ${Math.max(0, 1 - stream.progress * 1.5)})`; 
           context.lineWidth = 2;
           context.stroke();
 
-          // Draw the head (Glowing dot at the leading edge)
           context.beginPath();
           path({ type: 'Point', coordinates: currentPos } as d3.GeoPermissibleObjects);
-          // Only draw the dot if it is on the visible side of the globe
-          // We can check this by seeing if the path generator actually drew anything
-          context.fillStyle = '#ffcd42'; // Accent Yellow
+          context.fillStyle = '#ffcd42'; 
           context.fill();
           
-          // Outer glow for the dot
           context.beginPath();
           path({ type: 'Point', coordinates: currentPos } as d3.GeoPermissibleObjects);
           context.strokeStyle = 'rgba(255, 205, 66, 0.5)';
@@ -167,7 +164,6 @@ export default function AnimatedBackground() {
         }
       });
 
-      // Gradually populate streams on startup
       if (Math.random() < 0.05 && streams.length < maxStreams) {
         spawnStream();
       }
@@ -182,7 +178,7 @@ export default function AnimatedBackground() {
       window.removeEventListener('resize', setSize);
       cancelAnimationFrame(animationFrameId);
     };
-  },[mapData]);
+  },[mapData, theme]);
 
   return (
     <canvas

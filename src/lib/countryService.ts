@@ -1,5 +1,6 @@
-import { Country, RankingType } from '@/types';
 import fallbackData from '../../public/data/fallback-countries.json';
+
+import { Country, RankingType } from '@/types';
 
 let cachedCountries: Country[] | null = null;
 

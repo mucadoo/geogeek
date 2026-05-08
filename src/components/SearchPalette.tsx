@@ -1,10 +1,11 @@
 'use client';
 
-import { Command } from 'cmdk';
-import { useEffect, useState } from 'react';
-import { useRouter } from '@/i18n/routing';
-import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
+import { Command } from 'cmdk';
+import { useTranslations, useLocale } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { useRouter } from '@/i18n/routing';
 import { countryService } from '@/lib/countryService';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
 

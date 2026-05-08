@@ -1,10 +1,10 @@
 'use client';
 
+import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
 import { Trophy, Timer, ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect } from 'react';
-import confetti from 'canvas-confetti';
 import { twMerge } from 'tailwind-merge';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';

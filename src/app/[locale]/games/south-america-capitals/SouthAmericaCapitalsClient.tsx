@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 import BaseGameClient from '@/components/BaseGameClient';
 import { useGameConfig } from '@/hooks/useGameConfig';

@@ -59,7 +59,7 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
           ? hoveredCountry === numericId
           : hoveredContinent === continent;
 
-        let fillColor = "var(--color-map-fill)"; 
+        let fillColor = "var(--map-fill)"; 
         if (isHovered && isClickable) fillColor = "var(--color-danger)";
 
         const pathData = pathGenerator(geo);
@@ -70,7 +70,7 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
             key={numericId}
             d={pathData}
             fill={fillColor}
-            stroke="var(--color-map-stroke)"
+            stroke="var(--map-stroke)"
             strokeWidth={0.5}
             className={`transition-colors duration-200 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
             role={isClickable ? 'button' : undefined}

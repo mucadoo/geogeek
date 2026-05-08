@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import React, { useState, useMemo } from 'react';
 
 import { Link } from '@/i18n/routing';
-import { GameCategory } from '@/types';
 import { useGameStore } from '@/store/useGameStore';
+import { GameCategory } from '@/types';
 
 const games = [
   {

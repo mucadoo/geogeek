@@ -1,6 +1,6 @@
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { Metadata } from 'next';
 
 import CountryDetailsClient from './CountryDetailsClient';
 

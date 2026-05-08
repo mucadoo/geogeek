@@ -1,16 +1,16 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/Table';
 import { Link, useRouter } from '@/i18n/routing';
-import { getLocalizedCountryName } from '@/lib/i18n-utils';
 import { countryService } from '@/lib/countryService';
+import { getLocalizedCountryName } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
 import { Country } from '@/types';
 

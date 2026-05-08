@@ -9,6 +9,7 @@ import Providers from "./providers";
 import AnimatedBackground from "@/components/AnimatedBackground"; 
 import Header from "@/components/Header";
 import SearchPalette from "@/components/SearchPalette";
+import { ThemeProvider } from '@/components/ThemeProvider';
 import { routing } from '@/i18n/routing';
 
 
@@ -86,15 +87,17 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${inter.variable}`}>
+    <html lang={locale} className={`${inter.variable}`} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col antialiased">
         <NextTopLoader color="#00a8b5" showSpinner={false} height={3} />
-        <Providers messages={messages} locale={locale}>
-          <AnimatedBackground /> 
-          <SearchPalette />
-          <Header />
-          {children}
-        </Providers>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Providers messages={messages} locale={locale}>
+            <AnimatedBackground /> 
+            <SearchPalette />
+            <Header />
+            {children}
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,9 +1,11 @@
 'use client';
 
 import { clsx, type ClassValue } from 'clsx';
-import { Home, Globe, BarChart3, Gamepad2, Languages } from 'lucide-react';
+import { Home, Globe, BarChart3, Gamepad2, Languages, Sun, Moon } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
+import { useTheme } from 'next-themes';
+import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { Link, usePathname, useRouter, routing } from '@/i18n/routing';
@@ -37,30 +39,31 @@ export default function Header() {
   const t = useTranslations('Header');
   const pathname = usePathname();
   const locale = useLocale();
-  const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
   
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
 
   if (isFullscreen) return null;
 
   const onLanguageChange = (newLocale: string) => {
-    // Set cookie with 1-year expiration
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
 
     const path = window.location.pathname;
     const locales = routing.locales;
     
-    // Check if the current path starts with a locale prefix
     const isPrefixed = locales.some(locale => path.startsWith(`/${locale}/`) || path === `/${locale}`);
 
     if (isPrefixed) {
-      // Logic B (Prefixed URL): Replace prefix with new locale
       const segments = path.split('/');
       segments[1] = newLocale;
       const newPath = segments.join('/');
       window.location.href = `${newPath}${window.location.search}${window.location.hash}`;
     } else {
-      // Logic A (Clean URL): Reload current path to trigger middleware rewrite
       window.location.reload();
     }
   };
@@ -92,11 +95,11 @@ export default function Header() {
                       className={cn(
                         "flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-[13px] tracking-widest uppercase transition-all duration-300 shadow-sm",
                         isActive 
-                          ? "bg-white text-[#2c3e50] border border-gray-100" 
-                          : "bg-white/70 backdrop-blur-md text-[#2c3e50]/75 hover:text-primary hover:bg-white"
+                          ? "bg-white dark:bg-slate-800 text-[#2c3e50] dark:text-white border border-gray-100 dark:border-slate-700" 
+                          : "bg-white/70 dark:bg-slate-800/70 backdrop-blur-md text-[#2c3e50]/75 dark:text-slate-300 hover:text-primary dark:hover:text-primary hover:bg-white dark:hover:bg-slate-800"
                       )}
                     >
-                      <Icon size={15} className={isActive ? "text-primary" : "text-[#2c3e50]/50"} />
+                      <Icon size={15} className={isActive ? "text-primary" : "text-[#2c3e50]/50 dark:text-slate-400"} />
                       <span className="hidden md:inline">{item.labelKey === 'HOME' ? 'HOME' : t(item.labelKey.toLowerCase() as any)}</span>
                     </Link>
                   </li>
@@ -105,26 +108,38 @@ export default function Header() {
             </ul>
           </nav>
 
-          <div className="relative group">
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white/70 backdrop-blur-md rounded-full font-semibold text-[13px] text-[#2c3e50]/75 hover:bg-white transition-all shadow-sm">
-              <Languages size={15} className="text-[#2c3e50]/50" />
-              <span className="uppercase">{locale}</span>
-            </button>
-            <div className="absolute right-0 mt-2 w-24 bg-white rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 p-1">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => onLanguageChange(lang.code)}
-                  className={cn(
-                    "w-full text-left px-4 py-2 rounded-xl text-[12px] font-bold transition-colors",
-                    locale === lang.code 
-                      ? "bg-gray-100 text-primary" 
-                      : "text-[#2c3e50]/70 hover:bg-gray-50 hover:text-primary"
-                  )}
-                >
-                  {lang.name}
-                </button>
-              ))}
+          <div className="flex items-center gap-2">
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="flex items-center justify-center p-2.5 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-full text-[#2c3e50]/75 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            )}
+
+            <div className="relative group">
+              <button className="flex items-center gap-2 px-4 py-2.5 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-full font-semibold text-[13px] text-[#2c3e50]/75 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
+                <Languages size={15} className="text-[#2c3e50]/50 dark:text-slate-400" />
+                <span className="uppercase">{locale}</span>
+              </button>
+              <div className="absolute right-0 mt-2 w-24 bg-white dark:bg-slate-800 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100 dark:border-slate-700 p-1">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => onLanguageChange(lang.code)}
+                    className={cn(
+                      "w-full text-left px-4 py-2 rounded-xl text-[12px] font-bold transition-colors",
+                      locale === lang.code 
+                        ? "bg-gray-100 dark:bg-slate-700 text-primary" 
+                        : "text-[#2c3e50]/70 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-primary"
+                    )}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

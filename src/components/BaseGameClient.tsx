@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 import QuizLayout from '@/components/QuizLayout';
-import { ProjectionConfig, useGameProjection } from '@/hooks/useGameProjection';
 import { useGameConfig } from '@/hooks/useGameConfig';
+import { ProjectionConfig, useGameProjection } from '@/hooks/useGameProjection';
 
 interface BaseGameClientProps {
   useMapData: () => { data: any; status: 'pending' | 'success' | 'error' };
