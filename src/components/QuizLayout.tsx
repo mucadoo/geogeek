@@ -43,6 +43,7 @@ export default function QuizLayout({
   showOnlyValid = false, capitalCoordinates = {}
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
+  const tRegions = useTranslations('RegionNames');
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
     totalToGuess, timeLeft, tick, isNewHighScore,
