@@ -23,9 +23,10 @@ interface CountryFeature {
 interface MapPolygonsProps {
   mapData: Topology;
   projection: d3.GeoProjection;
+  activeCountryIso?: string;
 }
 
-export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
+export default function MapPolygons({ mapData, projection, activeCountryIso }: MapPolygonsProps) {
   const router = useRouter();
   const { 
     selectedContinent, hoveredContinent, hoveredCountry, 
@@ -53,7 +54,11 @@ export default function MapPolygons({ mapData, projection }: MapPolygonsProps) {
         
         const isClickable = continent !== 'Other';
 
+        // Filter: Continent isolation
         if (selectedContinent && continent !== selectedContinent) return null;
+        
+        // Filter: Country isolation
+        if (activeCountryIso && alpha2 !== activeCountryIso) return null;
 
         const isHovered = selectedContinent
           ? hoveredCountry === numericId

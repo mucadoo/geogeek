@@ -97,11 +97,21 @@ export default function Map({ slug }: MapProps) {
         const path = d3.geoPath().projection(projection);
         const [[x0, y0], [x1, y1]] = path.bounds(featureData);
         
-        // Offset centering to the left 60%
-        const centerX = width * 0.3; 
-        const centerY = height / 2;
-        const scale = Math.min(8, 0.7 / Math.max((x1 - x0) / width, (y1 - y0) / height));
-        const translate = [centerX - scale * (x0 + x1) / 2, centerY - scale * (y0 + y1) / 2];
+        // Calculate dimensions of the country
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const x = (x0 + x1) / 2;
+        const y = (y0 + y1) / 2;
+        
+        // Target is the left 60% of the screen
+        const targetWidth = width * 0.6;
+        const scale = Math.min(8, 0.8 / Math.max(dx / targetWidth, dy / height));
+        
+        // Calculate translation to center the country in the target area
+        const translate = [
+          (targetWidth / 2) - scale * x,
+          (height / 2) - scale * y
+        ];
 
         svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
         return;
@@ -156,7 +166,7 @@ export default function Map({ slug }: MapProps) {
             className="h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none"
           >
             <g ref={gRef}>
-              <MapPolygons mapData={mapData} projection={projection} />
+              <MapPolygons mapData={mapData} projection={projection} activeCountryIso={activeCountry?.ISO_code?.toLowerCase()} />
             </g>
           </svg>
 
