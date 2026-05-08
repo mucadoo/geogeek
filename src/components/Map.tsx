@@ -12,7 +12,7 @@ import MapSidebar from './MapSidebar';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { useMapStore } from '@/store/useMapStore';
-import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2 } from '@/config/mapConstants';
+import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { countryService } from '@/lib/countryService';
 
 interface MapProps {
