@@ -17,10 +17,10 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
   const t = useTranslations('CountryDetails.labels');
 
   return (
-    <div className="absolute right-4 top-24 z-30 flex h-[80vh] w-96 flex-col overflow-hidden rounded-lg border-2 border-dashed border-[#8d99ae] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-md">
+    <div className="animate-in slide-in-from-right fade-in duration-300 absolute bottom-0 right-0 z-40 flex h-[40vh] w-full flex-col overflow-hidden rounded-t-lg border-t-2 border-dashed border-[#8d99ae] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-md lg:bottom-auto lg:top-24 lg:right-4 lg:h-[80vh] lg:w-96 lg:rounded-lg lg:border-2 lg:border-l-2">
       {/* Perforated edge effect */}
-      <div className="absolute -left-3 top-10 h-6 w-6 rounded-full bg-[var(--background)] border-r-2 border-dashed border-[#8d99ae]" />
-      <div className="absolute -right-3 top-10 h-6 w-6 rounded-full bg-[var(--background)] border-l-2 border-dashed border-[#8d99ae]" />
+      <div className="absolute -left-3 top-10 h-6 w-6 rounded-full bg-[var(--background)] border-r-2 border-dashed border-[#8d99ae] hidden lg:block" />
+      <div className="absolute -right-3 top-10 h-6 w-6 rounded-full bg-[var(--background)] border-l-2 border-dashed border-[#8d99ae] hidden lg:block" />
 
       <div className="mb-6 flex items-center justify-between border-b-2 border-dashed border-[#8d99ae] pb-4">
         <h2 className="font-bebas text-4xl tracking-wider text-[var(--color-primary)] dark:text-[#00a8b5]">

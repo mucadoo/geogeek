@@ -12,7 +12,7 @@ import MapSidebar from './MapSidebar';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { useMapStore } from '@/store/useMapStore';
-import { CONTINENT_VIEWS } from '@/config/mapConstants';
+import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2 } from '@/config/mapConstants';
 import { countryService } from '@/lib/countryService';
 
 interface MapProps {
@@ -27,6 +27,13 @@ export default function Map({ slug }: MapProps) {
   const gRef = useRef<SVGGElement>(null);
   const [activeCountry, setActiveCountry] = useState<any>(null);
   
+  // Create mapping from Alpha2 to Numeric ID
+  const ALPHA2_TO_NUMERIC = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(NUMERIC_TO_ALPHA2).map(([num, alpha]) => [alpha.toUpperCase(), num])
+    );
+  }, []);
+
   const { 
     position, 
     selectedContinent, tooltip, setTooltip,
@@ -89,9 +96,11 @@ export default function Map({ slug }: MapProps) {
 
     // If a country is active, focus on it
     if (activeCountry && mapData) {
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
+      
       // Convert TopoJSON to GeoJSON
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
-      const featureData = world.features.find((f: any) => f.id === activeCountry.ISO_code);
+      const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
       
       if (featureData) {
         const path = d3.geoPath().projection(projection);

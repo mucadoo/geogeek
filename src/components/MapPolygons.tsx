@@ -57,8 +57,8 @@ export default function MapPolygons({ mapData, projection, activeCountryIso }: M
         // Filter: Continent isolation
         if (selectedContinent && continent !== selectedContinent) return null;
         
-        // Filter: Country isolation
-        if (activeCountryIso && alpha2 !== activeCountryIso) return null;
+        // Filter: Country isolation (Case-insensitive comparison)
+        if (activeCountryIso && alpha2?.toUpperCase() !== activeCountryIso.toUpperCase()) return null;
 
         const isHovered = selectedContinent
           ? hoveredCountry === numericId
