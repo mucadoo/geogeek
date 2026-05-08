@@ -113,32 +113,28 @@ export default function GamesClient() {
 
   return (
     <main className="container-custom animate-in fade-in flex-grow py-12 duration-1000">
-      {/* Hero Section */}
       <header className="mb-12 text-center">
-        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">
+        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-game-mono font-bold text-primary">
           <Sparkles size={16} /> {t('subtitle')}
         </div>
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
+        <h1 className="mb-4 text-5xl font-game-heading tracking-widest text-[var(--foreground)]">
           {t('title')}
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-gray-500">
+        <p className="mx-auto max-w-2xl text-lg font-game-mono text-gray-500 dark:text-gray-400">
           {t('description')}
         </p>
       </header>
 
-      {/* Controls: Search and Filters */}
-      <div className="mx-auto mb-10 flex w-full max-w-5xl flex-col items-center justify-between gap-6 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm md:flex-row">
-        
-        {/* Category Pills */}
+      <div className="mx-auto mb-10 flex w-full max-w-5xl flex-col items-center justify-between gap-6 game-card p-4 md:flex-row shadow-none">
         <div className="flex w-full flex-wrap gap-2 md:w-auto">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`flex-1 rounded-full px-6 py-2.5 text-sm font-bold transition-all md:flex-none ${
+              className={`flex-1 rounded-full px-6 py-2.5 text-sm font-game-heading tracking-wider transition-all md:flex-none ${
                 activeCategory === cat
-                  ? 'bg-[#2c3e50] text-white shadow-md'
-                  : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-[var(--input-bg)] text-slate-500 hover:text-[var(--foreground)]'
               }`}
             >
               {t(`categories.${cat}`)}
@@ -146,22 +142,20 @@ export default function GamesClient() {
           ))}
         </div>
 
-        {/* Search Bar */}
         <div className="relative w-full md:w-72">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-            <Search size={18} className="text-gray-400" />
+            <Search size={18} className="text-slate-400" />
           </div>
           <input
             type="text"
             placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-full border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-11 text-sm font-medium outline-none transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-full border-2 border-[var(--card-border)] bg-[var(--input-bg)] py-2.5 pr-4 pl-11 text-sm font-game-mono outline-none transition-all focus:border-primary"
           />
         </div>
       </div>
 
-      {/* Games Grid */}
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {filteredGames.length > 0 ? (
           filteredGames.map((game) => {
@@ -171,41 +165,31 @@ export default function GamesClient() {
               <Link 
                 key={game.id} 
                 href={game.href as any}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl"
+                className="game-card group flex flex-col hover:border-primary transition-all hover:shadow-lg"
               >
-                {/* Gamified Top Banner */}
-                <div className="flex items-center justify-between border-b border-gray-50 bg-gray-50/50 px-6 py-3">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-1.5 text-[10px] font-game-mono font-bold text-slate-400 uppercase tracking-wider">
                     {t(`categories.${game.category}` as `categories.${GameCategory}`)} • {t('itemsCount', { count: game.count })}
                   </div>
-                  {pb !== undefined && (
-                    <div className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
-                      PB: {pb}
-                    </div>
-                  )}
-                  <div className="flex gap-0.5" title={`${t('difficulty')}: ${game.difficulty}/3`}>
+                  <div className="flex gap-0.5">
                     {[1, 2, 3].map((star) => (
-                      <Star 
-                        key={star} 
-                        size={14} 
-                        className={star <= game.difficulty ? "text-amber-400 fill-amber-400" : "text-gray-200 fill-gray-200"} 
-                      />
+                      <Star key={star} size={12} className={star <= game.difficulty ? "text-accent fill-accent" : "text-slate-300"} />
                     ))}
                   </div>
                 </div>
 
-                <div className="flex flex-grow flex-col p-6">
-                  <div className={`${game.color} mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                <div className="flex flex-grow flex-col">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg transition-transform group-hover:rotate-6">
                     <Icon size={32} />
                   </div>
-                  <h2 className="mb-2 text-2xl font-extrabold text-gray-800">{t(`gameData.${game.id}.title`)}</h2>
-                  <p className="mb-8 flex-grow leading-relaxed text-gray-500">
+                  <h2 className="mb-2 text-2xl font-game-heading tracking-widest text-[var(--foreground)]">{t(`gameData.${game.id}.title`)}</h2>
+                  <p className="mb-8 flex-grow leading-relaxed font-game-mono text-slate-500 dark:text-slate-400">
                     {t(`gameData.${game.id}.description`)}
                   </p>
                   
-                  <div className="mt-auto flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 transition-colors group-hover:bg-primary/5">
-                    <span className="font-bold text-gray-400 transition-colors group-hover:text-primary">{t('startQuiz')}</span>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-gray-400 shadow-sm transition-all group-hover:bg-primary group-hover:text-white group-hover:shadow-md">
+                  <div className="mt-auto flex items-center justify-between rounded-xl bg-[var(--input-bg)] px-4 py-3 group-hover:bg-primary/10">
+                    <span className="font-game-heading uppercase tracking-widest text-sm text-slate-500 group-hover:text-primary">{t('startQuiz')}</span>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--card-bg)] text-slate-400 shadow-sm group-hover:bg-primary group-hover:text-white">
                       <Play size={14} fill="currentColor" className="ml-1" />
                     </div>
                   </div>
@@ -215,14 +199,14 @@ export default function GamesClient() {
           })
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--card-bg)] border-2 border-dashed border-[var(--card-border)] text-slate-400">
               <Search size={32} />
             </div>
-            <h3 className="mb-2 text-xl font-bold text-gray-800">{t('noGamesFound')}</h3>
-            <p className="text-gray-500">{t('noGamesDescription')}</p>
+            <h3 className="mb-2 text-xl font-game-heading text-[var(--foreground)]">{t('noGamesFound')}</h3>
+            <p className="font-game-mono text-slate-500">{t('noGamesDescription')}</p>
             <button 
               onClick={() => { setSearchQuery(''); setActiveCategory(GameCategory.ALL); }}
-              className="mt-6 font-bold text-primary hover:underline"
+              className="mt-6 font-game-heading text-primary hover:underline"
             >
               {t('clearFilters')}
             </button>

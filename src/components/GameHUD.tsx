@@ -19,12 +19,12 @@ export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
   return (
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 w-96 flex flex-col items-center gap-2">
       {/* Timer */}
-      <div className="font-heading text-6xl text-[#2c3e50] tabular-nums tracking-widest">
+      <div className="font-game-heading text-7xl text-[var(--foreground)] tabular-nums tracking-widest [text-shadow:0_2px_4px_rgba(0,0,0,0.2)]">
         {formatTime(timeLeft)}
       </div>
       
       {/* Progress Bar */}
-      <div className="relative w-full h-2 bg-slate-200 rounded-full flex items-center px-1">
+      <div className="relative w-full h-2 bg-[var(--card-border)] rounded-full flex items-center px-1">
         <div 
           className="absolute left-1 h-1 bg-primary rounded-full transition-all duration-500" 
           style={{ width: `calc(${progress}% - 8px)` }} 

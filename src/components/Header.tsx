@@ -9,6 +9,7 @@ import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { Link, usePathname, useRouter, routing } from '@/i18n/routing';
+import { useGameStore } from '@/store/useGameStore';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -41,14 +42,13 @@ export default function Header() {
   const locale = useLocale();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const { status } = useGameStore();
   
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
-
-  if (isFullscreen) return null;
+  if (status === 'playing') return null;
 
   const onLanguageChange = (newLocale: string) => {
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;

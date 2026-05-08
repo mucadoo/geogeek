@@ -3,6 +3,10 @@
 :root {
   --background: #f8faf9;
   --foreground: #2c3e50;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --input-bg: #f1f5f9;
+  --hud-bg: rgba(255, 255, 255, 0.8);
   --primary: #00a8b5;
   --accent: #ffcd42;
   --danger: #ff5a5f;
@@ -13,6 +17,10 @@
 .dark {
   --background: #0f172a;
   --foreground: #f8fafc;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --input-bg: #0f172a;
+  --hud-bg: rgba(30, 41, 59, 0.8);
   --map-fill: #1e293b;
   --map-stroke: #334155;
 }
@@ -20,6 +28,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-input-bg: var(--input-bg);
+  --color-hud-bg: var(--hud-bg);
   --color-primary: var(--primary);
   --color-accent: var(--accent);
   --color-danger: var(--danger);
@@ -34,40 +46,37 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  overflow-x: hidden;
   transition: background-color 0.3s, color 0.3s;
 }
 
-h1, h2, h3 {
+@utility font-game-heading {
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-code {
+@utility font-game-mono {
   font-family: var(--font-mono);
 }
 
-/* Force remove the black accessibility box when clicking paths */
-path {
-  outline: none !important;
-}
-path:focus {
-  outline: none !important;
-}
-
-.container-custom {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
+@utility game-card {
+  background-color: var(--card-bg);
+  border: 2px dashed var(--card-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white px-8 py-3 rounded-full font-medium tracking-wide text-sm hover:bg-[#008c98] transition-all shadow-md hover:shadow-lg active:scale-95;
+    @apply bg-primary text-white px-8 py-3 rounded-full font-game-heading tracking-wider text-sm hover:bg-teal-600 transition-all active:scale-95;
   }
-  .btn-accent {
-    @apply bg-accent text-[#2c3e50] px-8 py-3 rounded-full font-medium tracking-wide text-sm hover:bg-[#e6b83b] transition-all shadow-md hover:shadow-lg active:scale-95;
+  
+  .table-cell {
+    @apply p-4 border-b border-[var(--card-border)] text-sm;
   }
 }
+
+path { outline: none !important; }
+path:focus { outline: none !important; }
+

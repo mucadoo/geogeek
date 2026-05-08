@@ -131,13 +131,13 @@ export default function QuizLayout({
       {gameStatus === 'playing' && (
         <div className="pointer-events-none absolute bottom-8 left-0 right-0 z-10 px-6 md:bottom-12">
           <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
-            <div className="pointer-events-auto w-full bg-white rounded-full p-2 flex items-center shadow-2xl border border-slate-100">
-               <input className="flex-grow bg-transparent px-6 py-3 outline-none font-mono text-slate-700" placeholder="Type name..." />
-               <button className="bg-primary text-white px-8 py-3 rounded-full font-heading uppercase tracking-wider shadow-lg hover:bg-teal-600 transition-colors">Guess</button>
+            <div className="pointer-events-auto w-full bg-[var(--card-bg)] rounded-full p-2 flex items-center shadow-2xl border border-[var(--card-border)]">
+               <input className="flex-grow bg-transparent px-6 py-3 outline-none font-game-mono text-[var(--foreground)] placeholder:text-slate-400" placeholder="Type name..." />
+               <button className="bg-primary text-white px-8 py-3 rounded-full font-game-heading uppercase tracking-wider shadow-lg hover:bg-teal-600 transition-colors">Guess</button>
             </div>
             <div className="flex gap-2">
-              <button className="bg-accent text-[#2c3e50] px-6 py-2 rounded-xl font-heading uppercase text-sm shadow-md hover:bg-yellow-400 transition-colors">Get Hint</button>
-              <button className="bg-white text-slate-500 px-6 py-2 rounded-xl font-heading uppercase text-sm shadow-md hover:bg-slate-50 transition-colors">Skip</button>
+              <button className="bg-accent text-slate-900 px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-yellow-400 transition-colors">Get Hint</button>
+              <button className="bg-[var(--card-bg)] text-slate-500 px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Skip</button>
             </div>
           </div>
         </div>
