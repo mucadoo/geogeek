@@ -39,7 +39,7 @@ export default function Header() {
   const t = useTranslations('Header');
   const pathname = usePathname();
   const locale = useLocale();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
   const { status } = useGameStore();
   
@@ -104,11 +104,11 @@ export default function Header() {
           <div className="flex items-center gap-2">
             {mounted && (
               <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                 className="flex items-center justify-center p-2.5 bg-[var(--card-bg)]/70 backdrop-blur-md rounded-full text-[var(--foreground)]/70 hover:text-[var(--primary)] hover:bg-[var(--card-bg)] border border-transparent transition-all shadow-sm"
                 aria-label="Toggle theme"
               >
-                {theme === 'dark' ? <Sun size={18} className="text-[var(--primary)]" /> : <Moon size={18} className="text-[var(--primary)]" />}
+                {resolvedTheme === 'dark' ? <Sun size={18} className="text-[var(--primary)]" /> : <Moon size={18} className="text-[var(--primary)]" />}
               </button>
             )}
 

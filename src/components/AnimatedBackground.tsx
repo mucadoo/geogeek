@@ -19,13 +19,13 @@ export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: mapData } = useWorldMapData();
   const pathname = usePathname();
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   
   const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
 
   useEffect(() => {
     // DO NOT animate if we are on a fullscreen map page!
-    if (!mapData || !canvasRef.current || isFullscreen || !theme) return;
+    if (!mapData || !canvasRef.current || isFullscreen || !resolvedTheme) return;
 
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on base
@@ -84,7 +84,7 @@ export default function AnimatedBackground() {
     let rotation = 0;
     let animationFrameId: number;
 
-    const isDark = theme === 'dark';
+    const isDark = resolvedTheme === 'dark';
 
     const draw = () => {
       rotation += 0.1; // Base slow spin
@@ -109,8 +109,8 @@ export default function AnimatedBackground() {
 
       const path = d3.geoPath(projection, context);
 
-      // 1. Clear background
-      context.fillStyle = isDark ? '#0f172a' : '#f1f5f3';
+      // 1. Clear background - matching globals.css variables
+      context.fillStyle = isDark ? '#141614' : '#f0f4f2';
       context.fillRect(0, 0, width, height);
 
       // 2. Draw Sphere Background (Ocean glow)
@@ -178,7 +178,7 @@ export default function AnimatedBackground() {
       window.removeEventListener('resize', setSize);
       cancelAnimationFrame(animationFrameId);
     };
-  },[mapData, theme]);
+  },[mapData, resolvedTheme, isFullscreen]);
 
   return (
     <canvas
