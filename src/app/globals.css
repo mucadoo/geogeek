@@ -76,7 +76,11 @@ body {
   }
   
   /* Apply Bebas Neue (font-game-heading) to all buttons and headers */
-  button, h1, h2, h3, h4, h5, h6 {
+  button {
+    @apply font-game-heading cursor-pointer;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
     @apply font-game-heading;
   }
 
