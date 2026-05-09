@@ -59,17 +59,13 @@ export const countryService = {
     };
 
     let prop: keyof Country;
-    let desc = true;
 
     switch (type) {
-      case 'Most populous countries': prop = 'population'; break;
-      case 'Less populous countries': prop = 'population'; desc = false; break;
-      case 'Larger countries': prop = 'area_km2'; break;
-      case 'Smaller countries': prop = 'area_km2'; desc = false; break;
-      case 'Most populated countries': prop = 'density_km2'; break;
-      case 'Less populated countries': prop = 'density_km2'; desc = false; break;
-      case 'Highest HDI': prop = 'HDI'; break;
-      case 'Lowest HDI': prop = 'HDI'; desc = false; break;
+      case 'Population': prop = 'population'; break;
+      case 'Area': prop = 'area_km2'; break;
+      case 'Density': prop = 'density_km2'; break;
+      case 'HDI': prop = 'HDI'; break;
+      default: prop = 'population';
     }
 
     const sorted = [...countries].sort((a, b) => {
@@ -80,10 +76,10 @@ export const countryService = {
       if (valA === -Infinity) return 1;
       if (valB === -Infinity) return -1;
 
-      return desc ? valB - valA : valA - valB;
+      return valB - valA;
     });
 
-    return sorted.slice(0, 10).map(c => ({
+    return sorted.map(c => ({
       country: c.name,
       value: c[prop] as string | number,
       isoCode: c.ISO_code

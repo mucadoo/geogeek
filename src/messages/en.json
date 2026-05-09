@@ -1,7 +1,7 @@
 {
   "HomePage": {
     "heroTitle": "Master the World",
-    "heroSubtitle": "Dive into an interactive atlas. Play geography games, challenge your knowledge, and explore global rankings.",
+    "heroSubtitle": "Dive into an interactive atlas. Play geography games, challenge your knowledge, and explore world statistics.",
     "cta": "START EXPLORING",
     "cards": {
       "map": {
@@ -13,7 +13,7 @@
         "desc": "Test your regional knowledge"
       },
       "rankings": {
-        "title": "Global Rankings",
+        "title": "World Stats",
         "desc": "View country statistics"
       }
     }
@@ -22,7 +22,7 @@
     "games": "Games",
     "map": "Map",
     "explorer": "Explorer",
-    "rankings": "Rankings"
+    "rankings": "World Stats"
   },
   "Map": {
     "loading": "Loading Explorer...",
@@ -86,7 +86,8 @@
     }
   },
   "Rankings": {
-    "title": "Global Rankings",
+    "title": "World Statistics",
+    "searchPlaceholder": "Search country...",
     "table": {
       "rank": "Rank",
       "country": "Country",
@@ -98,14 +99,10 @@
       "na": "N/A"
     },
     "categories": {
-      "most-populous-countries": "Most populous countries",
-      "less-populous-countries": "Less populous countries",
-      "larger-countries": "Larger countries",
-      "smaller-countries": "Smaller countries",
-      "most-populated-countries": "Most populated countries",
-      "less-populated-countries": "Less populated countries",
-      "highest-hdi": "Highest HDI",
-      "lowest-hdi": "Lowest HDI"
+      "population": "World Population",
+      "area": "Largest Countries by Area",
+      "density": "Population Density",
+      "hdi": "Human Development Index (HDI)"
     }
   },
   "CountryDetails": {

@@ -1,7 +1,7 @@
 {
   "HomePage": {
     "heroTitle": "Domina il Mondo",
-    "heroSubtitle": "Immergiti in un atlante interattivo. Gioca a giochi di geografia, sfida le tue conoscenze ed esplora le classifiche globali.",
+    "heroSubtitle": "Immergiti in un atlante interattivo. Gioca a giochi di geografia, sfida le tue conoscenze ed esplora le statistiche mondiali.",
     "cta": "INIZIA A ESPLORARE",
     "cards": {
       "map": {
@@ -13,7 +13,7 @@
         "desc": "Metti alla prova le tue conoscenze regionali"
       },
       "rankings": {
-        "title": "Classifiche Globali",
+        "title": "Statistiche Mondiali",
         "desc": "Visualizza le statistiche dei paesi"
       }
     }
@@ -22,7 +22,7 @@
     "games": "Giochi",
     "map": "Mappa",
     "explorer": "Esploratore",
-    "rankings": "Classifiche"
+    "rankings": "Statistiche"
   },
   "Map": {
     "loading": "Caricamento Esploratore...",
@@ -86,9 +86,10 @@
     }
   },
   "Rankings": {
-    "title": "Classifiche Globali",
+    "title": "Statistiche Mondiali",
+    "searchPlaceholder": "Cerca paese...",
     "table": {
-      "rank": "Rango",
+      "rank": "Posizione",
       "country": "Paese",
       "value": "Valore",
       "population": "Popolazione",
@@ -98,14 +99,10 @@
       "na": "N/D"
     },
     "categories": {
-      "most-populous-countries": "Paesi più popolosi",
-      "less-populous-countries": "Paesi meno popolosi",
-      "larger-countries": "Paesi più grandi",
-      "smaller-countries": "Paesi più piccoli",
-      "most-populated-countries": "Paesi più densamente popolati",
-      "less-populated-countries": "Paesi meno densamente popolati",
-      "highest-hdi": "ISU più alto",
-      "lowest-hdi": "ISU più basso"
+      "population": "Popolazione Mondiale",
+      "area": "Paesi più grandi per area",
+      "density": "Densità di popolazione",
+      "hdi": "Indice di sviluppo umano (ISU)"
     }
   },
   "CountryDetails": {
@@ -114,7 +111,6 @@
     "neighboringCountries": "Paesi confinanti",
     "viewOnMap": "Visualizza sulla mappa",
     "labels": {
-
       "capital": "Capitale",
       "largestCity": "Città più grande",
       "languages": "Lingue",
@@ -172,7 +168,7 @@
   },
   "Metadata": {
     "title": "GeoGeek - Esplora il geografo che è in te",
-    "description": "Esploratore geografico interattivo e classifiche",
+    "description": "Esploratore geografico interattivo e statistiche",
     "mapOf": "Mappa di {continent}",
     "worldMapTitle": "Esploratore della Mappa Mondiale"
   }

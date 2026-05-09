@@ -1,7 +1,7 @@
 {
   "HomePage": {
     "heroTitle": "Domine o Mundo",
-    "heroSubtitle": "Mergulhe em um atlas interativo. Jogue jogos de geografia, desafie seus conhecimentos e explore rankings globais.",
+    "heroSubtitle": "Mergulhe em um atlas interativo. Jogue jogos de geografia, desafie seus conhecimentos e explore estatísticas mundiais.",
     "cta": "COMEÇAR A EXPLORAR",
     "cards": {
       "map": {
@@ -13,7 +13,7 @@
         "desc": "Teste seus conhecimentos regionais"
       },
       "rankings": {
-        "title": "Rankings Globais",
+        "title": "Estatísticas Mundiais",
         "desc": "Veja estatísticas dos países"
       }
     }
@@ -22,7 +22,7 @@
     "games": "Jogos",
     "map": "Mapa",
     "explorer": "Explorador",
-    "rankings": "Rankings"
+    "rankings": "Estatísticas Mundiais"
   },
   "Map": {
     "loading": "Carregando Explorador...",
@@ -86,26 +86,23 @@
     }
   },
   "Rankings": {
-    "title": "Rankings Globais",
+    "title": "Estatísticas Mundiais",
+    "searchPlaceholder": "Pesquisar país...",
     "table": {
       "rank": "Posição",
       "country": "País",
       "value": "Valor",
       "population": "População",
       "area": "Área (km²)",
-      "density": "Densidade Pop. (/km²)",
-      "hdi": "Pontuação IDH",
+      "density": "Densidade Pop (/km²)",
+      "hdi": "IDH",
       "na": "N/D"
     },
     "categories": {
-      "most-populous-countries": "Países mais populosos",
-      "less-populous-countries": "Países menos populosos",
-      "larger-countries": "Países maiores",
-      "smaller-countries": "Países menores",
-      "most-populated-countries": "Países mais povoados",
-      "less-populated-countries": "Países menos povoados",
-      "highest-hdi": "IDH mais alto",
-      "lowest-hdi": "IDH mais baixo"
+      "population": "População Mundial",
+      "area": "Maiores Países por Área",
+      "density": "Densidade Populacional",
+      "hdi": "Índice de Desenvolvimento Humano (IDH)"
     }
   },
   "CountryDetails": {
@@ -171,7 +168,7 @@
   },
   "Metadata": {
     "title": "GeoGeek - Explore o geógrafo dentro de você",
-    "description": "Explorador geográfico interactivo e rankings",
+    "description": "Explorador geográfico interactivo e estatísticas",
     "mapOf": "Mapa de {continent}",
     "worldMapTitle": "Explorador do Mapa Mundial"
   }

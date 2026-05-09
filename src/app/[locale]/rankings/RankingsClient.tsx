@@ -19,7 +19,7 @@ export default function RankingsClient() {
             className="game-card group flex h-[140px] items-center justify-center text-center transition-all duration-300 hover:border-primary hover:bg-[var(--primary)]/10"
           >
             <h3 className="group-hover:text-primary text-[24px] font-game-heading uppercase tracking-wider text-[var(--foreground)] transition-colors">
-              {t(`categories.${category.slug as RankingCategory}`)}
+              {t(`categories.${category.slug as any}`)}
             </h3>
           </Link>
         ))}

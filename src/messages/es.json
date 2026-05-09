@@ -1,7 +1,7 @@
 {
   "HomePage": {
     "heroTitle": "Domina el Mundo",
-    "heroSubtitle": "Sumérgete en un atlas interactivo. Juega a juegos de geografía, desafía tus conocimientos y explora las clasificaciones globales.",
+    "heroSubtitle": "Sumérgete en un atlas interactivo. Juega a juegos de geografía, desafía tus conocimientos y explora estadísticas mundiales.",
     "cta": "EMPEZAR A EXPLORAR",
     "cards": {
       "map": {
@@ -13,7 +13,7 @@
         "desc": "Pon a prueba tus conocimientos regionales"
       },
       "rankings": {
-        "title": "Clasificaciones Globales",
+        "title": "Estadísticas Mundiales",
         "desc": "Ver estadísticas de los países"
       }
     }
@@ -22,7 +22,7 @@
     "games": "Juegos",
     "map": "Mapa",
     "explorer": "Explorador",
-    "rankings": "Rankings"
+    "rankings": "Estadísticas"
   },
   "Map": {
     "loading": "Cargando Explorador...",
@@ -86,9 +86,10 @@
     }
   },
   "Rankings": {
-    "title": "Clasificaciones Globales",
+    "title": "Estadísticas Mundiales",
+    "searchPlaceholder": "Buscar país...",
     "table": {
-      "rank": "Rango",
+      "rank": "Posición",
       "country": "País",
       "value": "Valor",
       "population": "Población",
@@ -98,14 +99,10 @@
       "na": "N/A"
     },
     "categories": {
-      "most-populous-countries": "Países más poblados",
-      "less-populous-countries": "Países menos poblados",
-      "larger-countries": "Países más grandes",
-      "smaller-countries": "Países más pequeños",
-      "most-populated-countries": "Países más densamente poblados",
-      "less-populated-countries": "Países menos densamente poblados",
-      "highest-hdi": "IDH más alto",
-      "lowest-hdi": "IDH más bajo"
+      "population": "Población Mundial",
+      "area": "Países más grandes por área",
+      "density": "Densidad de población",
+      "hdi": "Índice de Desarrollo Humano (IDH)"
     }
   },
   "CountryDetails": {
@@ -171,7 +168,7 @@
   },
   "Metadata": {
     "title": "GeoGeek - Explora al geógrafo que llevas dentro",
-    "description": "Explorador geográfico interactivo y clasificaciones",
+    "description": "Explorador geográfico interactivo y estadísticas",
     "mapOf": "Mapa de {continent}",
     "worldMapTitle": "Explorador del Mapa Mundial"
   }

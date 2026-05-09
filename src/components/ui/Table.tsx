@@ -24,7 +24,7 @@ export const TableRow = ({ className, ...props }: React.HTMLAttributes<HTMLTable
 );
 
 export const TableHead = ({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) => (
-  <th className={cn('pb-4 pt-2 text-left align-middle font-game-heading text-xl text-slate-500 tracking-wider', className)} {...props} />
+  <th className={cn('pb-4 pt-2 text-left align-middle font-game-heading text-xl text-[var(--foreground)] opacity-70 tracking-wider', className)} {...props} />
 );
 
 export const TableCell = ({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) => (
