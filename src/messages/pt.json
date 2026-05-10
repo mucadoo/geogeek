@@ -102,7 +102,7 @@
       "population": "População Mundial",
       "area": "Maiores Países por Área",
       "density": "Densidade Populacional",
-      "hdi": "Índice de Desenvolvimento Humano (IDH)"
+      "hdi": "Índice de Desenvolvimento Humano (IDH)", "gdp": "PIB"
     }
   },
   "CountryDetails": {

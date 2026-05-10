@@ -5,6 +5,7 @@ export const RANKING_CATEGORIES: RankingConfig[] = [
   { title: 'Area', slug: 'area' },
   { title: 'Density', slug: 'density' },
   { title: 'HDI', slug: 'hdi' },
+  { title: 'GDP', slug: 'gdp' },
 ];
 
 export const getRankingBySlug = (slug: string): RankingConfig | undefined => {

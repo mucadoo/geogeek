@@ -95,14 +95,14 @@
       "population": "Population",
       "area": "Area (km²)",
       "density": "Pop Density (/km²)",
-      "hdi": "HDI Score",
+      "hdi": "HDI Score", "gdp": "GDP",
       "na": "N/A"
     },
     "categories": {
       "population": "World Population",
       "area": "Largest Countries by Area",
       "density": "Population Density",
-      "hdi": "Human Development Index (HDI)"
+      "hdi": "Human Development Index (HDI)", "gdp": "GDP"
     }
   },
   "CountryDetails": {

@@ -102,10 +102,14 @@ export default function RankingDetailClient({
 
     const percentage = maxValue > 0 ? (val / maxValue) * 100 : 0;
     
+    let displayValue = item.value.toLocaleString(locale);
+    if (slug === 'gdp') displayValue = '$' + item.value.toLocaleString(locale);
+    if (slug === 'hdi') displayValue = item.value.toFixed(3);
+
     return (
       <div className="flex flex-col items-end gap-1.5">
         <span className="font-game-mono text-sm">
-          {item.value.toLocaleString(locale)}
+          {displayValue}
         </span>
         <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--card-border)]/30 md:w-32">
           <div 

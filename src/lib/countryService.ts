@@ -55,6 +55,7 @@ export const countryService = {
       case 'Area': prop = 'area_km2'; break;
       case 'Density': prop = 'density_km2'; break;
       case 'HDI': prop = 'HDI'; break;
+      case 'GDP': prop = 'GDP'; break;
       default: prop = 'population';
     }
 

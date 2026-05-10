@@ -95,14 +95,14 @@
       "population": "Popolazione",
       "area": "Area (km²)",
       "density": "Densità pop. (/km²)",
-      "hdi": "Punteggio ISU",
+      "hdi": "Punteggio ISU", "gdp": "PIL",
       "na": "N/D"
     },
     "categories": {
       "population": "Popolazione Mondiale",
       "area": "Paesi più grandi per area",
       "density": "Densità di popolazione",
-      "hdi": "Indice di sviluppo umano (ISU)"
+      "hdi": "Indice di sviluppo umano (ISU)", "gdp": "PIL"
     }
   },
   "CountryDetails": {

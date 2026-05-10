@@ -34,6 +34,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ loca
   if (slug === 'area') valueLabel = t('table.area');
   if (slug === 'density') valueLabel = t('table.density');
   if (slug === 'hdi') valueLabel = t('table.hdi');
+  if (slug === 'gdp') valueLabel = t('table.gdp');
 
   return (
     <RankingDetailClient 

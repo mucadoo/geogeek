@@ -95,14 +95,14 @@
       "population": "Población",
       "area": "Área (km²)",
       "density": "Densidad de Pob. (/km²)",
-      "hdi": "Puntaje IDH",
+      "hdi": "Puntaje IDH", "gdp": "PIB",
       "na": "N/A"
     },
     "categories": {
       "population": "Población Mundial",
       "area": "Países más grandes por área",
       "density": "Densidad de población",
-      "hdi": "Índice de Desarrollo Humano (IDH)"
+      "hdi": "Índice de Desarrollo Humano (IDH)", "gdp": "PIB"
     }
   },
   "CountryDetails": {

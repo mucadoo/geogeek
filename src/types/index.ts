@@ -33,7 +33,7 @@ export interface Country {
   internet_TLD: string;
 }
 
-export type RankingType = 'Population' | 'Area' | 'Density' | 'HDI';
+export type RankingType = 'Population' | 'Area' | 'Density' | 'HDI' | 'GDP';
 
 export interface RankingConfig {
   title: RankingType;
