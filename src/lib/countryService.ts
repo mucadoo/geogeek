@@ -45,7 +45,7 @@ export const countryService = {
     return neighbors;
   },
 
-  getRankings: async (type: RankingType): Promise<{ country: string; value: number; isoCode: string }[]> => {
+  getRankings: async (type: RankingType): Promise<{ country: string; value: number; isoCode: string; rank: number }[]> => {
     const countries = await fetchCountries();
 
     let prop: keyof Country;
@@ -60,21 +60,33 @@ export const countryService = {
     }
 
     const sorted = [...countries].sort((a, b) => {
-      const valA = Number(a[prop]); // Explicitly convert to number
-      const valB = Number(b[prop]); // Explicitly convert to number
+      const valA = Number(a[prop]);
+      const valB = Number(b[prop]);
 
-      // Handle potential NaN values if data is malformed or missing
       if (isNaN(valA) && isNaN(valB)) return 0;
-      if (isNaN(valA)) return 1; // Push NaN values to the end
-      if (isNaN(valB)) return -1; // Push NaN values to the end
+      if (isNaN(valA)) return 1;
+      if (isNaN(valB)) return -1;
 
       return valB - valA;
     });
 
-    return sorted.map(c => ({
-      country: c.name,
-      value: Number(c[prop]), // Explicitly convert to number
-      isoCode: c.ISO_code
-    }));
+    let currentRank = 1;
+    let previousValue: number | undefined = undefined;
+
+    return sorted.map((c, index) => {
+      const value = Number(c[prop]);
+
+      if (index > 0 && value !== previousValue) {
+        currentRank = index + 1;
+      }
+      previousValue = value;
+
+      return {
+        country: c.name,
+        value: value,
+        isoCode: c.ISO_code,
+        rank: currentRank
+      };
+    });
   }
 };

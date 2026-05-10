@@ -10,8 +10,9 @@ import { getLocalizedCountryName } from '@/lib/i18n-utils';
 
 interface RankingItem {
   country: string;
-  value: string | number;
+  value: number;
   isoCode: string;
+  rank: number; // Added rank property
 }
 
 interface RankingDetailClientProps {
@@ -45,12 +46,11 @@ export default function RankingDetailClient({
   }, [initialRankings]);
 
   const filteredRankings = useMemo(() => {
-    const itemsWithRank = initialRankings.map((item, index) => ({ ...item, defaultRank: index + 1 }));
-    
-    let filtered = itemsWithRank;
+    let filtered = initialRankings; // initialRankings now already contains rank
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = itemsWithRank.filter(item => 
+      filtered = initialRankings.filter(item => 
         getLocalizedCountryName(item.isoCode, locale).toLowerCase().includes(query) ||
         item.isoCode.toLowerCase().includes(query)
       );
@@ -61,14 +61,14 @@ export default function RankingDetailClient({
       let valB: any;
 
       if (sortConfig.key === 'rank') {
-        valA = a.defaultRank;
-        valB = b.defaultRank;
+        valA = a.rank; // Use the new rank property
+        valB = b.rank; // Use the new rank property
       } else if (sortConfig.key === 'country') {
         valA = getLocalizedCountryName(a.isoCode, locale);
         valB = getLocalizedCountryName(b.isoCode, locale);
       } else {
-        valA = typeof a.value === 'string' ? parseFloat(a.value.replace(/,/g, '')) : a.value;
-        valB = typeof b.value === 'string' ? parseFloat(b.value.replace(/,/g, '')) : b.value;
+        valA = a.value; // value is already a number
+        valB = b.value; // value is already a number
         if (isNaN(valA)) valA = -Infinity;
         if (isNaN(valB)) valB = -Infinity;
       }
@@ -96,15 +96,15 @@ export default function RankingDetailClient({
       : <ArrowDown size={14} className="ml-1 text-[var(--primary)]" />;
   };
 
-  const renderValue = (item: any) => {
-    const val = typeof item.value === 'string' ? parseFloat(item.value.replace(/,/g, '')) : item.value;
-    if (!item.value || val === -Infinity) return t('table.na');
+  const renderValue = (item: RankingItem) => {
+    const val = item.value;
+    if (isNaN(val)) return t('table.na');
 
     const percentage = maxValue > 0 ? (val / maxValue) * 100 : 0;
     
-    let displayValue = item.value.toLocaleString(locale);
-    if (slug === 'gdp') displayValue = '$' + item.value.toLocaleString(locale);
-    if (slug === 'hdi') displayValue = item.value.toFixed(3);
+    let displayValue = val.toLocaleString(locale);
+    if (slug === 'gdp') displayValue = '$' + val.toLocaleString(locale);
+    if (slug === 'hdi') displayValue = val.toFixed(3);
 
     return (
       <div className="flex flex-col items-end gap-1.5">
@@ -183,11 +183,11 @@ export default function RankingDetailClient({
                 filteredRankings.map((item) => (
                   <TableRow key={item.isoCode} className="group">
                     <TableCell className="text-center font-semibold text-[var(--foreground)] opacity-30 group-hover:opacity-100 transition-opacity">
-                      {item.defaultRank}
+                      {item.rank}
                     </TableCell>
                     <TableCell className="pl-4">
                       <Link 
-                        href={`/map/${item.isoCode}` as any} 
+                        href={`/map/${item.isoCode}`}
                         className="flex items-center gap-4 hover:text-[var(--primary)] text-[17px] font-medium text-[var(--foreground)] transition-colors"
                       >
                         <img 
