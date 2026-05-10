@@ -96,6 +96,7 @@
       "area": "Área (km²)",
       "density": "Densidade Pop (/km²)",
       "hdi": "IDH",
+      "gdp": "PIB",
       "na": "N/D"
     },
     "categories": {

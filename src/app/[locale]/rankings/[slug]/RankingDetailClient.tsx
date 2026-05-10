@@ -10,7 +10,7 @@ import { getLocalizedCountryName } from '@/lib/i18n-utils';
 
 interface RankingItem {
   country: string;
-  value: number;
+  value: number | string;
   isoCode: string;
   rank: number; // Added rank property
 }
@@ -40,7 +40,7 @@ export default function RankingDetailClient({
   // Calculate max value for progress bars
   const maxValue = useMemo(() => {
     return Math.max(...initialRankings.map(item => {
-      const val = typeof item.value === 'string' ? parseFloat(item.value.replace(/,/g, '')) : item.value;
+      const val = typeof item.value === 'string' ? parseFloat(item.value.replace(/,/g, '')) : (typeof item.value === 'number' ? item.value : 0);
       return isNaN(val as number) ? 0 : (val as number);
     }));
   }, [initialRankings]);
@@ -97,7 +97,7 @@ export default function RankingDetailClient({
   };
 
   const renderValue = (item: RankingItem) => {
-    const val = item.value;
+    const val = typeof item.value === 'string' ? parseFloat(item.value.replace(/,/g, '')) : item.value;
     if (isNaN(val)) return t('table.na');
 
     const percentage = maxValue > 0 ? (val / maxValue) * 100 : 0;
