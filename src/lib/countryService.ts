@@ -48,16 +48,6 @@ export const countryService = {
   getRankings: async (type: RankingType): Promise<{ country: string; value: string | number; isoCode: string }[]> => {
     const countries = await fetchCountries();
 
-    const parseValue = (val: unknown): number => {
-      if (typeof val === 'number') return val;
-      if (typeof val === 'string') {
-        const cleaned = val.replace(/,/g, '');
-        const parsed = parseFloat(cleaned);
-        return isNaN(parsed) ? -Infinity : parsed;
-      }
-      return -Infinity;
-    };
-
     let prop: keyof Country;
 
     switch (type) {
@@ -69,19 +59,15 @@ export const countryService = {
     }
 
     const sorted = [...countries].sort((a, b) => {
-      const valA = parseValue(a[prop]);
-      const valB = parseValue(b[prop]);
-
-      // Move invalid values (-Infinity) to the bottom
-      if (valA === -Infinity) return 1;
-      if (valB === -Infinity) return -1;
+      const valA = a[prop] as number;
+      const valB = b[prop] as number;
 
       return valB - valA;
     });
 
     return sorted.map(c => ({
       country: c.name,
-      value: c[prop] as string | number,
+      value: c[prop] as number,
       isoCode: c.ISO_code
     }));
   }

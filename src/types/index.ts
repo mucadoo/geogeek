@@ -25,8 +25,8 @@ export interface Country {
   government: string;
   official_language: string;
   demonym: string;
-  GDP: string;
-  HDI: string;
+  GDP: number;
+  HDI: number;
   currency: string;
   time_zone: string;
   calling_code: string;
