@@ -6,14 +6,10 @@ export enum GameCategory {
 }
 
 export enum RankingCategory {
-  MOST_POPULOUS = 'most-populous-countries',
-  LESS_POPULOUS = 'less-populous-countries',
-  LARGER = 'larger-countries',
-  SMALLER = 'smaller-countries',
-  MOST_POPULATED = 'most-populated-countries',
-  LESS_POPULATED = 'less-populated-countries',
-  HIGHEST_HDI = 'highest-hdi',
-  LOWEST_HDI = 'lowest-hdi'
+  POPULATION = 'population',
+  AREA = 'area',
+  DENSITY = 'density',
+  HDI = 'hdi'
 }
 
 export interface Country {
@@ -37,15 +33,7 @@ export interface Country {
   internet_TLD: string;
 }
 
-export type RankingType = 
-  | 'Most populous countries'
-  | 'Less populous countries'
-  | 'Larger countries'
-  | 'Smaller countries'
-  | 'Most populated countries'
-  | 'Less populated countries'
-  | 'Highest HDI'
-  | 'Lowest HDI';
+export type RankingType = 'Population' | 'Area' | 'Density' | 'HDI';
 
 export interface RankingConfig {
   title: RankingType;

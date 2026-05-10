@@ -29,8 +29,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   const { 
     selectedContinent, hoveredContinent, hoveredCountry, 
     tooltip, setTooltip, exploreMode,
-    setHoveredContinent, setHoveredCountry,
-    handleContinentClick
+    setHoveredContinent, setHoveredCountry
   } = useMapStore();
 
   const pathGenerator = d3.geoPath().projection(projection);

@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import React, { useState, useMemo } from 'react';
 
 import { Link } from '@/i18n/routing';
-import { useGameStore } from '@/store/useGameStore';
 import { GameCategory } from '@/types';
 
 const games = [
@@ -98,7 +97,6 @@ export default function GamesClient() {
   const t = useTranslations('Games');
   const [activeCategory, setActiveCategory] = useState<GameCategory>(GameCategory.ALL);
   const [searchQuery, setSearchQuery] = useState('');
-  const { highScores } = useGameStore();
 
   const filteredGames = useMemo(() => {
     return games.filter((game) => {

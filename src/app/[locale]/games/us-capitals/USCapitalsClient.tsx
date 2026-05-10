@@ -15,7 +15,6 @@ export default function USCapitalsClient() {
     if (!config) return;
     
     const states = config.US_STATES || [];
-    const capitals = config.US_CAPITALS || {};
     
     states.forEach((name: string) => {
       try {

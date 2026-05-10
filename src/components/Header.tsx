@@ -39,7 +39,7 @@ export default function Header() {
   const t = useTranslations('Header');
   const pathname = usePathname();
   const locale = useLocale();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
   const { status } = useGameStore();
   

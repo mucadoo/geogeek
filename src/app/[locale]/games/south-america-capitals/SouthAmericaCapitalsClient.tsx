@@ -15,7 +15,6 @@ export default function SouthAmericaCapitalsClient() {
     if (!config) return;
     
     const countries = config.SOUTH_AMERICA_COUNTRIES || [];
-    const capitals = config.SOUTH_AMERICA_CAPITALS || {};
     
     countries.forEach((name: string) => {
       try {

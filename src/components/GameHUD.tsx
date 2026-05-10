@@ -1,4 +1,4 @@
-import { Timer, Star, Trophy } from 'lucide-react';
+import { Star, Trophy } from 'lucide-react';
 import React from 'react';
 
 interface GameHUDProps {
