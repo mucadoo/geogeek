@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import React from 'react';
+import { formatLargeNumber } from '@/lib/formatters';
 
 interface MapSidebarProps {
   type: 'continent' | 'country';
@@ -50,7 +51,7 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
                   { label: t('government'), value: data.government },
                   { label: t('area'), value: data.area ? data.area.toLocaleString(locale) + ' km²' : 'N/A' },
                   { label: 'Population', value: data.population ? data.population.toLocaleString(locale) : 'N/A' },
-                  { label: t('gdp'), value: data.gdp ? '$' + data.gdp.toLocaleString(locale) : 'N/A' },
+                  { label: t('gdp'), value: data.gdp ? '$' + formatLargeNumber(data.gdp, locale) : 'N/A' },
                   { label: t('hdi'), value: data.hdi ? data.hdi.toFixed(3) : 'N/A' },
                   { label: t('currency'), value: data.currency },
                   { label: t('timeZone'), value: data.timeZone },

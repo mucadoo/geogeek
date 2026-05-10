@@ -7,6 +7,7 @@ import React, { useState, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Link } from '@/i18n/routing';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
+import { formatLargeNumber } from '@/lib/formatters'; // Import the formatter
 
 interface RankingItem {
   country: string;
@@ -103,7 +104,7 @@ export default function RankingDetailClient({
     const percentage = maxValue > 0 ? (val / maxValue) * 100 : 0;
     
     let displayValue = val.toLocaleString(locale);
-    if (slug === 'gdp') displayValue = '$' + val.toLocaleString(locale);
+    if (slug === 'gdp') displayValue = '$' + formatLargeNumber(val, locale); // Use formatLargeNumber for GDP
     if (slug === 'hdi') displayValue = val.toFixed(3);
 
     return (
