@@ -26,7 +26,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ loca
     notFound();
   }
   
-  const rankings = await countryService.getRankings(category.title as any);
+  const rankings = await countryService.getRankings(category.title);
   const t = await getTranslations('Rankings');
 
   let valueLabel = t('table.value');
