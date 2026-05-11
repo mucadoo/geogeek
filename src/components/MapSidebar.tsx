@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import React from 'react';
 import { formatLargeNumber } from '@/lib/formatters';
+import { getLocalizedValue } from '@/lib/i18n-utils';
 
 interface MapSidebarProps {
   type: 'continent' | 'country';
@@ -38,24 +39,34 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
       <div className="flex-1 overflow-y-auto font-mono text-sm text-[var(--foreground)] pr-2">
         {type === 'country' && data && (
           <div className="space-y-6">
-            <div className="text-8xl text-center">{data.flag}</div>
+            <div className="flex justify-center">
+              <img 
+                src={data.flagUrl} 
+                alt={`${title} flag`} 
+                className="h-32 object-contain shadow-md rounded border border-gray-200"
+              />
+            </div>
+
+            <div className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 italic">
+              {getLocalizedValue(data.description, locale)}
+            </div>
             
             <div className="border border-dashed border-[#8d99ae] p-4 rounded-md">
               <h3 className="mb-4 font-bebas text-2xl tracking-wider text-[var(--color-primary)] dark:text-[#ffcd42]">QUICK FACTS</h3>
               <div className="space-y-3">
                 {[
-                  { label: t('capital'), value: data.capital },
-                  { label: 'Largest City', value: data.largestCity },
-                  { label: t('languages'), value: data.languages },
-                  { label: t('demonym'), value: data.demonym },
-                  { label: t('government'), value: data.government },
-                  { label: t('area'), value: data.area ? data.area.toLocaleString(locale) + ' km²' : 'N/A' },
+                  { label: t('capital'), value: getLocalizedValue(data.capital, locale) },
+                  { label: 'Largest City', value: getLocalizedValue(data.largest_city, locale) },
+                  { label: t('languages'), value: getLocalizedValue(data.official_language, locale) },
+                  { label: t('demonym'), value: getLocalizedValue(data.demonym, locale) },
+                  { label: t('government'), value: getLocalizedValue(data.government, locale) },
+                  { label: t('area'), value: data.area_km2 ? data.area_km2.toLocaleString(locale) + ' km²' : 'N/A' },
                   { label: 'Population', value: data.population ? data.population.toLocaleString(locale) : 'N/A' },
                   { label: t('gdp'), value: data.gdp ? '$' + formatLargeNumber(data.gdp, locale) : 'N/A' },
                   { label: t('hdi'), value: data.hdi ? data.hdi.toFixed(3) : 'N/A' },
-                  { label: t('currency'), value: data.currency },
-                  { label: t('timeZone'), value: data.timeZone },
-                  { label: t('callingCode'), value: data.callingCode },
+                  { label: t('currency'), value: getLocalizedValue(data.currency, locale) },
+                  { label: t('timeZone'), value: getLocalizedValue(data.time_zone, locale) },
+                  { label: t('callingCode'), value: getLocalizedValue(data.calling_code, locale) },
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-dashed border-slate-300 pb-2">
                     <span className="font-bebas text-slate-500">{row.label}:</span>

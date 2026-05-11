@@ -1,6 +1,6 @@
 import fallbackData from '../../public/data/fallback-countries.json';
 
-import { Country, RankingType } from '@/types';
+import { Country, RankingType, LocalizedString } from '@/types';
 
 let cachedCountries: Country[] | null = null;
 
@@ -28,24 +28,28 @@ export const countryService = {
 
   getCountryByIso: async (isoCode: string): Promise<Country | undefined> => {
     const countries = await fetchCountries();
-    return countries.find(c => c.ISO_code.toUpperCase() === isoCode.toUpperCase());
+    return countries.find(c => c.iso_code.toUpperCase() === isoCode.toUpperCase());
   },
 
-  getNeighbors: async (countryName: string): Promise<Country[]> => {
+  getNeighbors: async (countryName: string, locale: string = 'en'): Promise<Country[]> => {
     const countries = await fetchCountries();
-    const country = countries.find(c => c.name === countryName);
+    const country = countries.find(c => 
+      c.name[locale as keyof LocalizedString] === countryName || 
+      c.name.en === countryName
+    );
     if (!country) return [];
 
-    // Simple heuristic: check if other countries are mentioned in the description
-    // This is a naive approach; a better one would require a structured borders API
-    const neighbors = countries.filter(c => 
-      c.name !== country.name && 
-      country.description.toLowerCase().includes(c.name.toLowerCase())
-    );
+    const description = (country.description[locale as keyof LocalizedString] || country.description.en).toLowerCase();
+    
+    const neighbors = countries.filter(c => {
+      const name = (c.name[locale as keyof LocalizedString] || c.name.en).toLowerCase();
+      return name !== (country.name[locale as keyof LocalizedString] || country.name.en).toLowerCase() && 
+             description.includes(name);
+    });
     return neighbors;
   },
 
-  getRankings: async (type: RankingType): Promise<{ country: string; value: number; isoCode: string; rank: number }[]> => {
+  getRankings: async (type: RankingType, locale: string = 'en'): Promise<{ country: string; value: number; isoCode: string; rank: number }[]> => {
     const countries = await fetchCountries();
 
     let prop: keyof Country;
@@ -82,9 +86,9 @@ export const countryService = {
       previousValue = value;
 
       return {
-        country: c.name,
+        country: c.name[locale as keyof LocalizedString] || c.name.en,
         value: value,
-        isoCode: c.ISO_code,
+        isoCode: c.iso_code,
         rank: currentRank
       };
     });

@@ -12,25 +12,38 @@ export enum RankingCategory {
   HDI = 'hdi'
 }
 
+export interface LocalizedString {
+  en: string;
+  pt?: string;
+  es?: string;
+  fr?: string;
+  it?: string;
+}
+
+export interface LinkedValue {
+  articleId?: string;
+  name: LocalizedString;
+}
+
 export interface Country {
-  ISO_code: string;
-  name: string;
+  iso_code: string;
+  name: LocalizedString;
   flagUrl: string;
-  description: string;
-  capital: string;
-  largest_city: string;
+  description: LocalizedString;
+  capital: LinkedValue[];
+  largest_city: LinkedValue[];
   population: number;
   area_km2: number;
   density_km2: number;
-  government: string;
-  official_language: string;
-  demonym: string;
+  government: LinkedValue[];
+  official_language: LinkedValue[];
+  demonym: LinkedValue[];
   gdp: number;
   hdi: number;
-  currency: string;
-  time_zone: string;
-  calling_code: string;
-  internet_TLD: string;
+  currency: LinkedValue[];
+  time_zone: LinkedValue[];
+  calling_code: string[];
+  internet_TLD: string[];
 }
 
 export type RankingType = 'Population' | 'Area' | 'Density' | 'HDI' | 'GDP';

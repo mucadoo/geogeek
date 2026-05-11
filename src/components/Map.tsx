@@ -3,7 +3,7 @@
 import * as d3 from 'd3';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { feature } from 'topojson-client';
 
@@ -14,6 +14,7 @@ import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/conf
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { countryService } from '@/lib/countryService';
+import { getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
 
 interface MapProps {
@@ -30,6 +31,7 @@ const linearZoomInterpolator = (a: d3.ZoomView, b: d3.ZoomView) => {
 
 export default function Map({ slug }: MapProps) {
   const t = useTranslations('Map');
+  const locale = useLocale();
   const router = useRouter();
   const { data: mapData, status } = useWorldMapData();
   const svgRef = useRef<SVGSVGElement>(null);
@@ -50,7 +52,7 @@ export default function Map({ slug }: MapProps) {
     exploreMode, setExploreMode, resetMap, handleContinentClick
   } = useMapStore();
 
-  const { data: subMapData } = useCountrySubMap(activeCountry?.ISO_code || null);
+  const { data: subMapData } = useCountrySubMap(activeCountry?.iso_code || null);
   
   const isSubMap = !!(activeCountry && subMapData);
   const renderMapData = isSubMap ? subMapData : mapData;
@@ -59,7 +61,7 @@ export default function Map({ slug }: MapProps) {
     if (activeRegion) {
       router.push(`/map/${slugParts[0]}`);
     } else if (activeCountry) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.iso_code.toUpperCase()];
       const continent = NUMERIC_TO_CONTINENT[numericId];
       if (continent) {
         const continentSlug = continent.toLowerCase().replace(/\s+/g, '-');
@@ -79,7 +81,7 @@ export default function Map({ slug }: MapProps) {
     return d3.geoMercator().scale(120).translate([width / 2, height / 2 + 50]);
   },[]);
 
-  const targetIso = activeCountry?.ISO_code?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
+  const targetIso = activeCountry?.iso_code?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
 
   useEffect(() => {
     async function initView() {
@@ -151,7 +153,7 @@ export default function Map({ slug }: MapProps) {
     }
 
     if (activeCountry && mapData) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.ISO_code.toUpperCase()];
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.iso_code.toUpperCase()];
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
       const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
       
@@ -268,7 +270,7 @@ export default function Map({ slug }: MapProps) {
                     y={(projection(activeCountry.capitalCoordinates)?.[1] || 0) + 4} 
                     className="font-game-mono text-xs fill-[var(--foreground)]"
                   >
-                    {activeCountry.capital}
+                    {getLocalizedValue(activeCountry.capital, locale)}
                   </text>
                 </g>
               )}
@@ -292,7 +294,7 @@ export default function Map({ slug }: MapProps) {
           )}
 
           {activeCountry && (
-            <MapSidebar type="country" title={activeCountry.name} data={activeCountry} />
+            <MapSidebar type="country" title={getLocalizedValue(activeCountry.name, locale)} data={activeCountry} />
           )}
         </React.Fragment>
       )}

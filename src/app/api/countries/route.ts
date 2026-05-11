@@ -4,7 +4,7 @@ import path from 'path';
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
 
-const EXTERNAL_URL = 'https://mucadoo.github.io/country-info-scraper/countries.min.json';
+const EXTERNAL_URL = 'https://mucadoo.github.io/wikigeo-data-scraper/sovereign-states.min.json';
 
 const getCountriesData = unstable_cache(
   async () => {

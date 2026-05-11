@@ -6,6 +6,7 @@ import Map from '@/components/Map';
 import { CONTINENT_VIEWS } from '@/config/mapConstants';
 import { routing } from '@/i18n/routing';
 import { countryService } from '@/lib/countryService';
+import { getLocalizedValue } from '@/lib/i18n-utils';
 
 export function generateStaticParams() {
   const locales = routing.locales;
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     // Treat as country code
     const country = await countryService.getCountryByIso(s.toUpperCase());
     if (country) {
-      return { title: `${country.name} | Info & Map | GeoGeek` };
+      return { title: `${getLocalizedValue(country.name, locale)} | Info & Map | GeoGeek` };
     }
   }
 
