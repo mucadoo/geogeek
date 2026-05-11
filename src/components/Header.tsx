@@ -1,18 +1,19 @@
 'use client';
 
-import { clsx, type ClassValue } from 'clsx';
 import { Home, Globe, BarChart3, Gamepad2, Languages, Sun, Moon } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
-import { twMerge } from 'tailwind-merge';
 
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { Link, usePathname, routing } from '@/i18n/routing';
+import { cn } from '@/lib/utils';
 import { useGameStore } from '@/store/useGameStore';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 interface NavItem {
   href: string;
@@ -93,7 +94,7 @@ export default function Header() {
                       )}
                     >
                       <Icon size={18} className={isActive ? "text-[var(--primary)]" : "opacity-70"} />
-                      <span className="hidden md:inline">{item.labelKey === 'HOME' ? 'HOME' : t(item.labelKey.toLowerCase() as any)}</span>
+                      <span className="hidden md:inline">{item.labelKey === 'HOME' ? 'HOME' : t(item.labelKey.toLowerCase() as Parameters<typeof t>[0])}</span>
                     </Link>
                   </li>
                 );
@@ -112,28 +113,30 @@ export default function Header() {
               </button>
             )}
 
-            <div className="relative group">
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--card-bg)]/70 backdrop-blur-md rounded-full font-game-heading text-lg text-[var(--foreground)]/70 hover:text-[var(--primary)] hover:bg-[var(--card-bg)] border border-transparent transition-all shadow-sm">
-                <Languages size={18} className="opacity-70" />
-                <span className="uppercase">{locale}</span>
-              </button>
-              <div className="absolute right-0 mt-2 w-24 bg-[var(--card-bg)] rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-[var(--card-border)] p-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--card-bg)]/70 backdrop-blur-md rounded-full font-game-heading text-lg text-[var(--foreground)]/70 hover:text-[var(--primary)] hover:bg-[var(--card-bg)] border border-transparent transition-all shadow-sm outline-none">
+                  <Languages size={18} className="opacity-70" />
+                  <span className="uppercase">{locale}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-24 bg-[var(--card-bg)] rounded-2xl shadow-xl border border-[var(--card-border)] p-1 z-[100]">
                 {languages.map((lang) => (
-                  <button
+                  <DropdownMenuItem
                     key={lang.code}
                     onClick={() => onLanguageChange(lang.code)}
                     className={cn(
-                      "w-full text-left px-4 py-2 rounded-xl font-game-mono text-sm transition-colors",
+                      "w-full text-left px-4 py-2 rounded-xl font-game-mono text-sm transition-colors cursor-pointer outline-none",
                       locale === lang.code 
-                        ? "bg-[var(--primary)]/10 text-[var(--primary)]" 
-                        : "text-[var(--foreground)] hover:bg-[var(--primary)]/10"
+                        ? "bg-[var(--primary)]/10 text-[var(--primary)] focus:bg-[var(--primary)]/15 focus:text-[var(--primary)]" 
+                        : "text-[var(--foreground)] focus:bg-[var(--primary)]/10 focus:text-[var(--primary)]"
                     )}
                   >
                     {lang.name}
-                  </button>
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

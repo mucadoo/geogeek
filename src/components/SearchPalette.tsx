@@ -2,12 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Command } from 'cmdk';
+import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { useRouter } from '@/i18n/routing';
 import { countryService } from '@/lib/countryService';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
+import { Country } from '@/types';
 
 export default function SearchPalette() {
   const [open, setOpen] = useState(false);
@@ -16,7 +18,7 @@ export default function SearchPalette() {
   const locale = useLocale();
 
   // Load countries
-  const { data: countries = [] } = useQuery({
+  const { data: countries = [] } = useQuery<Country[]>({
     queryKey: ['countries'],
     queryFn: () => countryService.getAllCountries(),
   });
@@ -56,7 +58,7 @@ export default function SearchPalette() {
                 className="px-4 py-2 cursor-pointer rounded-lg font-game-mono text-[var(--foreground)] aria-selected:bg-[var(--primary)]/10"
               >
                 <div className="flex items-center gap-2">
-                  <img src={c.flagUrl} alt="" className="w-6 h-4 object-cover" />
+                  <Image src={c.flagUrl} alt="" width={24} height={16} className="w-6 h-4 object-cover" />
                   <span>{getLocalizedCountryName(c.iso_code, locale)}</span>
                 </div>
               </Command.Item>

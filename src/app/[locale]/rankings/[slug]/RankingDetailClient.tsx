@@ -1,13 +1,21 @@
 'use client';
 
 import { ArrowLeft, ArrowUpDown, ArrowUp, ArrowDown, Search } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React, { useState, useMemo } from 'react';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
 import { Link } from '@/i18n/routing';
-import { getLocalizedCountryName } from '@/lib/i18n-utils';
 import { formatLargeNumber } from '@/lib/formatters'; // Import the formatter
+import { getLocalizedCountryName } from '@/lib/i18n-utils';
 
 interface RankingItem {
   country: string;
@@ -58,8 +66,8 @@ export default function RankingDetailClient({
     }
 
     filtered.sort((a, b) => {
-      let valA: any;
-      let valB: any;
+      let valA: number | string;
+      let valB: number | string;
 
       if (sortConfig.key === 'rank') {
         valA = a.rank; // Use the new rank property
@@ -68,10 +76,10 @@ export default function RankingDetailClient({
         valA = getLocalizedCountryName(a.isoCode, locale);
         valB = getLocalizedCountryName(b.isoCode, locale);
       } else {
-        valA = a.value; // value is already a number
-        valB = b.value; // value is already a number
-        if (isNaN(valA)) valA = -Infinity;
-        if (isNaN(valB)) valB = -Infinity;
+        valA = typeof a.value === 'string' ? parseFloat(a.value.replace(/,/g, '')) : a.value;
+        valB = typeof b.value === 'string' ? parseFloat(b.value.replace(/,/g, '')) : b.value;
+        if (isNaN(valA as number)) valA = -Infinity;
+        if (isNaN(valB as number)) valB = -Infinity;
       }
 
       if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -131,7 +139,7 @@ export default function RankingDetailClient({
               <ArrowLeft size={28} strokeWidth={1.5} />
             </Link>
             <h1 className="text-4xl md:text-5xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">
-              {t(`categories.${slug as any}`)}
+              {t(`categories.${slug as Parameters<typeof t>[0]}`)}
             </h1>
           </div>
 
@@ -191,9 +199,11 @@ export default function RankingDetailClient({
                         href={`/map/${item.isoCode}`}
                         className="flex items-center gap-4 hover:text-[var(--primary)] text-[17px] font-medium text-[var(--foreground)] transition-colors"
                       >
-                        <img 
+                        <Image 
                           src={`https://flagcdn.com/w40/${item.isoCode.toLowerCase()}.png`}
                           alt=""
+                          width={40}
+                          height={24}
                           className="h-6 w-8 rounded-sm object-cover shadow-sm border border-[var(--card-border)]/50"
                         />
                         {getLocalizedCountryName(item.isoCode, locale)}

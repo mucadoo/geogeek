@@ -1,17 +1,25 @@
 'use client';
 
 import { X, BookOpen } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useState } from 'react';
+
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 import { formatLargeNumber } from '@/lib/formatters';
 import { getLocalizedValue } from '@/lib/i18n-utils';
-import { Dialog } from '@/components/ui/Dialog';
+import { Country } from '@/types';
 
 interface MapSidebarProps {
   type: 'continent' | 'country';
   title: string;
-  data?: any;
+  data?: Country;
 }
 
 export default function MapSidebar({ type, title, data }: MapSidebarProps) {
@@ -42,10 +50,12 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
         {type === 'country' && data && (
           <div className="space-y-6">
             <div className="flex justify-center">
-              <img 
+              <Image 
                 src={data.flagUrl} 
                 alt={`${title} flag`} 
-                className="h-32 object-contain shadow-md rounded border border-gray-200"
+                width={128}
+                height={128}
+                className="h-32 w-auto object-contain shadow-md rounded border border-gray-200"
               />
             </div>
 
@@ -94,23 +104,36 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
       </div>
 
       {type === 'country' && data && (
-        <Dialog 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-          title={title}
-        >
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-center">
-              <img 
-                src={data.flagUrl} 
-                alt={`${title} flag`} 
-                className="h-24 object-contain shadow-sm rounded border border-gray-100"
-              />
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent 
+            className="max-w-2xl bg-[var(--card-bg)] border-2 border-[var(--card-border)] rounded-3xl shadow-2xl p-0 overflow-hidden flex flex-col"
+            showCloseButton={true}
+          >
+            <DialogHeader className="flex items-center justify-between border-b-2 border-dashed border-[var(--card-border)] p-6 space-y-0">
+              <DialogTitle className="font-bebas text-3xl tracking-wider text-[var(--color-primary)] dark:text-[#00a8b5]">
+                {title}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto p-8 font-game-mono text-sm leading-relaxed text-[var(--foreground)]">
+              <div className="flex flex-col gap-6">
+                <div className="flex justify-center">
+                  <Image 
+                    src={data.flagUrl} 
+                    alt={`${title} flag`} 
+                    width={96}
+                    height={96}
+                    className="h-24 w-auto object-contain shadow-sm rounded border border-gray-100"
+                  />
+                </div>
+                <div className="whitespace-pre-wrap first-letter:text-4xl first-letter:font-bebas first-letter:mr-1 first-letter:float-left first-letter:text-[var(--primary)]">
+                  {getLocalizedValue(data.description, locale)}
+                </div>
+              </div>
             </div>
-            <div className="whitespace-pre-wrap first-letter:text-4xl first-letter:font-bebas first-letter:mr-1 first-letter:float-left first-letter:text-[var(--primary)]">
-              {getLocalizedValue(data.description, locale)}
-            </div>
-          </div>
+
+            <div className="h-4 bg-[var(--primary)]/10" />
+          </DialogContent>
         </Dialog>
       )}
     </div>
