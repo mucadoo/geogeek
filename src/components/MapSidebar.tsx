@@ -80,17 +80,17 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
               <div className="space-y-3">
                 {[
                   { label: t('labels.capital'), value: getLocalizedValue(data.capital, locale) },
-                  { label: t('labels.largestCity'), value: getLocalizedValue(data.largest_city, locale) },
-                  { label: t('labels.languages'), value: getLocalizedValue(data.official_language, locale) },
+                  { label: t('labels.largestCity'), value: getLocalizedValue(data.largestCity, locale) },
+                  { label: t('labels.languages'), value: getLocalizedValue(data.officialLanguage, locale) },
                   { label: t('labels.demonym'), value: getLocalizedValue(data.demonym, locale) },
                   { label: t('labels.government'), value: getLocalizedValue(data.government, locale) },
-                  { label: t('labels.area'), value: data.area_km2 ? data.area_km2.toLocaleString(locale) + ' km²' : 'N/A' },
+                  { label: t('labels.area'), value: data.areaKm2 ? data.areaKm2.toLocaleString(locale) + ' km²' : 'N/A' },
                   { label: t('labels.population'), value: data.population ? data.population.toLocaleString(locale) : 'N/A' },
                   { label: t('labels.gdp'), value: data.gdp ? '$' + formatLargeNumber(data.gdp, locale) : 'N/A' },
                   { label: t('labels.hdi'), value: data.hdi ? data.hdi.toFixed(3) : 'N/A' },
                   { label: t('labels.currency'), value: getLocalizedValue(data.currency, locale) },
-                  { label: t('labels.timeZone'), value: getLocalizedValue(data.time_zone, locale) },
-                  { label: t('labels.callingCode'), value: getLocalizedValue(data.calling_code, locale) },
+                  { label: t('labels.timeZone'), value: getLocalizedValue(data.timeZone, locale) },
+                  { label: t('labels.callingCode'), value: getLocalizedValue(data.callingCode, locale) },
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-dashed border-slate-300 pb-2">
                     <span className="font-bebas text-slate-500">{row.label}:</span>

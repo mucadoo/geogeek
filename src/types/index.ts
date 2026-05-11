@@ -26,24 +26,24 @@ export interface LinkedValue {
 }
 
 export interface Country {
-  iso_code: string;
+  isoCode: string;
   name: LocalizedString;
   flagUrl: string;
   description: LocalizedString;
   capital: LinkedValue[];
-  largest_city: LinkedValue[];
+  largestCity: LinkedValue[];
   population: number;
-  area_km2: number;
-  density_km2: number;
+  areaKm2: number;
+  densityKm2: number;
   government: LinkedValue[];
-  official_language: LinkedValue[];
+  officialLanguage: LinkedValue[];
   demonym: LinkedValue[];
   gdp: number;
   hdi: number;
   currency: LinkedValue[];
-  time_zone: LinkedValue[];
-  calling_code: string[];
-  internet_TLD: string[];
+  timeZone: LinkedValue[];
+  callingCode: string[];
+  internetTld: string[];
 }
 
 export type RankingType = 'Population' | 'Area' | 'Density' | 'HDI' | 'GDP';

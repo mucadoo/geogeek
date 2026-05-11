@@ -9,7 +9,7 @@ async function fetchCountries(): Promise<Country[]> {
 
   // During SSR/Build, use the imported fallback data
   if (typeof window === 'undefined') {
-    cachedCountries = (fallbackData as unknown) as Country[];
+    cachedCountries = (fallbackData as any).data as Country[];
     return cachedCountries;
   }
 
@@ -17,7 +17,8 @@ async function fetchCountries(): Promise<Country[]> {
   const response = await fetch('/api/countries');
   if (!response.ok) throw new Error('Failed to fetch country data');
   
-  cachedCountries = await response.json();
+  const json = await response.json();
+  cachedCountries = json.data || json;
   return cachedCountries!;
 }
 
@@ -28,7 +29,7 @@ export const countryService = {
 
   getCountryByIso: async (isoCode: string): Promise<Country | undefined> => {
     const countries = await fetchCountries();
-    return countries.find(c => c.iso_code.toUpperCase() === isoCode.toUpperCase());
+    return countries.find(c => c.isoCode.toUpperCase() === isoCode.toUpperCase());
   },
 
   getNeighbors: async (countryName: string, locale: string = 'en'): Promise<Country[]> => {
@@ -56,8 +57,8 @@ export const countryService = {
 
     switch (type) {
       case 'Population': prop = 'population'; break;
-      case 'Area': prop = 'area_km2'; break;
-      case 'Density': prop = 'density_km2'; break;
+      case 'Area': prop = 'areaKm2'; break;
+      case 'Density': prop = 'densityKm2'; break;
       case 'HDI': prop = 'hdi'; break;
       case 'GDP': prop = 'gdp'; break;
       default: prop = 'population';
@@ -88,7 +89,7 @@ export const countryService = {
       return {
         country: c.name[locale as keyof LocalizedString] || c.name.en,
         value: value,
-        isoCode: c.iso_code,
+        isoCode: c.isoCode,
         rank: currentRank
       };
     });

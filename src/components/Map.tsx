@@ -52,7 +52,7 @@ export default function Map({ slug }: MapProps) {
     exploreMode, setExploreMode, resetMap, handleContinentClick
   } = useMapStore();
 
-  const { data: subMapData } = useCountrySubMap(activeCountry?.iso_code || null);
+  const { data: subMapData } = useCountrySubMap(activeCountry?.isoCode || null);
   
   const isSubMap = !!(activeCountry && subMapData);
   const renderMapData = isSubMap ? subMapData : mapData;
@@ -61,7 +61,7 @@ export default function Map({ slug }: MapProps) {
     if (activeRegion) {
       router.push(`/map/${slugParts[0]}`);
     } else if (activeCountry) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.iso_code.toUpperCase()];
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const continent = NUMERIC_TO_CONTINENT[numericId];
       if (continent) {
         const continentSlug = continent.toLowerCase().replace(/\s+/g, '-');
@@ -81,7 +81,7 @@ export default function Map({ slug }: MapProps) {
     return d3.geoMercator().scale(120).translate([width / 2, height / 2 + 50]);
   },[]);
 
-  const targetIso = activeCountry?.iso_code?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
+  const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
 
   useEffect(() => {
     async function initView() {
@@ -153,7 +153,7 @@ export default function Map({ slug }: MapProps) {
     }
 
     if (activeCountry && mapData) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.iso_code.toUpperCase()];
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
       const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
       

@@ -2,7 +2,7 @@ import { Country, LinkedValue, LocalizedString } from '@/types';
 
 export const getLocalizedCountryName = (isoCode: string, locale: string, countries?: Country[]) => {
   if (countries) {
-    const country = countries.find(c => c.iso_code.toUpperCase() === isoCode.toUpperCase());
+    const country = countries.find(c => c.isoCode.toUpperCase() === isoCode.toUpperCase());
     if (country && country.name) {
       return country.name[locale as keyof LocalizedString] || country.name.en;
     }
