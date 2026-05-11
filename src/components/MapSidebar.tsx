@@ -1,11 +1,12 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { X, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import React from 'react';
+import React, { useState } from 'react';
 import { formatLargeNumber } from '@/lib/formatters';
 import { getLocalizedValue } from '@/lib/i18n-utils';
+import { Dialog } from '@/components/ui/Dialog';
 
 interface MapSidebarProps {
   type: 'continent' | 'country';
@@ -16,7 +17,8 @@ interface MapSidebarProps {
 export default function MapSidebar({ type, title, data }: MapSidebarProps) {
   const router = useRouter();
   const locale = useLocale();
-  const t = useTranslations('CountryDetails.labels');
+  const t = useTranslations('CountryDetails');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="animate-in slide-in-from-right fade-in duration-300 absolute bottom-0 right-0 z-40 flex h-[40vh] w-full flex-col overflow-hidden rounded-t-lg border-t-2 border-dashed border-[#8d99ae] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-md lg:bottom-auto lg:top-24 lg:right-4 lg:h-[80vh] lg:w-96 lg:rounded-lg lg:border-2 lg:border-l-2">
@@ -47,26 +49,38 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
               />
             </div>
 
-            <div className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 italic">
-              {getLocalizedValue(data.description, locale)}
-            </div>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="group relative flex w-full flex-col gap-2 rounded-xl border border-dashed border-[#8d99ae] bg-[var(--primary)]/5 p-4 text-left transition-all hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]"
+            >
+              <div className="flex items-center gap-2 text-[var(--primary)]">
+                <BookOpen size={16} />
+                <span className="font-bebas text-lg tracking-wider uppercase">{t('descriptionTitle')}</span>
+              </div>
+              <p className="line-clamp-2 text-xs italic text-slate-600 dark:text-slate-300">
+                {getLocalizedValue(data.description, locale)}
+              </p>
+              <div className="mt-1 text-[10px] font-bold text-[var(--primary)] opacity-0 transition-opacity group-hover:opacity-100 uppercase tracking-tighter">
+                {t('readMore')}
+              </div>
+            </button>
             
             <div className="border border-dashed border-[#8d99ae] p-4 rounded-md">
               <h3 className="mb-4 font-bebas text-2xl tracking-wider text-[var(--color-primary)] dark:text-[#ffcd42]">QUICK FACTS</h3>
               <div className="space-y-3">
                 {[
-                  { label: t('capital'), value: getLocalizedValue(data.capital, locale) },
-                  { label: 'Largest City', value: getLocalizedValue(data.largest_city, locale) },
-                  { label: t('languages'), value: getLocalizedValue(data.official_language, locale) },
-                  { label: t('demonym'), value: getLocalizedValue(data.demonym, locale) },
-                  { label: t('government'), value: getLocalizedValue(data.government, locale) },
-                  { label: t('area'), value: data.area_km2 ? data.area_km2.toLocaleString(locale) + ' km²' : 'N/A' },
-                  { label: 'Population', value: data.population ? data.population.toLocaleString(locale) : 'N/A' },
-                  { label: t('gdp'), value: data.gdp ? '$' + formatLargeNumber(data.gdp, locale) : 'N/A' },
-                  { label: t('hdi'), value: data.hdi ? data.hdi.toFixed(3) : 'N/A' },
-                  { label: t('currency'), value: getLocalizedValue(data.currency, locale) },
-                  { label: t('timeZone'), value: getLocalizedValue(data.time_zone, locale) },
-                  { label: t('callingCode'), value: getLocalizedValue(data.calling_code, locale) },
+                  { label: t('labels.capital'), value: getLocalizedValue(data.capital, locale) },
+                  { label: t('labels.largestCity'), value: getLocalizedValue(data.largest_city, locale) },
+                  { label: t('labels.languages'), value: getLocalizedValue(data.official_language, locale) },
+                  { label: t('labels.demonym'), value: getLocalizedValue(data.demonym, locale) },
+                  { label: t('labels.government'), value: getLocalizedValue(data.government, locale) },
+                  { label: t('labels.area'), value: data.area_km2 ? data.area_km2.toLocaleString(locale) + ' km²' : 'N/A' },
+                  { label: t('labels.population'), value: data.population ? data.population.toLocaleString(locale) : 'N/A' },
+                  { label: t('labels.gdp'), value: data.gdp ? '$' + formatLargeNumber(data.gdp, locale) : 'N/A' },
+                  { label: t('labels.hdi'), value: data.hdi ? data.hdi.toFixed(3) : 'N/A' },
+                  { label: t('labels.currency'), value: getLocalizedValue(data.currency, locale) },
+                  { label: t('labels.timeZone'), value: getLocalizedValue(data.time_zone, locale) },
+                  { label: t('labels.callingCode'), value: getLocalizedValue(data.calling_code, locale) },
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-dashed border-slate-300 pb-2">
                     <span className="font-bebas text-slate-500">{row.label}:</span>
@@ -78,6 +92,27 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
           </div>
         )}
       </div>
+
+      {type === 'country' && data && (
+        <Dialog 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          title={title}
+        >
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-center">
+              <img 
+                src={data.flagUrl} 
+                alt={`${title} flag`} 
+                className="h-24 object-contain shadow-sm rounded border border-gray-100"
+              />
+            </div>
+            <div className="whitespace-pre-wrap first-letter:text-4xl first-letter:font-bebas first-letter:mr-1 first-letter:float-left first-letter:text-[var(--primary)]">
+              {getLocalizedValue(data.description, locale)}
+            </div>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }

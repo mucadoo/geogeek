@@ -107,6 +107,8 @@
   },
   "CountryDetails": {
     "summary": "Resumen",
+    "descriptionTitle": "Historia y Cultura",
+    "readMore": "Haz clic para leer más →",
     "information": "Información",
     "neighboringCountries": "Países Vecinos",
     "viewOnMap": "Ver en el mapa",
