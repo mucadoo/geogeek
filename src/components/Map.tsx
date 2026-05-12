@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { feature } from 'topojson-client';
 
+import { Country } from '@/types';
 import MapPolygons from './MapPolygons';
 import MapSidebar from './MapSidebar';
 
@@ -36,7 +37,7 @@ export default function Map({ slug }: MapProps) {
   const { data: mapData, status } = useWorldMapData();
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
-  const [activeCountry, setActiveCountry] = useState<any>(null);
+  const [activeCountry, setActiveCountry] = useState<Country | null>(null);
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
 
   const slugParts = Array.isArray(slug) ? slug : (slug ? slug.split('/') : []);
@@ -60,7 +61,7 @@ export default function Map({ slug }: MapProps) {
   const handleBackClick = () => {
     if (activeRegion) {
       router.push(`/map/${slugParts[0]}`);
-    } else if (activeCountry) {
+    } else if (activeCountry?.isoCode) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const continent = NUMERIC_TO_CONTINENT[numericId];
       if (continent) {
@@ -152,7 +153,7 @@ export default function Map({ slug }: MapProps) {
       svg.call(zoom.transform, initialTransform);
     }
 
-    if (activeCountry && mapData) {
+    if (activeCountry?.isoCode && mapData) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
       const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
@@ -255,22 +256,22 @@ export default function Map({ slug }: MapProps) {
                   isSubMap={isSubMap} 
                 />
               )}
-              {activeCountry?.capitalCoordinates && (
+              {(activeCountry as any)?.capitalCoordinates && (
                 <g>
                   <circle 
-                    cx={projection(activeCountry.capitalCoordinates)?.[0]} 
-                    cy={projection(activeCountry.capitalCoordinates)?.[1]} 
+                    cx={projection((activeCountry as any).capitalCoordinates)?.[0]} 
+                    cy={projection((activeCountry as any).capitalCoordinates)?.[1]} 
                     r={4} 
                     fill="var(--primary)" 
                     stroke="white" 
                     strokeWidth={1} 
                   />
                   <text 
-                    x={(projection(activeCountry.capitalCoordinates)?.[0] || 0) + 8} 
-                    y={(projection(activeCountry.capitalCoordinates)?.[1] || 0) + 4} 
+                    x={(projection((activeCountry as any).capitalCoordinates)?.[0] || 0) + 8} 
+                    y={(projection((activeCountry as any).capitalCoordinates)?.[1] || 0) + 4} 
                     className="font-game-mono text-xs fill-[var(--foreground)]"
                   >
-                    {getLocalizedValue(activeCountry.capital, locale)}
+                    {getLocalizedValue((activeCountry as any).capital, locale)}
                   </text>
                 </g>
               )}

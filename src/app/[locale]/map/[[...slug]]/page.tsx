@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     // Treat as country code
     const country = await getCountryByIsoAction(s.toUpperCase());
     if (country) {
-      return { title: `${getLocalizedValue(country.data.name, locale)} | Info & Map | GeoGeek` };
+      return { title: `${getLocalizedValue(country.name, locale)} | Info & Map | GeoGeek` };
     }
   }
 

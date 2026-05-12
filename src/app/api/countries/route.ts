@@ -10,7 +10,8 @@ const client = new WikiGeoClient({ dataSource: 'remote' });
 const getCountriesData = unstable_cache(
   async () => {
     try {
-      return await client.getFullDatabase();
+      const response = await client.getFullDatabase();
+      return response.data;
     } catch (error) {
       console.error('Error fetching external data, using fallback:', error);
       const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
