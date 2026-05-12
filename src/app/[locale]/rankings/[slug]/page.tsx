@@ -3,9 +3,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import RankingDetailClient from './RankingDetailClient';
 
+import { getRankingsAction } from '@/app/actions';
 import { RANKING_CATEGORIES, getRankingBySlug } from '@/config/rankingsConfig';
 import { routing } from '@/i18n/routing';
-import { getRankingsAction } from '@/app/actions';
 
 export function generateStaticParams() {
   const params: { locale: string; slug: string }[] = [];

@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 
+import { WikiGeoClient } from '@mucadoo/wiki-geo-data';
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
-import { WikiGeoClient } from '@mucadoo/wiki-geo-data';
 
 const client = new WikiGeoClient({ dataSource: 'remote' });
 

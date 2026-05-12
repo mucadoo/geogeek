@@ -2,10 +2,10 @@ import { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
 
+import { getCountryByIsoAction } from '@/app/actions';
 import Map from '@/components/Map';
 import { CONTINENT_VIEWS } from '@/config/mapConstants';
 import { routing } from '@/i18n/routing';
-import { getCountryByIsoAction } from '@/app/actions';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 
 export function generateStaticParams() {
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     // Treat as country code
     const country = await getCountryByIsoAction(s.toUpperCase());
     if (country) {
-      return { title: `${getLocalizedValue(country.name, locale)} | Info & Map | GeoGeek` };
+      return { title: `${getLocalizedValue(country.data.name, locale)} | Info & Map | GeoGeek` };
     }
   }
 

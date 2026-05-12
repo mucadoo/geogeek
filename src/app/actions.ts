@@ -24,7 +24,8 @@ export async function getAllCountriesAction() {
 
 export async function getRankingsAction(type: any, locale: string = 'en') {
   try {
-    const countries = await client.listCountries();
+    const response = await client.listCountries();
+    const countries = response.data;
     // Replicating the logic from countryService.getRankings
     let prop: any;
 

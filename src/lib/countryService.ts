@@ -7,15 +7,18 @@ const client = new WikiGeoClient({ dataSource: 'remote' });
 
 export const countryService = {
   getAllCountries: async (): Promise<Country[]> => {
-    return await client.getFullDatabase();
+    const response = await client.getFullDatabase();
+    return response.data;
   },
 
   getCountryByIso: async (isoCode: string): Promise<Country | undefined> => {
-    return await client.getCountry(isoCode);
+    const response = await client.getCountry(isoCode);
+    return response?.data;
   },
 
   getNeighbors: async (countryName: string, locale: string = 'en'): Promise<Country[]> => {
-    const countries = await client.getFullDatabase();
+    const response = await client.getFullDatabase();
+    const countries = response.data;
     const country = countries.find(c => 
       c.name[locale as keyof Country['name']] === countryName || 
       c.name.en === countryName
@@ -32,7 +35,8 @@ export const countryService = {
   },
 
   getRankings: async (type: RankingType, locale: string = 'en'): Promise<{ country: string; value: number; isoCode: string; rank: number }[]> => {
-    const countries = await client.getFullDatabase();
+    const response = await client.getFullDatabase();
+    const countries = response.data;
 
     const propMap: Record<RankingType, keyof Country> = {
       'Population': 'population',
