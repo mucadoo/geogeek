@@ -3,15 +3,14 @@ import path from 'path';
 
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
+import { WikiGeoClient } from '@mucadoo/wiki-geo-data';
 
-const EXTERNAL_URL = 'https://mucadoo.github.io/wikigeo-data-scraper/sovereign-states.min.json';
+const client = new WikiGeoClient({ dataSource: 'remote' });
 
 const getCountriesData = unstable_cache(
   async () => {
     try {
-      const response = await fetch(EXTERNAL_URL, { next: { revalidate: 3600 } });
-      if (!response.ok) throw new Error('Failed to fetch from external source');
-      return await response.json();
+      return await client.getFullDatabase();
     } catch (error) {
       console.error('Error fetching external data, using fallback:', error);
       const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');

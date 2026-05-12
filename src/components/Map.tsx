@@ -13,7 +13,7 @@ import MapSidebar from './MapSidebar';
 import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
-import { countryService } from '@/lib/countryService';
+import { getCountryByIsoAction } from '@/app/actions';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
 
@@ -108,7 +108,7 @@ export default function Map({ slug }: MapProps) {
 
       // Handle Country
       if (firstPart.length === 2) {
-        const country = await countryService.getCountryByIso(firstPart.toUpperCase());
+        const country = await getCountryByIsoAction(firstPart.toUpperCase());
         if (country) {
           setActiveCountry(country);
           setActiveRegion(secondPart || null);

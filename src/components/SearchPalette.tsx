@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { useRouter } from '@/i18n/routing';
-import { countryService } from '@/lib/countryService';
+import { fetchCountries } from '@/lib/countryClient';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
 import { Country } from '@/types';
 
@@ -20,7 +20,7 @@ export default function SearchPalette() {
   // Load countries
   const { data: countries = [] } = useQuery<Country[]>({
     queryKey: ['countries'],
-    queryFn: () => countryService.getAllCountries(),
+    queryFn: () => fetchCountries(),
   });
 
   // Hotkey listener
@@ -53,8 +53,8 @@ export default function SearchPalette() {
           <Command.Group heading="Countries" className="font-game-heading text-lg tracking-widest text-slate-500 px-2 py-2">
             {countries.map((c) => (
               <Command.Item
-                key={c.isoCode}
-                onSelect={() => handleSelect(`/map/${c.isoCode.toLowerCase()}`)}
+                key={c.isoCode || 'unknown'}
+                onSelect={() => c.isoCode && handleSelect(`/map/${c.isoCode.toLowerCase()}`)}
                 className="px-4 py-2 cursor-pointer rounded-lg font-game-mono text-[var(--foreground)] aria-selected:bg-[var(--primary)]/10"
               >
                 <div className="flex items-center gap-2">

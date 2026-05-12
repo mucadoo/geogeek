@@ -5,7 +5,7 @@ import RankingDetailClient from './RankingDetailClient';
 
 import { RANKING_CATEGORIES, getRankingBySlug } from '@/config/rankingsConfig';
 import { routing } from '@/i18n/routing';
-import { countryService } from '@/lib/countryService';
+import { getRankingsAction } from '@/app/actions';
 
 export function generateStaticParams() {
   const params: { locale: string; slug: string }[] = [];
@@ -26,7 +26,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ loca
     notFound();
   }
   
-  const rankings = await countryService.getRankings(category.title, locale);
+  const rankings = await getRankingsAction(category.title, locale);
   const t = await getTranslations('Rankings');
 
   let valueLabel = t('table.value');
