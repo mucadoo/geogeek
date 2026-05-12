@@ -30,7 +30,7 @@
 ### 📊 Comprehensive Data Portal
 *   **Deep Dives:** Access profiles for countries, including capitals, languages, demographics, GDP, and HDI.
 *   **Comparative Rankings:** Explore world rankings based on population, area, and other key geographic metrics.
-*   **Wikipedia-Powered:** Consumes the [Wikipedia Country Info Scraper API](https://github.com/mucadoo/country-info-scraper) for up-to-date information.
+*   **Data Driven:** Uses the [@mucadoo/wiki-geo-data](https://www.npmjs.com/package/@mucadoo/wiki-geo-data) npm package for reliable, structured data access.
 
 ### 🌐 Advanced Modern Stack
 *   **Multilingual:** Internationalization support via `next-intl`.
