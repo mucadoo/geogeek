@@ -26,5 +26,5 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const data = await getCountriesData();
-  return NextResponse.json(data.data || data);
+  return NextResponse.json(data);
 }
