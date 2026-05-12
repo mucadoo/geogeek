@@ -50,13 +50,19 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
         {type === 'country' && data && (
           <div className="space-y-6">
             <div className="flex justify-center">
-              <Image 
-                src={data.flagUrl} 
-                alt={`${title} flag`} 
-                width={128}
-                height={128}
-                className="h-32 w-auto object-contain shadow-md rounded border border-gray-200"
-              />
+              {data.flagUrl ? (
+                <Image 
+                  src={data.flagUrl} 
+                  alt={`${title} flag`} 
+                  width={128}
+                  height={128}
+                  className="h-32 w-auto object-contain shadow-md rounded border border-gray-200"
+                />
+              ) : (
+                <div className="h-32 w-48 bg-slate-200 dark:bg-slate-700 flex items-center justify-center rounded border border-dashed border-[#8d99ae] text-slate-400">
+                  No Flag
+                </div>
+              )}
             </div>
 
             <button 
@@ -118,13 +124,19 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
             <div className="flex-1 overflow-y-auto p-8 font-game-mono text-sm leading-relaxed text-[var(--foreground)]">
               <div className="flex flex-col gap-6">
                 <div className="flex justify-center">
-                  <Image 
-                    src={data.flagUrl} 
-                    alt={`${title} flag`} 
-                    width={96}
-                    height={96}
-                    className="h-24 w-auto object-contain shadow-sm rounded border border-gray-100"
-                  />
+                  {data.flagUrl ? (
+                    <Image 
+                      src={data.flagUrl} 
+                      alt={`${title} flag`} 
+                      width={96}
+                      height={96}
+                      className="h-24 w-auto object-contain shadow-sm rounded border border-gray-100"
+                    />
+                  ) : (
+                    <div className="h-24 w-36 bg-slate-100 dark:bg-slate-800 flex items-center justify-center rounded border border-dashed border-gray-200 text-slate-400">
+                      No Flag
+                    </div>
+                  )}
                 </div>
                 <div className="whitespace-pre-wrap first-letter:text-4xl first-letter:font-bebas first-letter:mr-1 first-letter:float-left first-letter:text-[var(--primary)]">
                   {getLocalizedValue(data.description, locale)}

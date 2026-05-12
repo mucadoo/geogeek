@@ -2,9 +2,9 @@ import { Country, LinkedValue, LocalizedString } from '@/types';
 
 export const getLocalizedCountryName = (isoCode: string, locale: string, countries?: Country[]) => {
   if (countries) {
-    const country = countries.find(c => c.isoCode.toUpperCase() === isoCode.toUpperCase());
+    const country = countries.find(c => c.isoCode?.toUpperCase() === isoCode.toUpperCase());
     if (country && country.name) {
-      return country.name[locale as keyof LocalizedString] || country.name.en;
+      return country.name[locale as keyof LocalizedString] || country.name.en || isoCode;
     }
   }
 
@@ -18,13 +18,13 @@ export const getLocalizedCountryName = (isoCode: string, locale: string, countri
   }
 };
 
-export const getLocalizedValue = (value: LocalizedString | LinkedValue[] | string | string[] | undefined, locale: string): string => {
+export const getLocalizedValue = (value: LocalizedString | LinkedValue[] | string | string[] | null | undefined, locale: string): string => {
   if (!value) return 'N/A';
   if (typeof value === 'string') return value;
   if (Array.isArray(value)) {
     if (value.length === 0) return 'N/A';
-    if (typeof value[0] === 'string') return (value as string[]).join(', ');
-    return (value as LinkedValue[]).map(v => getLocalizedValue(v.name, locale)).join(', ');
+    if (typeof value[0] === 'string') return (value as string[]).filter(Boolean).join(', ') || 'N/A';
+    return (value as LinkedValue[]).map(v => getLocalizedValue(v.name, locale)).filter(s => s !== 'N/A').join(', ') || 'N/A';
   }
-  return value[locale as keyof LocalizedString] || value.en || '';
+  return value[locale as keyof LocalizedString] || value.en || 'N/A';
 };

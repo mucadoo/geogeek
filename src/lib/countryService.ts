@@ -1,25 +1,15 @@
-import fallbackData from '../../public/data/fallback-countries.json';
+import { WikiGeoClient, Country } from '@mucadoo/wiki-geo-data';
 
-import { Country, RankingType, LocalizedString } from '@/types';
+import { RankingType } from '@/types';
+
+const client = new WikiGeoClient({ dataSource: 'remote' });
 
 let cachedCountries: Country[] | null = null;
 
 async function fetchCountries(): Promise<Country[]> {
   if (cachedCountries) return cachedCountries;
-
-  // During SSR/Build, use the imported fallback data
-  if (typeof window === 'undefined') {
-    cachedCountries = (fallbackData as any).data as Country[];
-    return cachedCountries;
-  }
-
-  // At runtime, use the internal API proxy
-  const response = await fetch('/api/countries');
-  if (!response.ok) throw new Error('Failed to fetch country data');
-  
-  const json = await response.json();
-  cachedCountries = json.data || json;
-  return cachedCountries!;
+  cachedCountries = await client.listCountries();
+  return cachedCountries;
 }
 
 export const countryService = {
@@ -28,23 +18,27 @@ export const countryService = {
   },
 
   getCountryByIso: async (isoCode: string): Promise<Country | undefined> => {
-    const countries = await fetchCountries();
-    return countries.find(c => c.isoCode.toUpperCase() === isoCode.toUpperCase());
+    try {
+      return await client.getCountry(isoCode);
+    } catch {
+      const countries = await fetchCountries();
+      return countries.find(c => c.isoCode.toUpperCase() === isoCode.toUpperCase());
+    }
   },
 
   getNeighbors: async (countryName: string, locale: string = 'en'): Promise<Country[]> => {
     const countries = await fetchCountries();
     const country = countries.find(c => 
-      c.name[locale as keyof LocalizedString] === countryName || 
+      c.name[locale as keyof Country['name']] === countryName || 
       c.name.en === countryName
     );
     if (!country) return [];
 
-    const description = (country.description[locale as keyof LocalizedString] || country.description.en).toLowerCase();
+    const description = (country.description[locale as keyof Country['description']] || country.description.en).toLowerCase();
     
     const neighbors = countries.filter(c => {
-      const name = (c.name[locale as keyof LocalizedString] || c.name.en).toLowerCase();
-      return name !== (country.name[locale as keyof LocalizedString] || country.name.en).toLowerCase() && 
+      const name = (c.name[locale as keyof Country['name']] || c.name.en).toLowerCase();
+      return name !== (country.name[locale as keyof Country['name']] || country.name.en).toLowerCase() && 
              description.includes(name);
     });
     return neighbors;
@@ -87,7 +81,7 @@ export const countryService = {
       previousValue = value;
 
       return {
-        country: c.name[locale as keyof LocalizedString] || c.name.en,
+        country: (c.name[locale as keyof Country['name']] || c.name.en) as string,
         value: value,
         isoCode: c.isoCode,
         rank: currentRank

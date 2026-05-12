@@ -1,3 +1,5 @@
+import { Country as SDKCountry } from '@mucadoo/wiki-geo-data';
+
 export enum GameCategory {
   ALL = 'all',
   CONTINENTS = 'continents',
@@ -12,39 +14,14 @@ export enum RankingCategory {
   HDI = 'hdi'
 }
 
-export interface LocalizedString {
-  en: string;
-  pt?: string;
-  es?: string;
-  fr?: string;
-  it?: string;
-}
+export type LocalizedString = SDKCountry['name'];
 
 export interface LinkedValue {
-  articleId?: string;
+  articleId: string | null;
   name: LocalizedString;
 }
 
-export interface Country {
-  isoCode: string;
-  name: LocalizedString;
-  flagUrl: string;
-  description: LocalizedString;
-  capital: LinkedValue[];
-  largestCity: LinkedValue[];
-  population: number;
-  areaKm2: number;
-  densityKm2: number;
-  government: LinkedValue[];
-  officialLanguage: LinkedValue[];
-  demonym: LinkedValue[];
-  gdp: number;
-  hdi: number;
-  currency: LinkedValue[];
-  timeZone: LinkedValue[];
-  callingCode: string[];
-  internetTld: string[];
-}
+export type Country = SDKCountry;
 
 export type RankingType = 'Population' | 'Area' | 'Density' | 'HDI' | 'GDP';
 
