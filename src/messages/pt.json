@@ -22,7 +22,8 @@
     "games": "Jogos",
     "map": "Mapa",
     "explorer": "Explorador",
-    "rankings": "Estatísticas Mundiais"
+    "rankings": "Estatísticas Mundiais",
+    "about": "Sobre"
   },
   "Map": {
     "loading": "Carregando Explorador...",
@@ -38,7 +39,7 @@
       "all": "Tudo",
       "continents": "Continentes",
       "regions": "Regiões",
-      "capitals": "Capitais"
+      "capitals": "Capitales"
     },
     "itemsCount": "{count} itens",
     "difficulty": "Dificuldade",
@@ -65,7 +66,7 @@
       },
       "brazil-states": {
         "title": "Estados do Brasil",
-        "description": "Você consegue nomear todos os estados do território brasileiro?"
+        "description": "¿Puedes nomear todos os estados do território brasileiro?"
       },
       "italy-regions": {
         "title": "Regiões da Itália",
@@ -155,8 +156,8 @@
     }
   },
   "RegionNames": {
-    "Alabama": "Alabama", "Alaska": "Alasca", "Arizona": "Arizona", "Arkansas": "Arkansas", "California": "Califórnia", "Colorado": "Colorado", "Connecticut": "Connecticut", "Delaware": "Delaware", "Florida": "Flórida", "Georgia": "Geórgia", "Hawaii": "Havaí", "Idaho": "Idaho", "Illinois": "Illinois", "Indiana": "Indiana", "Iowa": "Iowa", "Kansas": "Kansas", "Kentucky": "Kentucky", "Louisiana": "Luisiana", "Maine": "Maine", "Maryland": "Maryland", "Massachusetts": "Massachusetts", "Michigan": "Michigan", "Minnesota": "Minnesota", "Mississippi": "Mississippi", "Missouri": "Missouri", "Montana": "Montana", "Nebraska": "Nebraska", "Nevada": "Nevada", "New Hampshire": "Nova Hampshire", "New Jersey": "Nova Jersey", "New Mexico": "Novo México", "New York": "Nova York", "North Carolina": "Carolina do Norte", "North Dakota": "Dakota do Norte", "Ohio": "Ohio", "Oklahoma": "Oklahoma", "Oregon": "Oregón", "Pennsylvania": "Pensilvânia", "Rhode Island": "Rhode Island", "South Carolina": "Carolina do Sul", "South Dakota": "Dakota do Sul", "Tennessee": "Tennessee", "Texas": "Texas", "Utah": "Utah", "Vermont": "Vermont", "Virginia": "Virgínia", "Washington": "Washington", "West Virginia": "Virgínia Ocidental", "Wisconsin": "Wisconsin", "Wyoming": "Wyoming",
-    "Acre": "Acre", "Alagoas": "Alagoas", "Amapá": "Amapá", "Amazonas": "Amazonas", "Bahia": "Bahia", "Ceará": "Ceará", "Distrito Federal": "Distrito Federal", "DF": "Distrito Federal", "Espírito Santo": "Espírito Santo", "Goiás": "Goiás", "Maranhão": "Maranhão", "Mato Grosso": "Mato Grosso", "Mato Grosso do Sul": "Mato Grosso do Sul", "Minas Gerais": "Minas Gerais", "Pará": "Pará", "Paraíba": "Paraíba", "Paraná": "Paraná", "Pernambuco": "Pernambuco", "Piauí": "Piauí", "Rio de Janeiro": "Río de Janeiro", "Rio Grande do Norte": "Río Grande del Norte", "Rio Grande do Sul": "Río Grande del Sur", "Rondônia": "Rondonia", "Roraima": "Roraima", "Santa Catarina": "Santa Catarina", "São Paulo": "São Paulo", "Sergipe": "Sergipe", "Tocantins": "Tocantins",
+    "Alabama": "Alabama", "Alaska": "Alasca", "Arizona": "Arizona", "Arkansas": "Arkansas", "California": "Califórnia", "Colorado": "Colorado", "Connecticut": "Connecticut", "Delaware": "Delaware", "Florida": "Flórida", "Georgia": "Geórgia", "Hawaii": "Havaí", "Idaho": "Idaho", "Illinois": "Illinois", "Indiana": "Indiana", "Iowa": "Iowa", "Kansas": "Kansas", "Kentucky": "Kentucky", "Louisiana": "Luisiana", "Maine": "Maine", "Maryland": "Maryland", "Massachusetts": "Massachusetts", "Michigan": "Michigan", "Minnesota": "Minnesota", "Mississippi": "Mississippi", "Missouri": "Missouri", "Montana": "Montana", "Nebraska": "Nebraska", "Nevada": "Nevada", "New Hampshire": "Nova Hampshire", "New Jersey": "Nova Jersey", "New Mexico": "Novo México", "New York": "Nova York", "North Carolina": "Carolina do Norte", "North Dakota": "Dakota do Norte", "Ohio": "Ohio", "Oklahoma": "Oregón", "Oregon": "Oregón", "Pennsylvania": "Pensilvânia", "Rhode Island": "Rhode Island", "South Carolina": "Carolina do Sul", "South Dakota": "Dakota do Sul", "Tennessee": "Tennessee", "Texas": "Texas", "Utah": "Utah", "Vermont": "Vermont", "Virginia": "Virgínia", "Washington": "Washington", "West Virginia": "Virgínia Ocidental", "Wisconsin": "Wisconsin", "Wyoming": "Wyoming",
+    "Acre": "Acre", "Alagoas": "Alagoas", "Amapá": "Amapá", "Amazonas": "Amazonas", "Bahia": "Bahia", "Ceará": "Ceará", "Distrito Federal": "Distrito Federal", "DF": "Distrito Federal", "Espírito Santo": "Espírito Santo", "Goiás": "Goiás", "Maranhão": "Maranhão", "Mato Grosso": "Mato Grosso", "Mato Grosso do Sul": "Mato Grosso do Sul", "Minas Gerais": "Minas Gerais", "Pará": "Pará", "Paraíba": "Paraíba", "Paraná": "Paraná", "Pernambuco": "Pernambuco", "Piauí": "Piauí", "Rio de Janeiro": "Rio de Janeiro", "Rio Grande do Norte": "Rio Grande do Norte", "Rio Grande do Sul": "Rio Grande do Sul", "Rondônia": "Rondônia", "Roraima": "Roraima", "Santa Catarina": "Santa Catarina", "São Paulo": "São Paulo", "Sergipe": "Sergipe", "Tocantins": "Tocantins",
     "Abruzzo": "Abruzos", "Basilicata": "Basilicata", "Calabria": "Calábria", "Campania": "Campânia", "Emilia-Romagna": "Emília-Romanha", "Friuli-Venezia Giulia": "Friuli-Venecia Júlia", "Lazio": "Lácio", "Liguria": "Ligúria", "Lombardia": "Lombardía", "Marche": "Marcas", "Molise": "Molise", "Piemonte": "Piemonte", "Puglia": "Apúlia", "Sardegna": "Sardenha", "Sicilia": "Sicília", "Toscana": "Toscana", "Trentino-Alto Adige": "Trentino-Alto Ádige", "Umbria": "Úmbria", "Valle d'Aosta": "Vale de Aosta", "Veneto": "Vêneto",
     "Auvergne-Rhône-Alpes": "Auvérnia-Ródano-Alpes", "Bourgogne-Franche-Comté": "Borgonha-Franco-Condado", "Bretagne": "Bretanha", "Brittany": "Bretanha", "Centre-Val de Loire": "Centro-Vale do Loire", "Corse": "Córcega", "Corsica": "Córcega", "Grand Est": "Grande Leste", "Hauts-de-France": "Altos da França", "Île-de-France": "Ilha de França", "Normandie": "Normandia", "Normandy": "Normandia", "Nouvelle-Aquitaine": "Nova Aquitânia", "Occitanie": "Occitânia", "Pays de la Loire": "País do Loire", "Provence-Alpes-Côte d'Azur": "Provença-Alpes-Costa Azul", "Guadeloupe": "Guadalupe", "Guyane": "Guiana Francesa", "French Guiana": "Guiana Francesa", "La Réunion": "Reunião", "Reunion": "Reunião", "Martinique": "Martinica", "Mayotte": "Maiote",
     "Alberta": "Alberta", "British Columbia": "Colúmbia Britânica", "Manitoba": "Manitoba", "New Brunswick": "Novo Brunswick", "Newfoundland and Labrador": "Terra Nova e Labrador", "Nova Scotia": "Nova Escocia", "Ontario": "Ontário", "Prince Edward Island": "Ilha do Príncipe Eduardo", "Quebec": "Quebec", "Saskatchewan": "Saskatchewan", "Northwest Territories": "Territórios do Noroeste", "Nunavut": "Nunavut", "Yukon": "Yukon",
@@ -174,5 +175,18 @@
     "description": "Explorador geográfico interactivo e estatísticas",
     "mapOf": "Mapa de {continent}",
     "worldMapTitle": "Explorador do Mapa Mundial"
+  },
+  "AboutPage": {
+    "title": "Sobre o GeoGeek",
+    "intro": "GeoGeek é mais do que um site; é um projeto apaixonante que nasceu de um profundo amor pela geografia e um fascínio pelos detalhes intrincados do nosso mundo. Ele foi projetado para ser uma plataforma dinâmica para exploração, aprendizado e para desafiar seu conhecimento sobre territórios globais.",
+    "passion": "Sou movido pela curiosidade e pelo desejo de entender como as coisas funcionam. GeoGeek é a minha maneira de transformar a complexa beleza dos dados geográficos em algo divertido e envolvente. Cada parte deste projeto é construída com precisão e um pouco de desafio intelectual em mente.",
+    "vision": "Meu objetivo para o GeoGeek é criar um lugar legal para outros entusiastas da geografia. Quero fornecer ferramentas que tornem o aprendizado sobre o mundo divertido e perspicaz. Seja explorando fronteiras políticas, analisando estatísticas ou jogando quizzes, espero que o GeoGeek acenda o geógrafo que há em você.",
+    "invitation": "Este é um projeto de código aberto, e eu realmente acredito no poder da construção colaborativa. Sinta-se à vontade para mergulhar no código, compartilhar suas ideias e ajudar a moldar o futuro do GeoGeek. Vamos tornar esta plataforma ainda mais incrível para descobrir o mundo, um território de cada vez.",
+    "creatorName": "Samuel Britto",
+    "websiteProfile": "Meu Site",
+    "projectGithub": "Repositório GitHub do Projeto",
+    "myPassion": "Minha Paixão",
+    "myVision": "Minha Visão",
+    "joinJourney": "Junte-se à Jornada"
   }
 }

@@ -22,7 +22,8 @@
     "games": "Giochi",
     "map": "Mappa",
     "explorer": "Esploratore",
-    "rankings": "Statistiche"
+    "rankings": "Statistiche",
+    "about": "Informazioni"
   },
   "Map": {
     "loading": "Caricamento Esploratore...",
@@ -158,9 +159,9 @@
     "Acre": "Acre", "Alagoas": "Alagoas", "Amapá": "Amapá", "Amazonas": "Amazonas", "Bahia": "Bahia", "Ceará": "Ceará", "Distrito Federal": "Distretto Federale", "DF": "Distretto Federale", "Espírito Santo": "Espírito Santo", "Goiás": "Goiás", "Maranhão": "Maranhão", "Mato Grosso": "Mato Grosso", "Mato Grosso do Sul": "Mato Grosso do Sul", "Minas Gerais": "Minas Gerais", "Pará": "Pará", "Paraíba": "Paraíba", "Paraná": "Paraná", "Pernambuco": "Pernambuco", "Piauí": "Piauí", "Rio de Janeiro": "Rio de Janeiro", "Rio Grande do Norte": "Rio Grande do Norte", "Rio Grande do Sul": "Rio Grande do Sul", "Rondônia": "Rondônia", "Roraima": "Roraima", "Santa Catarina": "Santa Catarina", "São Paulo": "San Paolo", "Sergipe": "Sergipe", "Tocantins": "Tocantins",
     "Abruzzo": "Abruzzo", "Basilicata": "Basilicata", "Calabria": "Calabria", "Campania": "Campania", "Emilia-Romagna": "Emilia-Romagna", "Friuli-Venezia Giulia": "Friuli-Venezia Giulia", "Lazio": "Lazio", "Liguria": "Liguria", "Lombardia": "Lombardia", "Marche": "Marche", "Molise": "Molise", "Piemonte": "Piemonte", "Puglia": "Puglia", "Sardegna": "Sardegna", "Sicilia": "Sicilia", "Toscana": "Toscana", "Trentino-Alto Adige": "Trentino-Alto Adige", "Umbria": "Umbria", "Valle d'Aosta": "Valle d'Aosta", "Veneto": "Veneto",
     "Auvergne-Rhône-Alpes": "Alvernia-Rodano-Alpi", "Bourgogne-Franche-Comté": "Borgogna-Franca Contea", "Bretagne": "Bretagna", "Brittany": "Bretagna", "Centre-Val de Loire": "Centro-Valle della Loira", "Corse": "Corsica", "Corsica": "Corsica", "Grand Est": "Grand Est", "Hauts-de-France": "Alta Francia", "Île-de-France": "Île-de-France", "Normandie": "Normandia", "Normandy": "Normandia", "Nouvelle-Aquitaine": "Nuova Aquitania", "Occitanie": "Occitania", "Pays de la Loire": "Paesi della Loira", "Provence-Alpes-Côte d'Azur": "Provenza-Alpi-Costa Azzurra", "Guadeloupe": "Guadalupa", "Guyane": "Guiana francese", "French Guiana": "Guiana francese", "La Réunion": "Riunione", "Reunion": "Riunione", "Martinique": "Martinica", "Mayotte": "Mayotte",
-    "Alberta": "Alberta", "British Columbia": "Columbia Britannica", "Manitoba": "Manitoba", "New Brunswick": "Nuovo Brunswick", "Newfoundland and Labrador": "Terranova e Labrador", "Nova Scotia": "Nuova Scozia", "Ontario": "Ontario", "Prince Edward Island": "Isola del Principe Edoardo", "Quebec": "Quebec", "Saskatchewan": "Saskatchewan", "Northwest Territories": "Territori del Nord-Ovest", "Nunavut": "Nunavut", "Yukon": "Yukon",
+    "Alberta": "Alberta", "British Columbia": "Columbia Britannica", "Manitoba": "Manitoba", "New Brunswick": "Nuovo Brunswick", "Newfoundland and Labrador": "Terranova e Labrador", "Nova Scotia": "Nuova Scozia", "Ontario": "Ontário", "Prince Edward Island": "Isola del Principe Edoardo", "Quebec": "Quebec", "Saskatchewan": "Saskatchewan", "Northwest Territories": "Territori del Nord-Ovest", "Nunavut": "Nunavut", "Yukon": "Yukon",
     "New South Wales": "Nuovo Galles del Sud", "Queensland": "Queensland", "South Australia": "Australia Meridional", "Tasmania": "Tasmania", "Victoria": "Victoria", "Western Australia": "Australia Occidentale", "Australian Capital Territory": "Territorio della Capitale Italiana", "Northern Territory": "Territorio del Nord",
-    "Argentina": "Argentina", "Bolivia": "Bolivia", "Brazil": "Brasile", "Chile": "Cile", "Colombia": "Colombia", "Ecuador": "Ecuador", "Guyana": "Guyana", "Paraguay": "Paraguay", "Peru": "Perù", "Suriname": "Suriname", "Uruguay": "Uruguay", "Venezuela": "Venezuela"
+    "Argentina": "Argentina", "Bolivia": "Bolivia", "Brazil": "Brasile", "Chile": "Cile", "Colombia": "Colômbia", "Ecuador": "Ecuador", "Guyana": "Guyana", "Paraguay": "Paraguai", "Peru": "Perù", "Suriname": "Suriname", "Uruguay": "Uruguai", "Venezuela": "Venezuela"
   },
   "Common": {
     "unknown": "Sconosciuto",
@@ -173,5 +174,18 @@
     "description": "Esploratore geografico interattivo e statistiche",
     "mapOf": "Mappa di {continent}",
     "worldMapTitle": "Esploratore della Mappa Mondiale"
+  },
+  "AboutPage": {
+    "title": "Informazioni su GeoGeek",
+    "intro": "GeoGeek è più di un semplice sito web; è un progetto appassionato nato da un profondo amore per la geografia e un fascino per gli intricati dettagli del nostro mondo. È progettato per essere una piattaforma dinamica per l'esplorazione, l'apprendimento e per mettere alla prova le tue conoscenze sui territori globali.",
+    "passion": "Sono spinto dalla curiosità e dal desiderio di capire come funzionano le cose. GeoGeek è il mio modo di trasformare la complessa bellezza dei dati geografici in qualcosa di divertente e coinvolgente. Ogni parte di questo progetto è costruita con precisione e un po' di sfida intellettuale in mente.",
+    "vision": "Il mio obiettivo per GeoGeek è creare un luogo fantastico per gli altri appassionati di geografia. Voglio fornire strumenti che rendano l'apprendimento del mondo sia divertente che istruttivo. Che tu stia esplorando i confini politici, analizzando le statistiche o giocando a quiz, spero che GeoGeek accenda il geografo che è in te.",
+    "invitation": "Questo è un progetto open-source, e credo davvero nel potere della costruzione collaborativa. Sentiti libero di immergerti nel codice, condividere le tue idee e aiutare a plasmare il futuro di GeoGeek. Rendiamo questa piattaforma ancora più eccezionale per scoprire il mondo, un territorio alla volta.",
+    "creatorName": "Samuel Britto",
+    "githubProfile": "Il mio profilo GitHub",
+    "projectGithub": "Repository GitHub del progetto",
+    "myPassion": "La mia passione",
+    "myVision": "La mia visione",
+    "joinJourney": "Unisciti al viaggio"
   }
 }

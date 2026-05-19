@@ -22,7 +22,8 @@
     "games": "Games",
     "map": "Map",
     "explorer": "Explorer",
-    "rankings": "World Stats"
+    "rankings": "World Stats",
+    "about": "About"
   },
   "Map": {
     "loading": "Loading Explorer...",
@@ -157,7 +158,9 @@
     "Alabama": "Alabama", "Alaska": "Alaska", "Arizona": "Arizona", "Arkansas": "Arkansas", "California": "California", "Colorado": "Colorado", "Connecticut": "Connecticut", "Delaware": "Delaware", "Florida": "Florida", "Georgia": "Georgia", "Hawaii": "Hawaii", "Idaho": "Idaho", "Illinois": "Illinois", "Indiana": "Indiana", "Iowa": "Iowa", "Kansas": "Kansas", "Kentucky": "Kentucky", "Louisiana": "Louisiana", "Maine": "Maine", "Maryland": "Maryland", "Massachusetts": "Massachusetts", "Michigan": "Michigan", "Minnesota": "Minnesota", "Mississippi": "Mississippi", "Missouri": "Missouri", "Montana": "Montana", "Nebraska": "Nebraska", "Nevada": "Nevada", "New Hampshire": "New Hampshire", "New Jersey": "New Jersey", "New Mexico": "New Mexico", "New York": "New York", "North Carolina": "North Carolina", "North Dakota": "North Dakota", "Ohio": "Ohio", "Oklahoma": "Oklahoma", "Oregon": "Oregon", "Pennsylvania": "Pennsylvania", "Rhode Island": "Rhode Island", "South Carolina": "South Carolina", "South Dakota": "South Dakota", "Tennessee": "Tennessee", "Texas": "Texas", "Utah": "Utah", "Vermont": "Vermont", "Virginia": "Virginia", "Washington": "Washington", "West Virginia": "West Virginia", "Wisconsin": "Wisconsin", "Wyoming": "Wyoming",
     "Acre": "Acre", "Alagoas": "Alagoas", "Amapá": "Amapá", "Amazonas": "Amazonas", "Bahia": "Bahia", "Ceará": "Ceará", "Distrito Federal": "Federal District", "DF": "Federal District", "Espírito Santo": "Espírito Santo", "Goiás": "Goiás", "Maranhão": "Maranhão", "Mato Grosso": "Mato Grosso", "Mato Grosso do Sul": "Mato Grosso do Sul", "Minas Gerais": "Minas Gerais", "Pará": "Pará", "Paraíba": "Paraíba", "Paraná": "Paraná", "Pernambuco": "Pernambuco", "Piauí": "Piauí", "Rio de Janeiro": "Rio de Janeiro", "Rio Grande do Norte": "Rio Grande do Norte", "Rio Grande do Sul": "Rio Grande do Sul", "Rondônia": "Rondônia", "Roraima": "Roraima", "Santa Catarina": "Santa Catarina", "São Paulo": "São Paulo", "Sergipe": "Sergipe", "Tocantins": "Tocantins",
     "Abruzzo": "Abruzzo", "Basilicata": "Basilicata", "Calabria": "Calabria", "Campania": "Campania", "Emilia-Romagna": "Emilia-Romagna", "Friuli-Venezia Giulia": "Friuli-Venezia Giulia", "Lazio": "Lazio", "Liguria": "Liguria", "Lombardia": "Lombardy", "Marche": "Marche", "Molise": "Molise", "Piemonte": "Piedmont", "Puglia": "Apulia", "Sardegna": "Sardinia", "Sicilia": "Sicily", "Toscana": "Tuscany", "Trentino-Alto Adige": "Trentino-South Tyrol", "Umbria": "Umbria", "Valle d'Aosta": "Aosta Valley", "Veneto": "Veneto",
-    "Auvergne-Rhône-Alpes": "Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté": "Bourgogne-Franche-Comté", "Bretagne": "Brittany", "Brittany": "Brittany", "Centre-Val de Loire": "Centre-Val de Loire", "Corse": "Corsica", "Corsica": "Corsica", "Grand Est": "Grand Est", "Hauts-de-France": "Hauts-de-France", "Île-de-France": "Île-de-France", "Normandie": "Normandy", "Normandy": "Normandy", "Nouvelle-Aquitaine": "Nouvelle-Aquitaine", "Occitanie": "Occitanie", "Pays de la Loire": "Pays de la Loire", "Provence-Alpes-Côte d'Azur": "Provence-Alpes-Côte d'Azur", "Guadeloupe": "Guadeloupe", "Guyane": "French Guiana", "French Guiana": "French Guiana", "La Réunion": "Réunion", "Reunion": "Réunion", "Martinique": "Martinique", "Mayotte": "Mayotte",
+    "Auvergne-Rhône-Alpes": "Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté": "Bourgogne-Franche-Comté", "Bretagne": "Brittany", "Brittany": "Brittany", "Centre-Val de Loire": "Centre-Val de Loire", "Corse": "Corsica", "Corsica": "Corsica", "Grand Est": "Grand Est", "Hauts-de-France": "Hauts-de-France", "Île-de-France": "Île-de-France", "Normandie": "Normandy", "Normandy": "Normandy", "Nouvelle-Aquitaine": "Nouvelle-Aquitaine", "Occitanie": "Occitanie", "Pays de la Loire": "Pays de la Loire", "Provence-Alpes-Côte d'Azur": "Provence-Alpes-Côte d'Azur", "Guadeloupe": "Guadeloupe", "Guyane": "French Guiana", "French Guiana": "French Guiana", "La Réunion": "Réunion",
+    "Reunion": "Réunion", "Martinique": "Martinique",
+    "Mayotte": "Mayotte",
     "Alberta": "Alberta", "British Columbia": "British Columbia", "Manitoba": "Manitoba", "New Brunswick": "New Brunswick", "Newfoundland and Labrador": "Newfoundland and Labrador", "Nova Scotia": "Nova Scotia", "Ontario": "Ontario", "Prince Edward Island": "Prince Edward Island", "Quebec": "Quebec", "Saskatchewan": "Saskatchewan", "Northwest Territories": "Northwest Territories", "Nunavut": "Nunavut", "Yukon": "Yukon",
     "New South Wales": "New South Wales", "Queensland": "Queensland", "South Australia": "South Australia", "Tasmania": "Tasmania", "Victoria": "Victoria", "Western Australia": "Western Australia", "Australian Capital Territory": "Australian Capital Territory", "Northern Territory": "Northern Territory",
     "Argentina": "Argentina", "Bolivia": "Bolivia", "Brazil": "Brazil", "Chile": "Chile", "Colombia": "Colombia", "Ecuador": "Ecuador", "Guyana": "Guyana", "Paraguay": "Paraguay", "Peru": "Peru", "Suriname": "Suriname", "Uruguay": "Uruguay", "Venezuela": "Venezuela"
@@ -173,5 +176,18 @@
     "description": "Interactive geography explorer and rankings",
     "mapOf": "Map of {continent}",
     "worldMapTitle": "World Map Explorer"
+  },
+  "AboutPage": {
+    "title": "About GeoGeek",
+    "intro": "GeoGeek is more than just a website; it's a passion project born from a deep love for geography and a fascination with the intricate details of our world. It's designed to be a dynamic platform for exploration, learning, and challenging your knowledge of global territories.",
+    "passion": "I'm driven by curiosity and a desire to understand how things work. GeoGeek is my way of turning the complex beauty of geographical data into something fun and engaging. Every part of this project is built with accuracy and a bit of intellectual challenge in mind.",
+    "vision": "My goal for GeoGeek is to create a cool spot for fellow geography enthusiasts. I want to provide tools that make learning about the world both enjoyable and insightful. Whether you're checking out political boundaries, digging into stats, or playing quizzes, I hope GeoGeek gets you excited about geography.",
+    "invitation": "This is an open-source project, and I truly believe in building things together. Feel free to dive into the code, share your ideas, and help shape what GeoGeek becomes. Let's make this an even more awesome platform for discovering the world, one territory at a time.",
+    "creatorName": "Samuel Britto",
+    "websiteProfile": "My Website",
+    "projectGithub": "Project GitHub Repository",
+    "myPassion": "My Passion",
+    "myVision": "My Vision",
+    "joinJourney": "Join the Journey"
   }
 }
