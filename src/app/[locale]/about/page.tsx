@@ -21,7 +21,7 @@ export default async function AboutPage({ params }: Props) {
 
         {/* Hero Section */}
         <div className="flex flex-col items-center gap-6 max-w-4xl">
-          <h1 className="text-[48px] font-game-heading tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-[var(--primary)] via-[#00d2ff] to-[var(--accent)] drop-shadow-sm uppercase leading-none pb-2">
+          <h1 className="text-[48px] font-game-heading tracking-widest text-[var(--foreground)] uppercase leading-none pb-2">
             {t('title')}
           </h1>
           <p className="text-lg md:text-xl font-game-mono text-[var(--foreground)] opacity-70 leading-relaxed max-w-2xl">
