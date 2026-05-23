@@ -7,7 +7,8 @@ import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
 export type Difficulty = 'easy' | 'medium' | 'hard';
-export type GameMode = 'name' | 'capital';
+export type GameMode = 'name' | 'capital' | 'flag';
+export type GameType = 'standard' | 'survival';
 
 export interface StateFeature {
   id: string;
@@ -23,6 +24,9 @@ interface GameState {
   difficulty: Difficulty;
   strictMode: boolean;
   gameMode: GameMode;
+  gameType: GameType;
+  isMultipleChoice: boolean;
+  options: string[];
   currentGameKey: string;
   capitalMap: Record<string, string>;
   score: number;
@@ -45,7 +49,9 @@ interface GameState {
     difficulty: Difficulty,
     gameKey: string,
     gameMode?: GameMode,
-    capitalMap?: Record<string, string>
+    capitalMap?: Record<string, string>,
+    gameType?: GameType,
+    isMultipleChoice?: boolean
   ) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
@@ -56,6 +62,9 @@ interface GameState {
 }
 
 const INITIAL_TIME = 300;
+const SURVIVAL_START_TIME = 15;
+const SURVIVAL_BONUS = 3;
+const SURVIVAL_PENALTY = 5;
 
 const normalizeString = (str: string | null | undefined) => {
   if (!str) return "";
@@ -106,6 +115,9 @@ export const useGameStore = create<GameState>()(
       difficulty: 'medium',
       strictMode: false,
       gameMode: 'name',
+      gameType: 'standard',
+      isMultipleChoice: false,
+      options: [],
       currentGameKey: '',
       capitalMap: {},
       score: 0,
@@ -121,7 +133,7 @@ export const useGameStore = create<GameState>()(
       isNewHighScore: false,
       totalToGuess: 0,
 
-      startGame: (states, validNames, duration, difficulty, gameKey, gameMode = 'name', capitalMap = {}) => {
+      startGame: (states, validNames, duration, difficulty, gameKey, gameMode = 'name', capitalMap = {}, gameType = 'standard', isMultipleChoice = false) => {
         const filtered = states.filter(s => {
           if (!s.properties.name) return false;
           return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
@@ -130,17 +142,31 @@ export const useGameStore = create<GameState>()(
         const shuffled = [...filtered].sort(() => Math.random() - 0.5);
         const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
         
+        const firstState = shuffled[0] || null;
+        let initialOptions: string[] = [];
+        
+        if (isMultipleChoice && firstState) {
+          const correct = gameMode === 'capital' ? (capitalMap[firstState.properties.name] || firstState.properties.name) : firstState.properties.name;
+          const others = shuffled.filter(s => s.id !== firstState.id)
+            .map(s => gameMode === 'capital' ? (capitalMap[s.properties.name] || s.properties.name) : s.properties.name);
+          
+          initialOptions = [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
+        }
+
         set({
           status: 'playing',
           difficulty,
           strictMode: difficulty === 'hard',
           gameMode,
+          gameType,
+          isMultipleChoice,
+          options: initialOptions,
           currentGameKey: gameKey,
           capitalMap,
           score: 0,
-          timeLeft: Math.floor(duration * difficultyMultiplier),
+          timeLeft: gameType === 'survival' ? SURVIVAL_START_TIME : Math.floor(duration * difficultyMultiplier),
           remainingStates: shuffled.slice(1),
-          currentState: shuffled[0] || null,
+          currentState: firstState,
           missedStates: [],
           correctlyGuessedIds: [],
           userInput: '',
@@ -155,7 +181,7 @@ export const useGameStore = create<GameState>()(
       setStrictMode: (strictMode) => set({ strictMode }),
 
       submitGuess: (guess) => {
-        const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode, currentGameKey, highScores } = get();
+        const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode, currentGameKey, highScores, gameType, timeLeft, isMultipleChoice } = get();
         if (!currentState) return false;
 
         const regionName = currentState.properties.name;
@@ -176,6 +202,7 @@ export const useGameStore = create<GameState>()(
           const newCorrectIds = [...correctlyGuessedIds, currentState.id];
           const newScore = score + 1;
           const isFinished = remainingStates.length === 0;
+          const newTime = gameType === 'survival' ? timeLeft + SURVIVAL_BONUS : timeLeft;
 
           if (isFinished) {
             const oldHighScore = highScores[currentGameKey] || 0;
@@ -189,10 +216,25 @@ export const useGameStore = create<GameState>()(
               lastSkippedState: null, 
               correctlyGuessedIds: newCorrectIds,
               highScores: isHighScore ? { ...highScores, [currentGameKey]: newScore } : highScores,
-              isNewHighScore: isHighScore
+              isNewHighScore: isHighScore,
+              timeLeft: newTime
             });
           } else {
             const nextState = remainingStates[0];
+            let nextOptions: string[] = [];
+            
+            if (isMultipleChoice) {
+              const correct = gameMode === 'capital' ? (capitalMap[nextState.properties.name] || nextState.properties.name) : nextState.properties.name;
+              // Mix from remaining and correct to ensure unique options
+              const allPossibleOptions = [...remainingStates.map(s => gameMode === 'capital' ? (capitalMap[s.properties.name] || s.properties.name) : s.properties.name), 
+                                          ...correctlyGuessedIds.map(_id => {
+                                            // This is a bit inefficient but for small sets it's fine
+                                            return ""; // Fallback
+                                          })].filter(o => o && normalizeString(o) !== normalizeString(correct));
+              
+              nextOptions = [correct, ...allPossibleOptions.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
+            }
+
             set({
               score: newScore,
               currentState: nextState,
@@ -201,6 +243,8 @@ export const useGameStore = create<GameState>()(
               lastGuessCorrect: true,
               lastSkippedState: null,
               correctlyGuessedIds: newCorrectIds,
+              timeLeft: newTime,
+              options: nextOptions
             });
           }
           return true;
@@ -211,22 +255,39 @@ export const useGameStore = create<GameState>()(
       },
 
       skipState: () => {
-        const { currentState, remainingStates, missedStates } = get();
+        const { currentState, remainingStates, missedStates, gameType, timeLeft, isMultipleChoice, gameMode, capitalMap } = get();
         if (!currentState) return;
         
         const updatedRemaining =[...remainingStates, currentState];
         const newMissed = [...new Set([...missedStates, currentState])];
+        const newTime = gameType === 'survival' ? Math.max(0, timeLeft - SURVIVAL_PENALTY) : timeLeft;
+
+        if (newTime === 0 && gameType === 'survival') {
+          set({ status: 'finished', timeLeft: 0, missedStates: newMissed });
+          return;
+        }
         
+        const nextState = updatedRemaining[0];
+        let nextOptions: string[] = [];
+        if (isMultipleChoice) {
+          const correct = gameMode === 'capital' ? (capitalMap[nextState.properties.name] || nextState.properties.name) : nextState.properties.name;
+          const others = updatedRemaining.filter(s => s.id !== nextState.id)
+            .map(s => gameMode === 'capital' ? (capitalMap[s.properties.name] || s.properties.name) : s.properties.name);
+          nextOptions = [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
+        }
+
         if (updatedRemaining.length === 0) {
-          set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, lastSkippedState: null, missedStates: newMissed });
+          set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, lastSkippedState: null, missedStates: newMissed, timeLeft: newTime });
         } else {
           set({
-            currentState: updatedRemaining[0],
+            currentState: nextState,
             remainingStates: updatedRemaining.slice(1),
             userInput: '',
             lastGuessCorrect: null,
             lastSkippedState: currentState,
             missedStates: newMissed,
+            timeLeft: newTime,
+            options: nextOptions
           });
         }
       },
@@ -253,7 +314,8 @@ export const useGameStore = create<GameState>()(
         lastGuessCorrect: null,
         lastSkippedState: null,
         totalToGuess: 0,
-        isNewHighScore: false
+        isNewHighScore: false,
+        options: []
       }),
     }),
     {

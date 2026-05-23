@@ -20,7 +20,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   try {
     const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
     const data = fs.readFileSync(fallbackPath, 'utf-8');
-    const countries = JSON.parse(data);
+    const json = JSON.parse(data);
+    const countries = json.data || [];
     countryCodes = countries.map((c: any) => c.isoCode?.toLowerCase()).filter(Boolean);
   } catch (error) {
     console.error('Error reading country data for sitemap:', error);

@@ -22,7 +22,8 @@ export async function generateStaticParams() {
   try {
     const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
     const data = await fs.readFile(fallbackPath, 'utf-8');
-    const countries = JSON.parse(data);
+    const json = JSON.parse(data);
+    const countries = json.data || [];
     countryCodes = countries.map((c: any) => c.isoCode?.toLowerCase()).filter(Boolean);
   } catch (error) {
     console.error('Error reading fallback-countries for static generation:', error);

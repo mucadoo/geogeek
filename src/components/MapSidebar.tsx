@@ -4,8 +4,9 @@ import { X, BookOpen } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
+import { getNeighborsAction } from '@/app/actions';
 import { 
   Dialog, 
   DialogContent, 
@@ -27,6 +28,23 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
   const locale = useLocale();
   const t = useTranslations('CountryDetails');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [neighbors, setNeighbors] = useState<Country[]>([]);
+  const [loadingNeighbors, setLoadingNeighbors] = useState(false);
+
+  useEffect(() => {
+    async function fetchNeighbors() {
+      if (type === 'country' && data) {
+        setLoadingNeighbors(true);
+        const name = getLocalizedValue(data.name, 'en'); // Use English name for more reliable neighbor lookup
+        const result = await getNeighborsAction(name, locale);
+        setNeighbors(result);
+        setLoadingNeighbors(false);
+      } else {
+        setNeighbors([]);
+      }
+    }
+    fetchNeighbors();
+  }, [data, type, locale]);
 
   return (
     <div className="animate-in slide-in-from-right fade-in duration-300 absolute bottom-0 right-0 z-40 flex h-[40vh] w-full flex-col overflow-hidden rounded-t-lg border-t-2 border-dashed border-[#8d99ae] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-md lg:bottom-auto lg:top-24 lg:right-4 lg:h-[80vh] lg:w-96 lg:rounded-lg lg:border-2 lg:border-l-2">
@@ -104,6 +122,46 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* NEIGHBORING COUNTRIES SECTION */}
+            <div className="border border-dashed border-[#8d99ae] p-4 rounded-md">
+              <h3 className="mb-4 font-bebas text-2xl tracking-wider text-[var(--color-primary)] dark:text-[#00d4ff]">NEIGHBORS</h3>
+              {loadingNeighbors ? (
+                <div className="flex gap-2 animate-pulse">
+                  {[1, 2, 3].map(i => <div key={i} className="h-10 w-14 bg-slate-200 dark:bg-slate-700 rounded-md" />)}
+                </div>
+              ) : neighbors.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {neighbors.map((neighbor) => (
+                    <button
+                      key={neighbor.isoCode}
+                      onClick={() => router.push(`/map/${neighbor.isoCode?.toLowerCase()}`)}
+                      className="group relative transition-transform hover:scale-110 active:scale-95"
+                      title={getLocalizedValue(neighbor.name, locale)}
+                    >
+                      {neighbor.flagUrl ? (
+                        <Image 
+                          src={neighbor.flagUrl} 
+                          alt="" 
+                          width={48} 
+                          height={32} 
+                          className="h-8 w-12 rounded border border-gray-200 object-cover shadow-sm" 
+                        />
+                      ) : (
+                        <div className="flex h-8 w-12 items-center justify-center rounded border border-dashed border-gray-200 bg-slate-100 text-[8px]">
+                          {neighbor.isoCode}
+                        </div>
+                      )}
+                      <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)] text-[8px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        ➔
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">No direct land neighbors found.</p>
+              )}
             </div>
           </div>
         )}

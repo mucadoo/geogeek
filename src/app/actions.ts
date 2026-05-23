@@ -30,3 +30,11 @@ export async function getRankingsAction(type: RankingType, locale: string = 'en'
     return [];
   }
 }
+
+export async function getNeighborsAction(countryName: string, locale: string = 'en') {
+  try {
+    return await countryService.getNeighbors(countryName, locale);
+  } catch {
+    return [];
+  }
+}

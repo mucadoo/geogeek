@@ -16,9 +16,10 @@ interface GameMapProps {
   width?: number;
   height?: number;
   showOnlyValid?: boolean;
-  gameMode?: 'name' | 'capital';
+  gameMode?: 'name' | 'capital' | 'flag';
   capitalMap?: Record<string, string>;
   capitalCoordinates?: Record<string, [number, number]>;
+  onRegionClick?: (id: string, name: string) => void;
 }
 
 const normalizeString = (str: string | null | undefined) => {
@@ -29,7 +30,8 @@ const normalizeString = (str: string | null | undefined) => {
 export default function GameMap({ 
   mapData, highlightedStateId, projection, validNames,
   width = 960, height = 600,
-  showOnlyValid = false, gameMode = 'name', capitalMap = {}, capitalCoordinates = {}
+  showOnlyValid = false, gameMode = 'name', capitalMap = {}, capitalCoordinates = {},
+  onRegionClick
 }: GameMapProps) {
   const { correctlyGuessedIds, lastGuessCorrect, lastSkippedState } = useGameStore();
   const pathGenerator = d3.geoPath().projection(projection);
@@ -122,7 +124,8 @@ export default function GameMap({
                 stroke="var(--map-stroke)" 
                 strokeWidth={0.5} 
                 vectorEffect="non-scaling-stroke"
-                className={`transition-colors duration-300 ${animationClass}`}
+                className={`transition-colors duration-300 ${animationClass} ${onRegionClick ? 'cursor-pointer' : ''}`}
+                onClick={() => onRegionClick?.(stateId, stateName)}
               />
             );
           })}
