@@ -77,6 +77,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               fill={fillColor}
               stroke="var(--map-stroke)"
               strokeWidth={0.5}
+              vectorEffect="non-scaling-stroke"
               className="transition-all duration-700 outline-none cursor-pointer"
               role="button"
               tabIndex={0}
@@ -129,6 +130,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               fill={fillColor}
               stroke="var(--map-stroke)"
               strokeWidth={isVisible ? 0.5 : 0}
+              vectorEffect="non-scaling-stroke"
               className={`transition-all duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               onMouseEnter={(e) => {
                 if (!isClickable) return;

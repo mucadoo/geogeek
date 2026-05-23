@@ -109,7 +109,8 @@ export default function RankingDetailClient({
     const val = typeof item.value === 'string' ? parseFloat(item.value.replace(/,/g, '')) : item.value;
     if (isNaN(val)) return t('table.na');
 
-    const percentage = maxValue > 0 ? (val / maxValue) * 100 : 0;
+    // Prevent NaN style widths
+    const percentage = (maxValue > 0 && !isNaN(val)) ? (val / maxValue) * 100 : 0;
     
     let displayValue = val.toLocaleString(locale);
     if (slug === 'gdp') displayValue = '$' + formatLargeNumber(val, locale); // Use formatLargeNumber for GDP
@@ -123,7 +124,7 @@ export default function RankingDetailClient({
         <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--card-border)]/30 md:w-32">
           <div 
             className="h-full bg-[var(--primary)] transition-all duration-1000 ease-out"
-            style={{ width: `${Math.max(2, percentage)}%` }}
+            style={{ width: `${Math.max(2, percentage)}%` }} // Now guarantees a clean visual number
           />
         </div>
       </div>

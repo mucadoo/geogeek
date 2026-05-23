@@ -1,10 +1,11 @@
 'use client';
 
-import { Map, Play, MapPin, Globe, Search, Star, Sparkles } from 'lucide-react';
+import { Map, Play, MapPin, Globe, Search, Star, Sparkles, Trophy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useState, useMemo } from 'react';
 
 import { Link } from '@/i18n/routing';
+import { useGameStore } from '@/store/useGameStore';
 import { GameCategory } from '@/types';
 
 const games = [
@@ -97,6 +98,7 @@ export default function GamesClient() {
   const t = useTranslations('Games');
   const [activeCategory, setActiveCategory] = useState<GameCategory>(GameCategory.ALL);
   const [searchQuery, setSearchQuery] = useState('');
+  const highScores = useGameStore((state) => state.highScores);
 
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
@@ -158,6 +160,8 @@ export default function GamesClient() {
         {filteredGames.length > 0 ? (
           filteredGames.map((game) => {
             const Icon = game.icon;
+            const highScore = highScores[game.id] || 0;
+
             return (
               <Link 
                 key={game.id} 
@@ -176,14 +180,22 @@ export default function GamesClient() {
                 </div>
 
                 <div className="flex flex-grow flex-col">
-                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg transition-transform group-hover:rotate-6">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg transition-transform group-hover:rotate-6 relative">
                     <Icon size={32} />
                   </div>
                   <h2 className="mb-2 text-2xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`gameData.${game.id}.title`)}</h2>
-                  <p className="mb-8 flex-grow leading-relaxed font-game-mono text-slate-500 dark:text-slate-400">
+                  <p className="mb-6 flex-grow leading-relaxed font-game-mono text-sm text-slate-500 dark:text-slate-400">
                     {t(`gameData.${game.id}.description`)}
                   </p>
                   
+                  {/* Dynamic High Score Badge */}
+                  {highScore > 0 && (
+                    <div className="mb-6 flex items-center gap-1.5 font-game-mono text-xs font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/20 px-3 py-1.5 rounded-lg w-fit">
+                      <Trophy size={14} className="text-teal-500" />
+                      Best: {highScore} / {game.count}
+                    </div>
+                  )}
+
                   <div className="mt-auto flex items-center justify-between rounded-xl bg-[var(--input-bg)] px-4 py-3 group-hover:bg-primary/10">
                     <span className="font-game-heading uppercase tracking-widest text-sm text-slate-500 group-hover:text-primary">{t('startQuiz')}</span>
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--card-bg)] text-slate-400 shadow-sm group-hover:bg-primary group-hover:text-white">

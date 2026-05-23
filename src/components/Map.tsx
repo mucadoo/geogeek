@@ -7,16 +7,16 @@ import { useLocale, useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { feature } from 'topojson-client';
 
-import { Country } from '@/types';
-import MapPolygons from './MapPolygons';
-import MapSidebar from './MapSidebar';
-
 import { getCountryByIsoAction } from '@/app/actions';
 import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
+import { Country } from '@/types';
+
+import MapPolygons from './MapPolygons';
+import MapSidebar from './MapSidebar';
 
 interface MapProps {
   slug?: string;
@@ -50,7 +50,8 @@ export default function Map({ slug }: MapProps) {
 
   const { 
     position, selectedContinent, tooltip, setTooltip,
-    exploreMode, setExploreMode, resetMap, handleContinentClick
+    exploreMode, setExploreMode, resetMap, handleContinentClick,
+    _hasHydrated
   } = useMapStore();
 
   const { data: subMapData } = useCountrySubMap(activeCountry?.isoCode || null);
@@ -83,6 +84,16 @@ export default function Map({ slug }: MapProps) {
   },[]);
 
   const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
+
+  // Guard render to avoid hydration mismatches
+  if (!_hasHydrated) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#f1f5f3]">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+        <p className="font-medium text-slate-500 mt-2">{t('loading')}</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     async function initView() {

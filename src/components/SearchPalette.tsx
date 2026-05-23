@@ -17,10 +17,11 @@ export default function SearchPalette() {
   const t = useTranslations('Games');
   const locale = useLocale();
 
-  // Load countries
+  // Load countries ONLY when the search box is toggled open
   const { data: countries = [] } = useQuery<Country[]>({
     queryKey: ['countries'],
     queryFn: () => fetchCountries(),
+    enabled: open, // <-- Performance Optimization: Saves massive initial load bandwidth
   });
 
   // Hotkey listener

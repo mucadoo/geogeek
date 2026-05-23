@@ -1,3 +1,6 @@
+import fs from 'fs/promises';
+import path from 'path';
+
 import { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
@@ -8,17 +11,32 @@ import { CONTINENT_VIEWS } from '@/config/mapConstants';
 import { routing } from '@/i18n/routing';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   const locales = routing.locales;
   const continents = Object.keys(CONTINENT_VIEWS).map((c) => c.toLowerCase().replace(' ', '-'));
   
-  const params = [];
+  const params: { locale: string; slug?: string[] }[] = [];
+
+  // Read fallback countries list at build time to pre-render dynamic routes
+  let countryCodes: string[] = [];
+  try {
+    const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
+    const data = await fs.readFile(fallbackPath, 'utf-8');
+    const countries = JSON.parse(data);
+    countryCodes = countries.map((c: any) => c.isoCode?.toLowerCase()).filter(Boolean);
+  } catch (error) {
+    console.error('Error reading fallback-countries for static generation:', error);
+  }
+
   for (const locale of locales) {
     params.push({ locale, slug: undefined }); // World
     for (const continent of continents) {
       params.push({ locale, slug: [continent] });
     }
-    // Note: Countries would typically be generated based on dynamic data or a predefined list
+    // Pre-render individual country pages! (e.g., /map/us, /map/it)
+    for (const code of countryCodes) {
+      params.push({ locale, slug: [code] });
+    }
   }
   return params;
 }

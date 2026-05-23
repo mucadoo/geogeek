@@ -2,9 +2,9 @@
 
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, ArrowLeft } from 'lucide-react';
+import { Trophy, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
@@ -12,7 +12,6 @@ import { Topology } from 'topojson-specification';
 import DifficultyTicket from '@/components/DifficultyTicket';
 import { GameHUD } from '@/components/GameHUD';
 import GameMap from '@/components/GameMap';
-import { RegionCounter } from '@/components/RegionCounter';
 import { Link } from '@/i18n/routing';
 import { useGameStore, StateFeature, getFeedback, GameMode } from '@/store/useGameStore';
 
@@ -32,7 +31,7 @@ interface QuizLayoutProps {
   gameMode?: GameMode;
   capitalMap?: Record<string, string>;
   showOnlyValid?: boolean;
-  capitalCoordinates?: Record<string,[number, number]>;
+  capitalCoordinates?: Record<string, [number, number]>;
 }
 
 export default function QuizLayout({
@@ -41,11 +40,13 @@ export default function QuizLayout({
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
   const tRegions = useTranslations('RegionNames');
+  const inputRef = useRef<HTMLInputElement>(null);
   
   const { 
     status: gameStatus, startGame, resetGame, currentState, score, 
     totalToGuess, timeLeft, tick, isNewHighScore,
-    userInput, setUserInput, submitGuess, skipState, lastGuessCorrect
+    userInput, setUserInput, submitGuess, skipState, lastGuessCorrect,
+    correctlyGuessedIds, missedStates
   } = useGameStore();
 
   const getLocalizedName = (name: string) => {
@@ -56,6 +57,7 @@ export default function QuizLayout({
     }
   };
 
+  // High score effects
   useEffect(() => {
     if (gameStatus === 'finished' && score > 0 && score === totalToGuess) {
       confetti({
@@ -65,6 +67,19 @@ export default function QuizLayout({
       });
     }
   }, [gameStatus, score, totalToGuess]);
+
+  // Handle auto-focus and auto-selection on incorrect guess for perfect UX
+  useEffect(() => {
+    if (gameStatus === 'playing' && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentState, gameStatus]);
+
+  useEffect(() => {
+    if (lastGuessCorrect === false && inputRef.current) {
+      inputRef.current.select(); // Highlight wrong answer so players can immediately overwrite it
+    }
+  }, [lastGuessCorrect]);
 
   const [difficulty, setDifficulty] = React.useState<'easy' | 'medium' | 'hard'>('medium');
 
@@ -84,6 +99,18 @@ export default function QuizLayout({
       startGame(states, validNames, duration, difficulty, 'QUIZ_KEY', gameMode, capitalMap);
     }
   };
+
+  // Helper to extract the list of recently guessed region names to display
+  const recentGuesses = useMemo(() => {
+    if (!mapData || !correctlyGuessedIds.length) return [];
+    const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
+    const geo = feature(mapData, mapData.objects[objectKey]) as any;
+    
+    return correctlyGuessedIds.slice(-4).reverse().map((id) => {
+      const feat = geo.features.find((f: any) => String(f.id) === id);
+      return feat ? feat.properties.name : 'Unknown';
+    });
+  }, [mapData, correctlyGuessedIds]);
 
   if (mapStatus === 'pending') {
     return (
@@ -112,23 +139,50 @@ export default function QuizLayout({
         )}
       </div>
 
-      {/* LAYER 2: HUD - TOP & SIDES */}
+      {/* LAYER 2: INTERACTIVE SIDE HUD STATS */}
       {gameStatus === 'playing' && (
         <>
           <GameHUD score={score} total={totalToGuess} timeLeft={timeLeft} />
           
-          <div className="absolute top-24 left-10 hidden xl:flex flex-col gap-6">
-            <RegionCounter label="North" count={0} total={10} />
-            <RegionCounter label="South" count={0} total={10} />
+          {/* Left Side: Guesses Feed */}
+          <div className="absolute top-24 left-10 hidden xl:flex flex-col gap-4 w-60 bg-[var(--card-bg)]/85 backdrop-blur-md p-5 rounded-2xl border border-[var(--card-border)] shadow-lg animate-in fade-in slide-in-from-left-4 duration-500">
+            <h3 className="font-game-heading text-lg tracking-wider text-primary border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+              <CheckCircle2 size={16} /> GUESSED ({score})
+            </h3>
+            <div className="flex flex-col gap-2.5">
+              {recentGuesses.length === 0 ? (
+                <span className="text-xs font-game-mono text-slate-400 italic">None yet</span>
+              ) : (
+                recentGuesses.map((name, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs font-game-mono text-slate-600 dark:text-slate-300">
+                    <span className="text-emerald-500 font-bold">✓</span> {getLocalizedName(name)}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-          <div className="absolute top-24 right-10 hidden xl:flex flex-col gap-6">
-            <RegionCounter label="East" count={0} total={10} />
-            <RegionCounter label="West" count={0} total={10} />
+
+          {/* Right Side: Misses / Skips Feed */}
+          <div className="absolute top-24 right-10 hidden xl:flex flex-col gap-4 w-60 bg-[var(--card-bg)]/85 backdrop-blur-md p-5 rounded-2xl border border-[var(--card-border)] shadow-lg animate-in fade-in slide-in-from-right-4 duration-500">
+            <h3 className="font-game-heading text-lg tracking-wider text-red-500 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
+              <AlertCircle size={16} /> SKIPPED ({missedStates.length})
+            </h3>
+            <div className="flex flex-col gap-2.5">
+              {missedStates.length === 0 ? (
+                <span className="text-xs font-game-mono text-slate-400 italic">None yet</span>
+              ) : (
+                missedStates.slice(-4).reverse().map((state) => (
+                  <div key={state.id} className="flex items-center gap-2 text-xs font-game-mono text-slate-600 dark:text-slate-300">
+                    <span className="text-amber-500 font-bold">➔</span> {getLocalizedName(state.properties.name)}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </>
       )}
 
-      {/* LAYER 3: HUD - BOTTOM CENTER UI W/ ACTIONS*/}
+      {/* LAYER 3: HUD - BOTTOM CENTER UI W/ ACTIONS */}
       {gameStatus === 'playing' && (
         <div className="pointer-events-none absolute bottom-8 left-0 right-0 z-10 px-6 md:bottom-12">
           <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
@@ -141,10 +195,11 @@ export default function QuizLayout({
             )}
 
             <div className={cn(
-              "pointer-events-auto w-full bg-[var(--card-bg)] rounded-full p-2 flex items-center shadow-2xl border transition-colors",
-              lastGuessCorrect === false ? "border-red-400 bg-red-50 shake" : "border-[var(--card-border)]"
+              "pointer-events-auto w-full bg-[var(--card-bg)] rounded-full p-2 flex items-center shadow-2xl border transition-all",
+              lastGuessCorrect === false ? "border-red-400 bg-red-50/90 dark:bg-red-950/20 shake" : "border-[var(--card-border)]"
             )}>
                <input 
+                 ref={inputRef}
                  autoFocus
                  value={userInput}
                  onChange={(e) => setUserInput(e.target.value)}
@@ -153,7 +208,7 @@ export default function QuizLayout({
                  }}
                  className={cn(
                    "flex-grow bg-transparent px-6 py-3 outline-none font-game-mono text-[var(--foreground)] placeholder:text-slate-400",
-                   lastGuessCorrect === false ? "text-red-500 placeholder:text-red-300" : ""
+                   lastGuessCorrect === false ? "text-red-600 placeholder:text-red-300" : ""
                  )} 
                  placeholder={gameMode === 'capital' ? t('typeCapital') : t('typeRegion')} 
                />

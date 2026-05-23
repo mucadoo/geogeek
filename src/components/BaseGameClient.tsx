@@ -15,6 +15,7 @@ interface BaseGameClientProps {
   gameKey: string;
   projectionConfig: ProjectionConfig;
   showOnlyValid?: boolean;
+  gameMode?: 'name' | 'capital';
 }
 
 export default function BaseGameClient({
@@ -25,6 +26,7 @@ export default function BaseGameClient({
   gameKey,
   projectionConfig,
   showOnlyValid,
+  gameMode: gameModeProp,
 }: BaseGameClientProps) {
   const { data: mapData, status: mapStatus } = useMapData();
   const { data: config, status: configStatus } = useGameConfig();
@@ -48,8 +50,19 @@ export default function BaseGameClient({
     return names;
   }, [tRegions, config, configKey]);
 
+  // Dynamically resolve capitals variables for capital modes
+  const isCapitalMode = gameKey.includes('capitals') || gameModeProp === 'capital';
+  const capitalMap = isCapitalMode
+    ? (gameKey === 'us-capitals' ? config?.US_CAPITALS : config?.SOUTH_AMERICA_CAPITALS)
+    : undefined;
+  const capitalCoordinates = isCapitalMode ? config?.CAPITAL_COORDINATES : undefined;
+
   if (mapStatus === 'pending' || configStatus === 'pending') {
-    return <div>Loading...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[#f1f5f3]">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+      </div>
+    );
   }
   
   const finalDuration = (durationKey && config?.[durationKey]) || duration || 300;
@@ -64,6 +77,9 @@ export default function BaseGameClient({
       validNames={localizedValidNames}
       duration={finalDuration}
       showOnlyValid={showOnlyValid}
+      gameMode={isCapitalMode ? 'capital' : 'name'}
+      capitalMap={capitalMap}
+      capitalCoordinates={capitalCoordinates}
     />
   );
 }
