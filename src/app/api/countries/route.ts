@@ -23,9 +23,11 @@ const getCountriesData = unstable_cache(
   { revalidate: 3600 }
 );
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
   const data = await getCountriesData();
-  return NextResponse.json(data);
+  return NextResponse.json(data, {
+    headers: {
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400', // Cache on edge CDN for 1 hour, serve stale up to 24 hrs
+    }
+  });
 }

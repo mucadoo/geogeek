@@ -114,6 +114,22 @@ export default function QuizLayout({
 
   useEffect(() => { return () => resetGame(); }, [resetGame]);
 
+  useEffect(() => {
+    const handleKeys = (e: KeyboardEvent) => {
+      if (gameStatus !== 'playing') return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        resetGame();
+      }
+      if (e.key === 'Tab' || (e.key === ' ' && e.ctrlKey)) {
+        e.preventDefault();
+        skipState();
+      }
+    };
+    window.addEventListener('keydown', handleKeys);
+    return () => window.removeEventListener('keydown', handleKeys);
+  }, [gameStatus, skipState, resetGame]);
+
   const handleStartGame = () => {
     if (mapData) {
       const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);

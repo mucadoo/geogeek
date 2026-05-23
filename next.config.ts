@@ -1,12 +1,21 @@
-import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
+import withPWA from 'next-pwa';
 
 const withNextIntl = createNextIntlPlugin();
 
-const nextConfig: NextConfig = {
+const pwaConfig = withPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+});
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     unoptimized: true,
   },
 };
 
-export default withNextIntl(nextConfig);
+// @ts-ignore
+export default withNextIntl(pwaConfig(nextConfig));

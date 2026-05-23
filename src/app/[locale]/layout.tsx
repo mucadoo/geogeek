@@ -50,6 +50,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   return {
     title: messages.Metadata.title,
     description: messages.Metadata.description,
+    manifest: '/manifest.json',
+    themeColor: '#00a8b5',
+    viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
     robots: { index: true, follow: true },
     alternates: {
       canonical: `${baseUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}`,

@@ -8,6 +8,7 @@ import { Topology } from 'topojson-specification';
 
 import { NUMERIC_TO_CONTINENT, NUMERIC_TO_ALPHA2, CONTINENT_VIEWS } from '@/config/mapConstants';
 import { useRouter } from '@/i18n/routing';
+import { useGameStore } from '@/store/useGameStore';
 import { useMapStore } from '@/store/useMapStore';
 
 interface CountryFeature {
@@ -28,9 +29,20 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   const router = useRouter();
   const { 
     selectedContinent, hoveredContinent, hoveredCountry, 
-    tooltip, setTooltip, exploreMode,
+    tooltip, setTooltip, exploreMode, masteryMode,
     setHoveredContinent, setHoveredCountry
   } = useMapStore();
+
+  const { highScores } = useGameStore();
+
+  const getMasteryColor = (alpha2: string) => {
+    if (!alpha2) return "var(--map-fill)";
+    const score = highScores[alpha2.toLowerCase()] || 0;
+    if (score > 0) {
+      return "var(--color-primary)"; 
+    }
+    return "var(--map-fill)";
+  };
 
   const pathGenerator = d3.geoPath().projection(projection);
 
@@ -119,6 +131,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
 
           let fillColor = "var(--map-fill)"; 
           if (isHovered && isClickable) fillColor = "var(--color-danger)";
+          else if (masteryMode && alpha2) fillColor = getMasteryColor(alpha2);
 
           const pathData = pathGenerator(geo);
           if (!pathData) return null;

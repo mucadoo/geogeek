@@ -1,0 +1,16 @@
+{
+  "name": "GeoGeek",
+  "short_name": "GeoGeek",
+  "description": "Interactive world explorer and geography challenge.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8faf9",
+  "theme_color": "#00a8b5",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

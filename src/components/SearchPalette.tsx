@@ -56,6 +56,8 @@ export default function SearchPalette() {
               <Command.Item
                 key={c.isoCode || 'unknown'}
                 onSelect={() => c.isoCode && handleSelect(`/map/${c.isoCode.toLowerCase()}`)}
+                // Pass a composite string to make cmdk search across aliases, English name, and ISO codes
+                value={`${getLocalizedCountryName(c.isoCode || '', locale)} ${c.isoCode} ${c.name.en || ''}`.toLowerCase()}
                 className="px-4 py-2 cursor-pointer rounded-lg font-game-mono text-[var(--foreground)] aria-selected:bg-[var(--primary)]/10"
               >
                 <div className="flex items-center gap-2">

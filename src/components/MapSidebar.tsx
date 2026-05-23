@@ -1,10 +1,10 @@
 'use client';
 
-import { X, BookOpen } from 'lucide-react';
+import { X, BookOpen, Layers } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { getNeighborsAction } from '@/app/actions';
 import { 
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { formatLargeNumber } from '@/lib/formatters';
 import { getLocalizedValue } from '@/lib/i18n-utils';
+import { useMapStore } from '@/store/useMapStore';
 import { Country } from '@/types';
 
 interface MapSidebarProps {
@@ -27,9 +28,27 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('CountryDetails');
+  const { masteryMode, setMasteryMode } = useMapStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [neighbors, setNeighbors] = useState<Country[]>([]);
   const [loadingNeighbors, setLoadingNeighbors] = useState(false);
+  
+  // Swipe-to-dismiss touch states
+  const touchStartY = useRef<number>(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const currentY = e.touches[0].clientY;
+    const diffY = currentY - touchStartY.current;
+
+    // If swipe down exceeds 150px, dismiss the drawer
+    if (diffY > 150) {
+      router.push('/map');
+    }
+  };
 
   useEffect(() => {
     async function fetchNeighbors() {
@@ -47,21 +66,40 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
   }, [data, type, locale]);
 
   return (
-    <div className="animate-in slide-in-from-right fade-in duration-300 absolute bottom-0 right-0 z-40 flex h-[40vh] w-full flex-col overflow-hidden rounded-t-lg border-t-2 border-dashed border-[#8d99ae] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-md lg:bottom-auto lg:top-24 lg:right-4 lg:h-[80vh] lg:w-96 lg:rounded-lg lg:border-2 lg:border-l-2">
+    <div 
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      className="animate-in slide-in-from-right fade-in duration-300 absolute bottom-0 right-0 z-40 flex h-[40vh] w-full flex-col overflow-hidden rounded-t-lg border-t-2 border-dashed border-[#8d99ae] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-md lg:bottom-auto lg:top-24 lg:right-4 lg:h-[80vh] lg:w-96 lg:rounded-lg lg:border-2 lg:border-l-2"
+    >
+      {/* Decorative Swipe Drag Handle (only visible on mobile) */}
+      <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700 lg:hidden" />
+
       {/* Perforated edge effect */}
       <div className="absolute -left-3 top-10 h-6 w-6 rounded-full bg-[var(--background)] border-r-2 border-dashed border-[#8d99ae] hidden lg:block" />
       <div className="absolute -right-3 top-10 h-6 w-6 rounded-full bg-[var(--background)] border-l-2 border-dashed border-[#8d99ae] hidden lg:block" />
 
-      <div className="mb-6 flex items-center justify-between border-b-2 border-dashed border-[#8d99ae] pb-4">
-        <h2 className="font-bebas text-4xl tracking-wider text-[var(--color-primary)] dark:text-[#00a8b5]">
-          {title}
-        </h2>
+      <div className="mb-4 flex items-center justify-between">
+        <button 
+          onClick={() => setMasteryMode(!masteryMode)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-dashed transition-all font-bebas tracking-widest text-xs ${
+            masteryMode ? 'border-primary bg-primary/10 text-primary' : 'border-slate-300 text-slate-400 grayscale'
+          }`}
+        >
+          <Layers size={14} />
+          {masteryMode ? 'Mastery: ON' : 'Mastery: OFF'}
+        </button>
         <button
           onClick={() => router.push('/map')}
           className="rounded-full bg-gray-200 dark:bg-gray-700 p-1 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
         >
           <X size={20} />
         </button>
+      </div>
+
+      <div className="mb-6 flex items-center justify-between border-b-2 border-dashed border-[#8d99ae] pb-4">
+        <h2 className="font-bebas text-4xl tracking-wider text-[var(--color-primary)] dark:text-[#00a8b5]">
+          {title}
+        </h2>
       </div>
 
       <div className="flex-1 overflow-y-auto font-mono text-sm text-[var(--foreground)] pr-2">
