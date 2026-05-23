@@ -1,15 +1,12 @@
 'use server';
-import { WikiGeoClient, Country } from '@mucadoo/wiki-geo-data';
 
 import { countryService } from '@/lib/countryService';
-import { RankingType } from '@/types';
-
-const client = new WikiGeoClient({ dataSource: 'remote' });
+import { Country, RankingType } from '@/types';
 
 export async function getCountryByIsoAction(isoCode: string): Promise<Country | null> {
   try {
-    const response = await client.getCountry(isoCode);
-    return response.data;
+    const country = await countryService.getCountryByIso(isoCode);
+    return country || null;
   } catch {
     return null;
   }

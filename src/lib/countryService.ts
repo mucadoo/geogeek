@@ -1,32 +1,54 @@
 import 'server-only';
-import { WikiGeoClient, Country } from '@mucadoo/wiki-geo-data';
+import { Country, RankingType } from '@/types';
 
-import { RankingType } from '@/types';
-
-const client = new WikiGeoClient({ dataSource: 'remote' });
+const fetchInternalCountries = async (): Promise<Country[]> => {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const response = await fetch(`${baseUrl}/api/countries`, { next: { revalidate: 3600 } });
+  if (!response.ok) return [];
+  return response.json();
+};
 
 export const countryService = {
   getAllCountries: async (): Promise<Country[]> => {
-    const response = await client.getFullDatabase();
-    return response.data;
+    return await fetchInternalCountries();
   },
 
   getCountryByIso: async (isoCode: string): Promise<Country | undefined> => {
-    const response = await client.getCountry(isoCode);
-    return response?.data;
+    const countries = await fetchInternalCountries();
+    return countries.find(c => c.isoCode?.toUpperCase() === isoCode.toUpperCase());
   },
 
   getNeighbors: async (countryName: string, locale: string = 'en'): Promise<Country[]> => {
-    const response = await client.getFullDatabase();
-    const countries = response.data;
+    const countries = await fetchInternalCountries();
+    
+    // Find our focus country
     const country = countries.find(c => 
       c.name[locale as keyof Country['name']] === countryName || 
       c.name.en === countryName
     );
-    if (!country || !country.description) return [];
+    if (!country) return [];
 
+    // Map CCA3 codes in memory for rapid lookup
+    const cca3ToCca2Map = countries.reduce((acc, c) => {
+      if ((c as any).cca3 && c.isoCode) {
+        acc[(c as any).cca3.toUpperCase()] = c.isoCode.toUpperCase();
+      }
+      return acc;
+    }, {} as Record<string, string>);
+
+    // If borders array is empty, fallback safely to descriptive matching
+    const borders = (country as any).borders || [];
+    if (borders.length > 0) {
+      return borders
+        .map((borderCode: string) => {
+          const matchedIso = cca3ToCca2Map[borderCode.toUpperCase()];
+          return countries.find(c => c.isoCode === matchedIso);
+        })
+        .filter(Boolean) as Country[];
+    }
+
+    // Secondary fallback matching (string checking description)
     const description = (country.description[locale as keyof Country['description']] || country.description.en || '').toLowerCase();
-    
     return countries.filter(c => {
       const name = ((c.name && (c.name[locale as keyof Country['name']] || c.name.en)) || '').toLowerCase();
       return name !== ((country.name && (country.name[locale as keyof Country['name']] || country.name.en)) || '').toLowerCase() && 
@@ -35,15 +57,14 @@ export const countryService = {
   },
 
   getRankings: async (type: RankingType, locale: string = 'en'): Promise<{ country: string; value: number; isoCode: string; rank: number }[]> => {
-    const response = await client.getFullDatabase();
-    const countries = response.data;
+    const countries = await fetchInternalCountries();
 
     const propMap: Record<RankingType, keyof Country> = {
       'Population': 'population',
       'Area': 'areaKm2',
       'Density': 'densityKm2',
-      'HDI': 'hdi',
-      'GDP': 'gdp'
+      'HDI': 'hdi' as any,
+      'GDP': 'gdp' as any
     };
 
     const prop = propMap[type] || 'population';
