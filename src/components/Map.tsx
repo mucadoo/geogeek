@@ -140,15 +140,31 @@ export default function Map({ slug }: MapProps) {
 
       // Handle Country
       if (firstPart.length === 2) {
-        const country = await getCountryByIsoAction(firstPart.toUpperCase());
+        const iso = firstPart.toUpperCase();
+        // Avoid redundant fetches if we're already on this country
+        if (activeCountry?.isoCode === iso) {
+          setActiveRegion(secondPart || null);
+          return;
+        }
+
+        const country = await getCountryByIsoAction(iso);
         if (country) {
           setActiveCountry(country);
           setActiveRegion(secondPart || null);
+        } else {
+          // If fetch fails, we should still probably clear the previous country
+          setActiveCountry(null);
+          setActiveRegion(null);
         }
+      } else {
+        // Fallback for unknown slugs
+        resetMap();
+        setActiveCountry(null);
+        setActiveRegion(null);
       }
     }
     initView();
-  }, [slug, handleContinentClick, resetMap]);
+  }, [slug, handleContinentClick, resetMap, activeCountry?.isoCode]);
 
   useEffect(() => {
     if (!svgRef.current || !gRef.current) return;
