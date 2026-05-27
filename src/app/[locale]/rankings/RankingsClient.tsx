@@ -9,7 +9,7 @@ export default function RankingsClient() {
   const t = useTranslations('Rankings');
 
   return (
-    <main className="container-custom animate-in fade-in mt-10 mb-20 flex-grow duration-1000">
+    <main className="container-custom animate-in fade-in mt-10 mb-20 flex-grow duration-1000 relative z-10">
       <h1 className="mb-16 text-center text-[48px] font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t('title')}</h1>
       <div className="mx-auto grid max-w-[1000px] grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {RANKING_CATEGORIES.map((category) => (

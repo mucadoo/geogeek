@@ -132,7 +132,7 @@ export default function RankingDetailClient({
   };
 
   return (
-    <main className="container-custom animate-in fade-in mt-10 mb-20 flex-grow duration-1000">
+    <main className="container-custom animate-in fade-in mt-10 mb-20 flex-grow duration-1000 relative z-10">
       <div className="relative mx-auto mb-12 w-full max-w-[900px]">
         <div className="flex flex-col items-center gap-8 md:flex-row md:justify-between">
           <div className="flex items-center gap-6">

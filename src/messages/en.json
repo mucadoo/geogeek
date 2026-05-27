@@ -84,6 +84,30 @@
       "australia-states": {
         "title": "Australia States",
         "description": "Test your knowledge of the land down under!"
+      },
+      "africa-flags": {
+        "title": "Africa Flags",
+        "description": "Test your knowledge of African national flags."
+      },
+      "asia-flags": {
+        "title": "Asia Flags",
+        "description": "Test your knowledge of Asian national flags."
+      },
+      "europe-flags": {
+        "title": "Europe Flags",
+        "description": "Test your knowledge of European national flags."
+      },
+      "north-america-flags": {
+        "title": "North America Flags",
+        "description": "Test your knowledge of North American national flags."
+      },
+      "oceania-flags": {
+        "title": "Oceania Flags",
+        "description": "Test your knowledge of Oceania national flags."
+      },
+      "south-america-flags": {
+        "title": "South America Flags",
+        "description": "Test your knowledge of South American national flags."
       }
     }
   },

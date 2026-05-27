@@ -11,7 +11,7 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://geogeek.com';
   const continents = Object.keys(CONTINENT_VIEWS).map((c) => c.toLowerCase().replace(' ', '-'));
-  const routes = ['', '/map', '/rankings', '/games'];
+  const routes = ['', '/map', '/rankings', '/games', '/about', '/compare'];
 
   const sitemap: MetadataRoute.Sitemap = [];
 

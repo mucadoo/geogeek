@@ -92,10 +92,6 @@ export default function GameMap({
         
         <rect width="100%" height="100%" fill="url(#ocean-dots)" />
         
-        <text x="50%" y="50%" textAnchor="middle" className="font-mono text-8xl font-black uppercase fill-[var(--map-stroke)] select-none pointer-events-none opacity-10">
-          Oceania
-        </text>
-
         {/* Dynamic Zooming Group Wrapper */}
         <g style={focusTransformStyle} className="will-change-transform">
           {allFeatures.map((feat: Feature, i: number) => {

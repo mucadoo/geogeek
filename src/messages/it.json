@@ -84,6 +84,30 @@
       "australia-states": {
         "title": "Stati dell'Australia",
         "description": "Metti alla prova la tua conoscenza della terra laggiù!"
+      },
+      "africa-flags": {
+        "title": "Bandiere dell'Africa",
+        "description": "Metti alla prova la tua conoscenza delle bandiere nazionali africane."
+      },
+      "asia-flags": {
+        "title": "Bandiere dell'Asia",
+        "description": "Metti alla prova la tua conoscenza delle bandiere nazionali asiatiche."
+      },
+      "europe-flags": {
+        "title": "Bandiere dell'Europa",
+        "description": "Metti alla prova la tua conoscenza delle bandiere nazionali europee."
+      },
+      "north-america-flags": {
+        "title": "Bandiere del Nord America",
+        "description": "Metti alla prova la tua conoscenza delle bandiere nazionali nordamericane."
+      },
+      "oceania-flags": {
+        "title": "Bandiere dell'Oceania",
+        "description": "Metti alla prova la tua conoscenza delle bandiere nazionali dell'Oceania."
+      },
+      "south-america-flags": {
+        "title": "Bandiere del Sud America",
+        "description": "Metti alla prova la tua conoscenza delle bandiere nazionali sudamericane."
       }
     }
   },
