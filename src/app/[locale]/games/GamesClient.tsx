@@ -112,29 +112,29 @@ export default function GamesClient() {
   }, [activeCategory, searchQuery, t]);
 
   return (
-    <main className="container-custom animate-in fade-in flex-grow py-12 duration-1000">
-      <header className="mb-12 text-center">
-        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-game-mono font-bold text-primary uppercase tracking-widest">
+    <main className="container-custom animate-in fade-in flex-grow py-12 duration-1000 relative z-10">
+      <header className="mb-16 text-center">
+        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-game-mono font-bold text-primary uppercase tracking-widest border border-primary/20">
           <Sparkles size={16} /> {t('subtitle')}
         </div>
-        <h1 className="mb-4 text-5xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">
+        <h1 className="mb-6 text-6xl md:text-8xl font-game-heading tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-[var(--primary)] via-[#00d2ff] to-[var(--accent)] drop-shadow-sm uppercase leading-none pb-2">
           {t('title')}
         </h1>
-        <p className="mx-auto max-w-2xl text-lg font-game-mono text-gray-500 dark:text-gray-400">
+        <p className="mx-auto max-w-2xl text-lg font-game-mono text-[var(--foreground)] opacity-70 leading-relaxed">
           {t('description')}
         </p>
       </header>
 
-      <div className="mx-auto mb-10 flex w-full max-w-5xl flex-col items-center justify-between gap-6 game-card border-2 border-dashed border-[var(--card-border)] p-4 md:flex-row shadow-none">
+      <div className="mx-auto mb-10 flex w-full max-w-5xl flex-col items-center justify-between gap-6 rounded-2xl bg-[var(--card-bg)]/80 backdrop-blur-md border border-[var(--card-border)] p-5 md:flex-row shadow-lg">
         <div className="flex w-full flex-wrap gap-2 md:w-auto">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`flex-1 rounded-full px-6 py-2.5 text-sm font-game-heading tracking-widest uppercase transition-all md:flex-none ${
+              className={`flex-1 rounded-full px-6 py-2.5 text-sm font-game-heading tracking-widest uppercase transition-all duration-300 md:flex-none border ${
                 activeCategory === cat
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-[var(--input-bg)] text-slate-500 hover:text-[var(--foreground)]'
+                  ? 'bg-primary border-primary text-white shadow-md shadow-primary/20 scale-105'
+                  : 'bg-[var(--card-bg)]/50 backdrop-blur-sm text-slate-500 border-[var(--card-border)] hover:border-primary/50 hover:text-[var(--foreground)]'
               }`}
             >
               {t(`categories.${cat}`)}
@@ -151,7 +151,7 @@ export default function GamesClient() {
             placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-full border-2 border-[var(--card-border)] bg-[var(--input-bg)] py-2.5 pr-4 pl-11 text-sm font-game-mono outline-none transition-all focus:border-primary"
+            className="w-full rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/50 py-2.5 pr-4 pl-11 text-sm font-game-mono outline-none transition-all focus:border-primary focus:bg-[var(--card-bg)] focus:shadow-md"
           />
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function GamesClient() {
               <Link 
                 key={game.id} 
                 href={game.href as any}
-                className="game-card group flex flex-col border-2 border-dashed border-[var(--card-border)] hover:border-primary transition-all shadow-none"
+                className="group flex flex-col rounded-3xl bg-[var(--card-bg)]/80 backdrop-blur-md border-2 border-dashed border-[var(--card-border)] hover:border-primary p-6 hover:-translate-y-2 hover:shadow-[0_12px_30px_rgba(0,168,181,0.15)] active:scale-[0.98] transition-all duration-300 relative overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-1.5 text-[10px] font-game-mono font-bold text-slate-400 uppercase tracking-wider">
@@ -180,7 +180,7 @@ export default function GamesClient() {
                 </div>
 
                 <div className="flex flex-grow flex-col">
-                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg transition-transform group-hover:rotate-6 relative">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                     <Icon size={32} />
                   </div>
                   <h2 className="mb-2 text-2xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`gameData.${game.id}.title`)}</h2>
@@ -196,9 +196,9 @@ export default function GamesClient() {
                     </div>
                   )}
 
-                  <div className="mt-auto flex items-center justify-between rounded-xl bg-[var(--input-bg)] px-4 py-3 group-hover:bg-primary/10">
-                    <span className="font-game-heading uppercase tracking-widest text-sm text-slate-500 group-hover:text-primary">{t('startQuiz')}</span>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--card-bg)] text-slate-400 shadow-sm group-hover:bg-primary group-hover:text-white">
+                  <div className="mt-auto flex items-center justify-between rounded-xl bg-[var(--input-bg)]/50 border border-[var(--card-border)]/50 px-4 py-3 group-hover:bg-primary/10 group-hover:border-primary/25 transition-all duration-300">
+                    <span className="font-game-heading uppercase tracking-widest text-sm text-slate-500 group-hover:text-primary transition-colors">{t('startQuiz')}</span>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--card-bg)] text-slate-400 shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
                       <Play size={14} fill="currentColor" className="ml-1" />
                     </div>
                   </div>

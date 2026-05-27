@@ -59,6 +59,26 @@ export default function Map({ slug }: MapProps) {
   const isSubMap = !!(activeCountry && subMapData);
   const renderMapData = isSubMap ? subMapData : mapData;
 
+  const activeRegionName = useMemo(() => {
+    if (!activeRegion || !subMapData) return null;
+    const geoObject = subMapData.objects.regions;
+    if (!geoObject) return null;
+    const features = feature(subMapData as any, geoObject as any) as any;
+    const regFeature = features.features.find((f: any) => String(f.id) === String(activeRegion));
+    return regFeature?.properties?.name || null;
+  }, [activeRegion, subMapData]);
+
+  const regionsList = useMemo(() => {
+    if (!subMapData) return [];
+    const geoObject = subMapData.objects.regions;
+    if (!geoObject) return [];
+    const features = feature(subMapData as any, geoObject as any) as any;
+    return features.features.map((f: any) => ({
+      id: String(f.id),
+      name: f.properties.name || "Unknown",
+    })).sort((a: any, b: any) => a.name.localeCompare(b.name));
+  }, [subMapData]);
+
   const handleBackClick = () => {
     if (activeRegion) {
       router.push(`/map/${slugParts[0]}`);
@@ -164,6 +184,34 @@ export default function Map({ slug }: MapProps) {
       svg.call(zoom.transform, initialTransform);
     }
 
+    if (activeCountry?.isoCode && activeRegion && subMapData) {
+      const geoObject = subMapData.objects.regions;
+      if (geoObject) {
+        const features = feature(subMapData as any, geoObject as any) as any;
+        const featureData = features.features.find((f: any) => String(f.id) === String(activeRegion));
+        
+        if (featureData) {
+          const path = d3.geoPath().projection(projection);
+          const [[x0, y0], [x1, y1]] = path.bounds(featureData);
+          
+          const dx = x1 - x0;
+          const dy = y1 - y0;
+          const x = (x0 + x1) / 2;
+          const y = (y0 + y1) / 2;
+          
+          const targetWidth = width * 0.6;
+          const scale = Math.min(8, 0.75 / Math.max(dx / targetWidth, dy / height));
+          const translate =[
+            (targetWidth / 2) - scale * x,
+            (height / 2) - scale * y
+          ];
+
+          svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+          return;
+        }
+      }
+    }
+
     if (activeCountry?.isoCode && mapData) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
@@ -205,7 +253,7 @@ export default function Map({ slug }: MapProps) {
         );
     }
 
-  },[position, projection, activeCountry, mapData, ALPHA2_TO_NUMERIC]);
+  }, [position, projection, activeCountry, activeRegion, mapData, subMapData, ALPHA2_TO_NUMERIC]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
@@ -306,7 +354,14 @@ export default function Map({ slug }: MapProps) {
           )}
 
           {activeCountry && (
-            <MapSidebar type="country" title={getLocalizedValue(activeCountry.name, locale)} data={activeCountry} />
+            <MapSidebar 
+              type={activeRegionName ? 'region' : 'country'} 
+              title={activeRegionName ? activeRegionName : getLocalizedValue(activeCountry.name, locale)} 
+              data={activeCountry} 
+              regionName={activeRegionName}
+              regionsList={regionsList}
+              activeRegionId={activeRegion}
+            />
           )}
         </React.Fragment>
       )}

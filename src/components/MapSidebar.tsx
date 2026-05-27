@@ -19,15 +19,19 @@ import { useMapStore } from '@/store/useMapStore';
 import { Country } from '@/types';
 
 interface MapSidebarProps {
-  type: 'continent' | 'country';
+  type: 'continent' | 'country' | 'region';
   title: string;
   data?: Country;
+  regionName?: string | null;
+  regionsList?: { id: string; name: string }[];
+  activeRegionId?: string | null;
 }
 
-export default function MapSidebar({ type, title, data }: MapSidebarProps) {
+export default function MapSidebar({ type, title, data, regionName, regionsList, activeRegionId }: MapSidebarProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('CountryDetails');
+  const tRegions = useTranslations('RegionNames');
   const { masteryMode, setMasteryMode } = useMapStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [neighbors, setNeighbors] = useState<Country[]>([]);
@@ -46,7 +50,19 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
 
     // If swipe down exceeds 150px, dismiss the drawer
     if (diffY > 150) {
-      router.push('/map');
+      if (type === 'region' && data?.isoCode) {
+        router.push(`/map/${data.isoCode.toLowerCase()}`);
+      } else {
+        router.push('/map');
+      }
+    }
+  };
+
+  const getLocalizedRegionName = (name: string) => {
+    try {
+      return tRegions(name as any);
+    } catch {
+      return name;
     }
   };
 
@@ -64,6 +80,8 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
     }
     fetchNeighbors();
   }, [data, type, locale]);
+
+  const displayTitle = type === 'region' && regionName ? getLocalizedRegionName(regionName) : title;
 
   return (
     <div 
@@ -89,7 +107,13 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
           {masteryMode ? 'Mastery: ON' : 'Mastery: OFF'}
         </button>
         <button
-          onClick={() => router.push('/map')}
+          onClick={() => {
+            if (type === 'region' && data?.isoCode) {
+              router.push(`/map/${data.isoCode.toLowerCase()}`);
+            } else {
+              router.push('/map');
+            }
+          }}
           className="rounded-full bg-gray-200 dark:bg-gray-700 p-1 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
         >
           <X size={20} />
@@ -98,7 +122,7 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
 
       <div className="mb-6 flex items-center justify-between border-b-2 border-dashed border-[#8d99ae] pb-4">
         <h2 className="font-bebas text-4xl tracking-wider text-[var(--color-primary)] dark:text-[#00a8b5]">
-          {title}
+          {displayTitle}
         </h2>
       </div>
 
@@ -201,6 +225,91 @@ export default function MapSidebar({ type, title, data }: MapSidebarProps) {
                 <p className="text-xs text-slate-500 italic">No direct land neighbors found.</p>
               )}
             </div>
+          </div>
+        )}
+
+        {type === 'region' && data && (
+          <div className="space-y-6">
+            <div className="flex flex-col items-center gap-2">
+              {data.flagUrl ? (
+                <div 
+                  className="relative group cursor-pointer" 
+                  onClick={() => router.push(`/map/${data.isoCode?.toLowerCase()}`)}
+                  title={`Back to ${getLocalizedValue(data.name, locale)}`}
+                >
+                  <Image 
+                    src={data.flagUrl} 
+                    alt={`${getLocalizedValue(data.name, locale)} flag`} 
+                    width={128}
+                    height={128}
+                    className="h-24 w-auto object-contain shadow-md rounded border border-gray-200 transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded transition-opacity">
+                    <span className="text-[10px] text-white font-bold uppercase tracking-wider">Back to Country</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-24 w-36 bg-slate-200 dark:bg-slate-700 flex items-center justify-center rounded border border-dashed border-[#8d99ae] text-slate-400">
+                  No Flag
+                </div>
+              )}
+              <span className="text-xs text-slate-400 font-game-mono mt-1">
+                Region of {getLocalizedValue(data.name, locale)}
+              </span>
+            </div>
+
+            <div className="border border-dashed border-[#8d99ae] p-4 rounded-md">
+              <h3 className="mb-4 font-bebas text-2xl tracking-wider text-[var(--color-primary)] dark:text-[#ffcd42]">QUICK FACTS</h3>
+              <div className="space-y-3">
+                {[
+                  { label: "Parent Country", value: getLocalizedValue(data.name, locale), onClick: () => router.push(`/map/${data.isoCode?.toLowerCase()}`) },
+                  { label: "Region ID", value: activeRegionId || 'N/A' },
+                  { label: "Country Capital", value: getLocalizedValue(data.capital, locale) },
+                  { label: "Official Language", value: getLocalizedValue(data.officialLanguage, locale) },
+                  { label: "Currency", value: getLocalizedValue(data.currency, locale) },
+                ].map((row, i) => (
+                  <div key={i} className="flex justify-between border-b border-dashed border-slate-300 pb-2">
+                    <span className="font-bebas text-slate-500">{row.label}:</span>
+                    {row.onClick ? (
+                      <button 
+                        onClick={row.onClick}
+                        className="font-mono text-right text-[var(--primary)] hover:underline cursor-pointer"
+                      >
+                        {row.value}
+                      </button>
+                    ) : (
+                      <span className="font-mono text-right">{row.value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {regionsList && regionsList.length > 0 && (
+              <div className="border border-[#8d99ae]/60 p-4 rounded-md bg-[var(--input-bg)]/20">
+                <h3 className="mb-4 font-bebas text-2xl tracking-wider text-[var(--color-primary)] dark:text-[#00d4ff]">
+                  EXPLORE REGIONS ({regionsList.length})
+                </h3>
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
+                  {regionsList.map((region) => {
+                    const isCurrent = region.id === activeRegionId;
+                    return (
+                      <button
+                        key={region.id}
+                        onClick={() => router.push(`/map/${data.isoCode?.toLowerCase()}/${region.id}`)}
+                        className={`px-3 py-1 rounded-full text-xs transition-all border ${
+                          isCurrent 
+                            ? 'bg-primary border-primary text-white font-bold scale-105'
+                            : 'bg-[var(--card-bg)] text-slate-600 dark:text-slate-300 border-[#8d99ae]/40 hover:border-primary hover:text-primary'
+                        }`}
+                      >
+                        {getLocalizedRegionName(region.name)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

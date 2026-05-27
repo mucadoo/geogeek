@@ -1,7 +1,7 @@
 'use client';
 
 import * as d3 from 'd3';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/routing';
 import { useTheme } from 'next-themes';
 import React, { useEffect, useRef } from 'react';
 import { feature } from 'topojson-client';
@@ -21,7 +21,7 @@ export default function AnimatedBackground() {
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
   
-  const isFullscreen = pathname === '/map' || (pathname.startsWith('/games/') && pathname !== '/games');
+  const isFullscreen = pathname.startsWith('/map') || (pathname.startsWith('/games/') && pathname !== '/games');
 
   useEffect(() => {
     // DO NOT animate if we are on a fullscreen map page!

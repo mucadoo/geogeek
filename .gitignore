@@ -156,3 +156,7 @@ build/
 # IDE
 .idea/
 .vscode/
+
+# Antigravity
+.antigravity/
+.antigravitycli/
