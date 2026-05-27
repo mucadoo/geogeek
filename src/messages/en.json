@@ -23,6 +23,7 @@
     "map": "Map",
     "explorer": "Explorer",
     "rankings": "World Stats",
+    "compare": "Compare",
     "about": "About"
   },
   "Map": {

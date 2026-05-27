@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Globe, BarChart3, Gamepad2, Languages, Sun, Moon, Info } from 'lucide-react';
+import { Home, Globe, BarChart3, Gamepad2, Languages, Sun, Moon, Info, Scale } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
@@ -18,7 +18,7 @@ import UserMenu from '@/components/UserMenu';
 
 interface NavItem {
   href: string;
-  labelKey: 'HOME' | 'EXPLORER' | 'RANKINGS' | 'GAMES' | 'ABOUT';
+  labelKey: 'HOME' | 'EXPLORER' | 'RANKINGS' | 'GAMES' | 'COMPARE' | 'ABOUT';
   icon: React.ElementType;
 }
 
@@ -27,6 +27,7 @@ const navItems: NavItem[] = [
   { href: '/map', labelKey: 'EXPLORER', icon: Globe },
   { href: '/rankings', labelKey: 'RANKINGS', icon: BarChart3 },
   { href: '/games', labelKey: 'GAMES', icon: Gamepad2 },
+  { href: '/compare', labelKey: 'COMPARE', icon: Scale },
   { href: '/about', labelKey: 'ABOUT', icon: Info },
 ];
 

@@ -22,7 +22,8 @@
     "games": "Jeux",
     "map": "Carte",
     "explorer": "Explorateur",
-    "rankings": "Stats mondiales",
+    "rankings": "Classements",
+    "compare": "Comparer",
     "about": "À propos"
   },
   "Map": {

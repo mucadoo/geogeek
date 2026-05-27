@@ -108,7 +108,7 @@ export default function Map({ slug }: MapProps) {
   // Guard render to avoid hydration mismatches
   if (!_hasHydrated) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#f1f5f3]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--background)]">
         <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
         <p className="font-medium text-slate-500 mt-2">{t('loading')}</p>
       </div>

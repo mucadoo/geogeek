@@ -59,7 +59,7 @@ export default function CompareClient() {
   }, [mapData, countryA, countryB]);
 
   return (
-    <main className="container-custom py-12 animate-in fade-in duration-1000">
+    <main className="container-custom flex-grow relative z-10 py-12 animate-in fade-in duration-1000">
       <header className="mb-12 text-center">
         <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-game-mono font-bold text-primary uppercase tracking-widest">
           <Scale size={16} /> True Size Atlas

@@ -59,7 +59,7 @@ export default function BaseGameClient({
 
   if (mapStatus === 'pending' || configStatus === 'pending') {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#f1f5f3]">
+      <div className="fixed inset-0 flex items-center justify-center bg-[var(--background)]">
         <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
       </div>
     );
