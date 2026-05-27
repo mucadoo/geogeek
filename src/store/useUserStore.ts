@@ -16,6 +16,8 @@ interface UserState {
   logout: () => void;
   registerGuestScore: (username: string, points: number) => void;
   updateUserScore: (userId: string, points: number) => void;
+  updateUsername: (newUsername: string) => { success: boolean; error?: string };
+  deleteAccount: () => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -83,6 +85,33 @@ export const useUserStore = create<UserState>()(
         if (currentUser?.id === userId) {
           set({ currentUser: { ...currentUser, totalMasteryPoints: currentUser.totalMasteryPoints + points } });
         }
+      },
+
+      updateUsername: (newUsername: string) => {
+        const { allUsers, currentUser } = get();
+        if (!currentUser) return { success: false, error: 'Not logged in' };
+        
+        const exists = allUsers.find(u => u.username.toLowerCase() === newUsername.toLowerCase() && u.id !== currentUser.id);
+        if (exists) return { success: false, error: 'Username already taken' };
+
+        const updatedUsers = allUsers.map(u => 
+          u.id === currentUser.id ? { ...u, username: newUsername } : u
+        );
+
+        set({
+          allUsers: updatedUsers,
+          currentUser: { ...currentUser, username: newUsername }
+        });
+
+        return { success: true };
+      },
+
+      deleteAccount: () => {
+        const { allUsers, currentUser } = get();
+        if (!currentUser) return;
+
+        const filteredUsers = allUsers.filter(u => u.id !== currentUser.id);
+        set({ allUsers: filteredUsers, currentUser: null });
       }
     }),
     {

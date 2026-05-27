@@ -40,6 +40,14 @@ export default function UserMenu() {
           <p className="text-[10px] text-slate-400 font-game-mono uppercase tracking-widest">Mastery Points</p>
           <p className="text-lg font-game-heading text-[var(--primary)]">{currentUser.totalMasteryPoints.toLocaleString()}</p>
         </div>
+        
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="w-full text-left px-4 py-2 rounded-xl font-game-mono text-xs transition-colors cursor-pointer outline-none text-[var(--foreground)] focus:bg-[var(--primary)]/10 focus:text-[var(--primary)] flex items-center gap-2 mb-1">
+            <UserIcon size={14} />
+            MY PROFILE
+          </Link>
+        </DropdownMenuItem>
+
         <DropdownMenuItem
           onClick={logout}
           className="w-full text-left px-4 py-2 rounded-xl font-game-mono text-xs transition-colors cursor-pointer outline-none text-red-500 focus:bg-red-500/10 focus:text-red-500 flex items-center gap-2"
