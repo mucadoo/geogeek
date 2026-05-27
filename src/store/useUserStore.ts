@@ -11,7 +11,8 @@ export interface User {
 interface UserState {
   currentUser: User | null;
   allUsers: User[]; // Mock database
-  login: (username: string) => void;
+  login: (username: string) => { success: boolean; error?: string };
+  register: (username: string) => { success: boolean; error?: string };
   logout: () => void;
   registerGuestScore: (username: string, points: number) => void;
   updateUserScore: (userId: string, points: number) => void;
@@ -25,19 +26,37 @@ export const useUserStore = create<UserState>()(
 
       login: (username: string) => {
         const { allUsers } = get();
-        let user = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+        const user = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
         
         if (!user) {
-          user = {
-            id: Math.random().toString(36).substring(7),
-            username,
-            isGuest: false,
-            totalMasteryPoints: 0
-          };
-          set({ allUsers: [...allUsers, user] });
+          return { success: false, error: 'User not found' };
         }
         
         set({ currentUser: user });
+        return { success: true };
+      },
+
+      register: (username: string) => {
+        const { allUsers } = get();
+        const exists = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+        
+        if (exists) {
+          return { success: false, error: 'Username already taken' };
+        }
+
+        const newUser: User = {
+          id: Math.random().toString(36).substring(7),
+          username,
+          isGuest: false,
+          totalMasteryPoints: 0
+        };
+
+        set({ 
+          allUsers: [...allUsers, newUser],
+          currentUser: newUser
+        });
+        
+        return { success: true };
       },
 
       logout: () => set({ currentUser: null }),

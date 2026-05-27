@@ -1,7 +1,7 @@
 'use client';
 
-import { User as UserIcon, LogOut, UserCircle } from 'lucide-react';
-import React, { useState } from 'react';
+import { User as UserIcon, LogOut, UserCircle, LogIn } from 'lucide-react';
+import React from 'react';
 
 import { 
   DropdownMenu, 
@@ -9,60 +9,21 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { Link } from '@/i18n/routing';
 import { useUserStore } from '@/store/useUserStore';
 
 export default function UserMenu() {
-  const { currentUser, login, logout } = useUserStore();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [username, setUsername] = useState('');
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username.trim()) {
-      login(username.trim());
-      setIsLoginOpen(false);
-      setUsername('');
-    }
-  };
+  const { currentUser, logout } = useUserStore();
 
   if (!currentUser) {
     return (
-      <div className="flex items-center gap-2">
-        {isLoginOpen ? (
-          <form onSubmit={handleLogin} className="flex items-center gap-2 animate-in slide-in-from-right-2 duration-300">
-            <input
-              autoFocus
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username..."
-              className="px-4 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-full font-game-mono text-xs outline-none focus:border-[var(--primary)] transition-all w-32 md:w-40"
-            />
-            <button 
-              type="submit"
-              className="bg-[var(--primary)] text-white p-2.5 rounded-full hover:scale-105 transition-all shadow-sm"
-            >
-              <UserIcon size={18} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => setIsLoginOpen(false)}
-              className="text-slate-400 hover:text-slate-600 px-2 font-game-mono text-[10px] uppercase"
-            >
-              Cancel
-            </button>
-          </form>
-        ) : (
-          <button
-            onClick={() => setIsLoginOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--card-bg)]/70 backdrop-blur-md rounded-full font-game-heading text-lg text-[var(--foreground)]/70 hover:text-[var(--primary)] hover:bg-[var(--card-bg)] border border-transparent transition-all shadow-sm outline-none"
-          >
-            <UserIcon size={18} className="opacity-70" />
-            <span className="hidden sm:inline">LOGIN</span>
-          </button>
-        )}
-      </div>
+      <Link
+        href="/login"
+        className="flex items-center gap-2 px-4 py-2.5 bg-[var(--card-bg)]/70 backdrop-blur-md rounded-full font-game-heading text-lg text-[var(--foreground)]/70 hover:text-[var(--primary)] hover:bg-[var(--card-bg)] border border-transparent transition-all shadow-sm outline-none"
+      >
+        <LogIn size={18} className="opacity-70" />
+        <span className="hidden sm:inline">LOGIN</span>
+      </Link>
     );
   }
 

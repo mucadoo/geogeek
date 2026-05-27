@@ -68,10 +68,11 @@ export default function QuizLayout({
     const finalPoints = useGameStore.getState().masteryPoints;
     if (currentUser) {
       updateUserScore(currentUser.id, finalPoints);
+      setIsScoreRegistered(true);
     } else if (guestName.trim()) {
       registerGuestScore(guestName.trim(), finalPoints);
+      setIsScoreRegistered(true);
     }
-    setIsScoreRegistered(true);
   };
 
   useEffect(() => {
