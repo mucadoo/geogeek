@@ -166,7 +166,7 @@ export default function QuizLayout({
   }
 
   return (
-    <main className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-[#f8faf9]">
+    <main className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-[var(--background)]">
 
       {/* LAYER 1: THE FULLSCREEN MAP */}
       <div className="absolute inset-0 z-0 h-full w-full">

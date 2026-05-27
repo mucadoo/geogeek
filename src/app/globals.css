@@ -44,34 +44,34 @@
 }
 
 .dark {
-  --background: #141614;
-  --foreground: #e2e8f0;
-  --card: #1c1f1c;
-  --card-foreground: #e2e8f0;
-  --popover: #1c1f1c;
-  --popover-foreground: #e2e8f0;
-  --primary: #00a8b5;
-  --primary-foreground: #141614;
-  --secondary: #2d332d;
-  --secondary-foreground: #e2e8f0;
-  --muted: #2d332d;
+  --background: #0a0a0a;
+  --foreground: #f8fafc;
+  --card: #121212;
+  --card-foreground: #f8fafc;
+  --popover: #121212;
+  --popover-foreground: #f8fafc;
+  --primary: #00bcd4;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent: #ffcd42;
-  --accent-foreground: #141614;
-  --destructive: #ff5a5f;
-  --destructive-foreground: #ffffff;
-  --border: #334155;
-  --input: #334155;
-  --ring: #00a8b5;
+  --accent: #facc15;
+  --accent-foreground: #0a0a0a;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #00bcd4;
 
-  /* Original custom variables */
-  --card-bg: var(--card);
-  --card-border: var(--border);
-  --input-bg: #141614;
-  --hud-bg: rgba(28, 31, 28, 0.8);
-  --map-fill: #2d332d;
-  --map-stroke: #4a524a;
-  --ocean-bg: #0d0f0d;
+  /* Original custom variables refined */
+  --card-bg: rgba(18, 18, 18, 0.85);
+  --card-border: rgba(30, 41, 59, 0.5);
+  --input-bg: #0a0a0a;
+  --hud-bg: rgba(10, 10, 10, 0.75);
+  --map-fill: #1e293b;
+  --map-stroke: #334155;
+  --ocean-bg: #050505;
 }
 
 @theme inline {
@@ -128,8 +128,16 @@
 
 body {
   background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility glass-morphism {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
 }
 
 @utility font-game-heading {
@@ -143,11 +151,11 @@ body {
 }
 
 @utility game-card {
-  background-color: var(--card-bg);
+  @apply glass-morphism;
   border: 2px dashed var(--card-border);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
 }
 
 @layer components {

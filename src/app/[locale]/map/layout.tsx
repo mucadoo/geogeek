@@ -12,7 +12,7 @@ export default async function MapLayout({
   setRequestLocale(locale);
 
   return (
-    <main className="animate-in fade-in fixed inset-0 z-0 h-screen w-screen bg-[#f1f5f3] duration-1000">
+    <main className="animate-in fade-in fixed inset-0 z-0 h-screen w-screen bg-[var(--background)] duration-1000">
       {children}
     </main>
   );
