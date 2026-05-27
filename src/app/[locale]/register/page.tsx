@@ -49,7 +49,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)]">
+    <main className="flex-grow flex items-center justify-center p-6 relative z-10">
       <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
         <Link 
           href="/" 
