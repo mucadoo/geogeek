@@ -147,7 +147,7 @@ export default function QuizLayout({
   }, [gameStatus, skipState, resetGame]);
 
   // Preset Selection Logic
-  const handlePresetSelect = (preset: 'easy' | 'medium' | 'hard') => {
+  const handlePresetSelect = (preset: Exclude<Difficulty, 'custom'>) => {
     setDifficulty(preset);
     setAdv(PRESETS[preset]);
   };
@@ -157,9 +157,11 @@ export default function QuizLayout({
     setAdv(newAdv);
     
     // Check if it still matches a preset
-    if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.easy)) setDifficulty('easy');
+    if (JSON.stringify(newAdv) === JSON.stringify(PRESETS['very-easy'])) setDifficulty('very-easy');
+    else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.easy)) setDifficulty('easy');
     else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.medium)) setDifficulty('medium');
     else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.hard)) setDifficulty('hard');
+    else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.blazing)) setDifficulty('blazing');
     else setDifficulty('custom');
   };
 
@@ -403,9 +405,11 @@ export default function QuizLayout({
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-4 justify-center">
-                        <DifficultyTicket title="Easy" description="Casual" isSelected={difficulty === 'easy'} onClick={() => handlePresetSelect('easy')} />
-                        <DifficultyTicket title="Med" description="Standard" isSelected={difficulty === 'medium'} onClick={() => handlePresetSelect('medium')} />
-                        <DifficultyTicket title="Hard" description="Elite" isSelected={difficulty === 'hard'} onClick={() => handlePresetSelect('hard')} />
+                        <DifficultyTicket title="Very Easy" description="60s / Guess" isSelected={difficulty === 'very-easy'} onClick={() => handlePresetSelect('very-easy')} />
+                        <DifficultyTicket title="Easy" description="30s / Guess" isSelected={difficulty === 'easy'} onClick={() => handlePresetSelect('easy')} />
+                        <DifficultyTicket title="Med" description="20s / Guess" isSelected={difficulty === 'medium'} onClick={() => handlePresetSelect('medium')} />
+                        <DifficultyTicket title="Hard" description="15s / Guess" isSelected={difficulty === 'hard'} onClick={() => handlePresetSelect('hard')} />
+                        <DifficultyTicket title="Blazing" description="5s / Guess" isSelected={difficulty === 'blazing'} onClick={() => handlePresetSelect('blazing')} />
                         <button 
                           onClick={() => setShowAdvanced(!showAdvanced)}
                           className={cn(

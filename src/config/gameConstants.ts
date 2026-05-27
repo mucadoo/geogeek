@@ -1,6 +1,6 @@
 export const TIME_PER_STATE_SECONDS = 20;
 
-export type Difficulty = 'easy' | 'medium' | 'hard' | 'custom';
+export type Difficulty = 'very-easy' | 'easy' | 'medium' | 'hard' | 'blazing' | 'custom';
 
 export const POINTS_MULTIPLIERS = {
   input: {
@@ -27,7 +27,15 @@ export interface AdvancedSettings {
   timePerGuess: number; // in seconds
 }
 
-export const PRESETS: Record<'easy' | 'medium' | 'hard', AdvancedSettings> = {
+export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = {
+  'very-easy': {
+    isMultipleChoice: true,
+    gameType: 'standard',
+    strictMatching: false,
+    noMapHints: false,
+    hideBorders: false,
+    timePerGuess: 60,
+  },
   easy: {
     isMultipleChoice: true,
     gameType: 'standard',
@@ -48,9 +56,17 @@ export const PRESETS: Record<'easy' | 'medium' | 'hard', AdvancedSettings> = {
     isMultipleChoice: false,
     gameType: 'survival',
     strictMatching: true,
+    noMapHints: false,
+    hideBorders: false,
+    timePerGuess: 15,
+  },
+  blazing: {
+    isMultipleChoice: false,
+    gameType: 'survival',
+    strictMatching: true,
     noMapHints: true,
     hideBorders: true,
-    timePerGuess: 10,
+    timePerGuess: 5,
   },
 };
 
