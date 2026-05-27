@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
@@ -49,7 +49,8 @@ export default function QuizLayout({
     status: gameStatus, startGame, resetGame, currentState, score, 
     totalToGuess, timeLeft, tick, isNewHighScore,
     userInput, setUserInput, submitGuess, skipState, lastGuessCorrect,
-    correctlyGuessedIds, missedStates, gameType, isMultipleChoice, options
+    correctlyGuessedIds, missedStates, gameType, isMultipleChoice, options,
+    autoZoom, setAutoZoom
   } = useGameStore();
 
   const [allCountries, setAllCountries] = useState<Country[]>([]);
@@ -189,6 +190,20 @@ export default function QuizLayout({
       {gameStatus === 'playing' && (
         <>
           <GameHUD score={score} total={totalToGuess} timeLeft={timeLeft} />
+
+          {/* Top Right: View Controls */}
+          <div className="absolute top-6 right-10 z-20 flex gap-2 pointer-events-auto">
+            <button 
+              onClick={() => setAutoZoom(!autoZoom)}
+              className={cn(
+                "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
+                autoZoom ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
+              )}
+              title={autoZoom ? "Disable Auto-Zoom (Swap to Full View)" : "Enable Auto-Zoom (Swap to Focus View)"}
+            >
+              {autoZoom ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+            </button>
+          </div>
 
           {/* Left Side: Guesses Feed */}
           <div className="absolute top-24 left-10 hidden xl:flex flex-col gap-4 w-60 bg-[var(--card-bg)]/85 backdrop-blur-md p-5 rounded-2xl border border-[var(--card-border)] shadow-lg animate-in fade-in slide-in-from-left-4 duration-500">
@@ -341,10 +356,10 @@ export default function QuizLayout({
                  <h1 className="mb-4 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
                  <p className="mb-8 font-game-mono text-slate-500">{description}</p>
 
-                 <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="mb-8 flex flex-col gap-10">
                     <div className="flex flex-col gap-4">
-                      <h3 className="font-bebas text-xl tracking-widest text-slate-400 text-left">Difficulty</h3>
-                      <div className="flex gap-4">
+                      <h3 className="font-bebas text-xl tracking-widest text-slate-400 text-left border-b border-[var(--card-border)] pb-2 uppercase">1. Select Difficulty</h3>
+                      <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
                         <DifficultyTicket 
                           title="Easy" 
                           description="10 min" 
@@ -367,32 +382,34 @@ export default function QuizLayout({
                     </div>
 
                     <div className="flex flex-col gap-4">
-                      <h3 className="font-bebas text-xl tracking-widest text-slate-400 text-left">Game Mode</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <h3 className="font-bebas text-xl tracking-widest text-slate-400 text-left border-b border-[var(--card-border)] pb-2 uppercase">2. Game Mode</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button 
                           onClick={() => setSelectedGameType(selectedGameType === 'survival' ? 'standard' : 'survival')}
                           className={cn(
-                            "py-3 px-4 rounded-xl border-2 border-dashed font-bebas text-lg tracking-widest transition-all",
-                            selectedGameType === 'survival' ? "border-amber-500 bg-amber-50 text-amber-600" : "border-[var(--card-border)] text-slate-400"
+                            "py-4 px-6 rounded-2xl border-2 border-dashed font-bebas text-xl tracking-widest transition-all shadow-sm",
+                            selectedGameType === 'survival' ? "border-amber-500 bg-amber-500/10 text-amber-600 shadow-amber-200/20" : "border-[var(--card-border)] text-slate-400 hover:border-slate-400"
                           )}
                         >
-                          Survival
+                          Survival Mode
                         </button>
                         <button 
                           onClick={() => setSelectedMultipleChoice(!selectedMultipleChoice)}
                           className={cn(
-                            "py-3 px-4 rounded-xl border-2 border-dashed font-bebas text-lg tracking-widest transition-all",
-                            selectedMultipleChoice ? "border-primary bg-primary/5 text-primary" : "border-[var(--card-border)] text-slate-400"
+                            "py-4 px-6 rounded-2xl border-2 border-dashed font-bebas text-xl tracking-widest transition-all shadow-sm",
+                            selectedMultipleChoice ? "border-primary bg-primary/10 text-primary shadow-primary/20" : "border-[var(--card-border)] text-slate-400 hover:border-slate-400"
                           )}
                         >
-                          Choices
+                          Multiple Choice
                         </button>
                       </div>
-                      <p className="text-[10px] font-game-mono text-slate-400 text-left">
-                        {selectedGameType === 'survival' ? "• Survival: Start with 15s. +3s correct, -5s skip." : "• Standard: Classic countdown timer."}
-                        <br />
-                        {selectedMultipleChoice ? "• Choices: Select from 4 options." : "• Type: Manual text entry."}
-                      </p>
+                      <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-[var(--card-border)]">
+                        <p className="text-xs font-game-mono text-slate-500 leading-relaxed">
+                          {selectedGameType === 'survival' ? "• SURVIVAL: Start with 15s. +3s per correct answer, -5s per skip. Game ends when time runs out." : "• STANDARD: Classic mode with a fixed countdown timer based on difficulty."}
+                          <br />
+                          {selectedMultipleChoice ? "• CHOICES: Select the correct answer from 4 randomized options." : "• TYPE: Manual text entry for an extra challenge (includes fuzzy matching)."}
+                        </p>
+                      </div>
                     </div>
                  </div>
 

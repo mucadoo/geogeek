@@ -41,6 +41,7 @@ interface GameState {
   lastSkippedState: StateFeature | null;
   isNewHighScore: boolean;
   totalToGuess: number;
+  autoZoom: boolean;
   
   startGame: (
     states: StateFeature[], 
@@ -58,6 +59,7 @@ interface GameState {
   tick: () => void;
   setUserInput: (input: string) => void;
   setStrictMode: (enabled: boolean) => void;
+  setAutoZoom: (enabled: boolean) => void;
   resetGame: () => void;
 }
 
@@ -132,6 +134,7 @@ export const useGameStore = create<GameState>()(
       lastSkippedState: null,
       isNewHighScore: false,
       totalToGuess: 0,
+      autoZoom: true,
 
       startGame: (states, validNames, duration, difficulty, gameKey, gameMode = 'name', capitalMap = {}, gameType = 'standard', isMultipleChoice = false) => {
         const filtered = states.filter(s => {
@@ -179,6 +182,7 @@ export const useGameStore = create<GameState>()(
       
       setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
       setStrictMode: (strictMode) => set({ strictMode }),
+      setAutoZoom: (autoZoom) => set({ autoZoom }),
 
       submitGuess: (guess) => {
         const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode, currentGameKey, highScores, gameType, timeLeft, isMultipleChoice } = get();

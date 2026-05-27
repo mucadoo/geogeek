@@ -33,7 +33,7 @@ export default function GameMap({
   showOnlyValid = false, gameMode = 'name', capitalMap = {}, capitalCoordinates = {},
   onRegionClick
 }: GameMapProps) {
-  const { correctlyGuessedIds, lastGuessCorrect, lastSkippedState } = useGameStore();
+  const { correctlyGuessedIds, lastGuessCorrect, lastSkippedState, autoZoom } = useGameStore();
   const pathGenerator = d3.geoPath().projection(projection);
 
   const allFeatures = useMemo(() => {
@@ -46,7 +46,7 @@ export default function GameMap({
 
   // Compute smooth zoom focus transformation style
   const focusTransformStyle = useMemo(() => {
-    if (!highlightedStateId || !allFeatures.length) {
+    if (!autoZoom || !highlightedStateId || !allFeatures.length) {
       return { transform: 'translate(0px, 0px) scale(1)', transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)' };
     }
 
