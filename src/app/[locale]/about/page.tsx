@@ -33,14 +33,14 @@ export default async function AboutPage({ params }: Props) {
         <div className="text-center mt-12 flex flex-col items-center gap-4">
           <p className="text-2xl font-game-heading tracking-wider text-[var(--foreground)]">{t('creatorName')}</p>
           <div className="flex gap-4">
-            <Link href="https://mucadoo.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[var(--primary)] hover:underline font-game-mono text-md transition-colors">
+            <a href="https://mucadoo.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[var(--primary)] hover:underline font-game-mono text-md transition-colors">
               <Globe size={20} />
               {t('websiteProfile')}
-            </Link>
-            <Link href="https://github.com/mucadoo/geo-geek" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[var(--primary)] hover:underline font-game-mono text-md transition-colors">
+            </a>
+            <a href="https://github.com/mucadoo/geo-geek" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[var(--primary)] hover:underline font-game-mono text-md transition-colors">
               <SiGithub size={20} />
               {t('projectGithub')}
-            </Link>
+            </a>
           </div>
         </div>
 
