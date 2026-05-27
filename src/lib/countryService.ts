@@ -36,6 +36,10 @@ const getCountriesData = unstable_cache(
           es: item.translations?.spa?.common || wiki.name?.es || item.name?.common || '',
           fr: item.translations?.fra?.common || wiki.name?.fr || item.name?.common || '',
           it: item.translations?.ita?.common || wiki.name?.it || item.name?.common || '',
+          de: item.translations?.deu?.common || wiki.name?.de || item.name?.common || '',
+          ja: item.translations?.jpn?.common || wiki.name?.ja || item.name?.common || '',
+          zh: item.translations?.zho?.common || wiki.name?.zh || item.name?.common || '',
+          ru: item.translations?.rus?.common || wiki.name?.ru || item.name?.common || '',
         };
 
         const capital = {
@@ -44,6 +48,10 @@ const getCountriesData = unstable_cache(
           es: item.capital ? item.capital.join(', ') : (wiki.capital?.es || 'N/A'),
           fr: item.capital ? item.capital.join(', ') : (wiki.capital?.fr || 'N/A'),
           it: item.capital ? item.capital.join(', ') : (wiki.capital?.it || 'N/A'),
+          de: item.capital ? item.capital.join(', ') : (wiki.capital?.de || 'N/A'),
+          ja: item.capital ? item.capital.join(', ') : (wiki.capital?.ja || 'N/A'),
+          zh: item.capital ? item.capital.join(', ') : (wiki.capital?.zh || 'N/A'),
+          ru: item.capital ? item.capital.join(', ') : (wiki.capital?.ru || 'N/A'),
         };
 
         const currency = {

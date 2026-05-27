@@ -1,0 +1,41 @@
+{
+  "HomePage": {
+    "heroTitle": "世界をマスターしよう",
+    "heroSubtitle": "インタラクティブなアトラスへ飛び込もう。地理クイズで知識を試し、世界の統計を探索しよう。",
+    "cta": "探索を開始",
+    "cards": {
+      "map": { "title": "世界エクスプローラー", "desc": "インタラクティブな世界地図探索" },
+      "games": { "title": "地理ハブ", "desc": "地域知識を試すクイズ" },
+      "rankings": { "title": "世界の統計", "desc": "国別の統計データ" }
+    }
+  },
+  "Header": {
+    "games": "ゲーム", "map": "地図", "explorer": "エクスプローラー", "rankings": "統計", "compare": "比較", "about": "GeoGeekについて"
+  },
+  "Map": {
+    "loading": "探索中...", "returnToContinent": "大陸選択に戻る", "returnToWorld": "世界地図に戻る"
+  },
+  "Games": {
+    "title": "地理ハブ", "subtitle": "挑戦を選ぼう", "description": "地理マスターを目指そう。ゲームを選択し、時間制限に挑み、パーフェクトスコアを目指せ！", "searchPlaceholder": "ゲームを検索...",
+    "categories": { "all": "すべて", "continents": "大陸", "regions": "地域", "capitals": "首都" },
+    "itemsCount": "{count} 個", "difficulty": "難易度", "startQuiz": "クイズ開始", "noGamesFound": "ゲームが見つかりません", "noGamesDescription": "検索ワードやフィルターを調整してください。", "clearFilters": "フィルターをクリア"
+  },
+  "Rankings": {
+    "title": "世界の統計", "searchPlaceholder": "国名で検索...",
+    "table": { "rank": "順位", "country": "国", "value": "数値", "population": "人口", "area": "面積 (km²)", "density": "人口密度 (/km²)", "hdi": "HDIスコア", "gdp": "GDP", "na": "該当なし" },
+    "categories": { "population": "人口順", "area": "面積順", "density": "人口密度順", "hdi": "人間開発指数 (HDI)", "gdp": "GDP" }
+  },
+  "CountryDetails": {
+    "summary": "概要", "descriptionTitle": "歴史と文化", "readMore": "もっと読む →", "information": "基本情報", "neighboringCountries": "隣接する国", "viewOnMap": "地図で見る",
+    "labels": { "capital": "首都", "largestCity": "最大都市", "languages": "言語", "demonym": "住民の呼称", "government": "政治体制", "area": "面積", "population": "人口", "gdp": "GDP", "hdi": "HDI", "currency": "通貨", "timeZone": "タイムゾーン", "callingCode": "国番号", "isoCode": "ISOコード" }
+  },
+  "Quiz": {
+    "score": "スコア", "timeLeft": "残り時間", "difficulty": { "easy": "初級", "medium": "中級", "hard": "上級" }, "start": "ゲーム開始", "resume": "再開", "newGame": "新しいゲーム", "playAgain": "もう一度プレイ", "menu": "メニュー", "skip": "スキップ", "quit": "終了", "typeCapital": "首都を入力...", "typeRegion": "地域を入力...", "tryAgain": "もう一度試す", "target": "ターゲット: {name}",
+    "feedback": { "perfect": "完璧！", "amazing": "素晴らしい！", "great": "よくできました！", "good": "頑張りました！", "practice": "練習を続けましょう！" }
+  },
+  "RegionNames": {
+    "Alabama": "アラバマ州", "Alaska": "アラスカ州", "Arizona": "アリゾナ州", "Arkansas": "アーカンソー州", "California": "カリフォルニア州", "Colorado": "コロラド州", "Connecticut": "コネチカット州", "Delaware": "デラウェア州", "Florida": "フロリダ州", "Georgia": "ジョージア州", "Hawaii": "ハワイ州", "Idaho": "アイダホ州", "Illinois": "イリノイ州", "Indiana": "インディアナ州", "Iowa": "アイオワ州", "Kansas": "カンザス州", "Kentucky": "ケンタッキー州", "Louisiana": "ルイジアナ州", "Maine": "メイン州", "Maryland": "メリーランド州", "Massachusetts": "マサチューセッツ州", "Michigan": "ミシガン州", "Minnesota": "ミネソタ州", "Mississippi": "ミシシッピ州", "Missouri": "ミズーリ州", "Montana": "モンタナ州", "Nebraska": "ネブラスカ州", "Nevada": "ネバダ州", "New Hampshire": "ニューハンプシャー州", "New Jersey": "ニュージャージー州", "New Mexico": "ニューメキシコ州", "New York": "ニューヨーク州", "North Carolina": "ノースカロライナ州", "North Dakota": "ノースダコタ州", "Ohio": "オハイオ州", "Oklahoma": "オクラホマ州", "Oregon": "オレゴン州", "Pennsylvania": "ペンシルベニア州", "Rhode Island": "ロードアイランド州", "South Carolina": "サウスカロライナ州", "South Dakota": "サウスダコタ州", "Tennessee": "テネシー州", "Texas": "テキサス州", "Utah": "ユタ州", "Vermont": "バーモント州", "Virginia": "バージニア州", "Washington": "ワシントン州", "West Virginia": "ウェストバージニア州", "Wisconsin": "ウィスコンシン州", "Wyoming": "ワイオミング州"
+  },
+  "Common": { "unknown": "不明", "loading": "読み込み中...", "back": "戻る", "na": "該当なし" },
+  "Metadata": { "title": "GeoGeek - 地理の冒険へ", "description": "インタラクティブな地理探索とランキング", "mapOf": "{continent}の地図", "worldMapTitle": "世界地図エクスプローラー" }
+}

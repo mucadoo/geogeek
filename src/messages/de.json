@@ -1,0 +1,41 @@
+{
+  "HomePage": {
+    "heroTitle": "Meistere die Welt",
+    "heroSubtitle": "Tauche ein in einen interaktiven Atlas. Spiele Geografie-Spiele, fordere dein Wissen heraus und erkunde Weltstatistiken.",
+    "cta": "START ENTDECKEN",
+    "cards": {
+      "map": { "title": "Weltentdecker", "desc": "Interaktive globale Entdeckung" },
+      "games": { "title": "Geografie-Hub", "desc": "Teste dein regionales Wissen" },
+      "rankings": { "title": "Weltstatistiken", "desc": "Länderstatistiken ansehen" }
+    }
+  },
+  "Header": {
+    "games": "Spiele", "map": "Karte", "explorer": "Entdecker", "rankings": "Weltstatistiken", "compare": "Vergleichen", "about": "Über uns"
+  },
+  "Map": {
+    "loading": "Lade Entdecker...", "returnToContinent": "Zurück zum Kontinent", "returnToWorld": "Zurück zur Welt"
+  },
+  "Games": {
+    "title": "Geografie-Hub", "subtitle": "Wähle deine Herausforderung", "description": "Erwirb dir deinen Platz als Meister-Geograf. Wähle ein Spiel, kämpfe gegen die Zeit und versuche eine perfekte Punktzahl zu erreichen!", "searchPlaceholder": "Spiele suchen...",
+    "categories": { "all": "Alle", "continents": "Kontinente", "regions": "Regionen", "capitals": "Hauptstädte" },
+    "itemsCount": "{count} Elemente", "difficulty": "Schwierigkeit", "startQuiz": "QUIZ STARTEN", "noGamesFound": "Keine Spiele gefunden", "noGamesDescription": "Versuche, deine Such- oder Kategoriefilter anzupassen.", "clearFilters": "Alle Filter löschen"
+  },
+  "Rankings": {
+    "title": "Weltstatistiken", "searchPlaceholder": "Land suchen...",
+    "table": { "rank": "Rang", "country": "Land", "value": "Wert", "population": "Bevölkerung", "area": "Fläche (km²)", "density": "Bevölkerungsdichte (/km²)", "hdi": "HDI-Index", "gdp": "BIP", "na": "N/A" },
+    "categories": { "population": "Weltbevölkerung", "area": "Größte Länder nach Fläche", "density": "Bevölkerungsdichte", "hdi": "Human Development Index (HDI)", "gdp": "BIP" }
+  },
+  "CountryDetails": {
+    "summary": "Zusammenfassung", "descriptionTitle": "Geschichte & Kultur", "readMore": "Mehr lesen →", "information": "Informationen", "neighboringCountries": "Nachbarländer", "viewOnMap": "Auf Karte ansehen",
+    "labels": { "capital": "Hauptstadt", "largestCity": "Größte Stadt", "languages": "Sprachen", "demonym": "Ethnonym", "government": "Regierung", "area": "Fläche", "population": "Bevölkerung", "gdp": "BIP", "hdi": "HDI", "currency": "Währung", "timeZone": "Zeitzone", "callingCode": "Vorwahl", "isoCode": "ISO-Code" }
+  },
+  "Quiz": {
+    "score": "Punktzahl", "timeLeft": "Verbleibende Zeit", "difficulty": { "easy": "Einfach", "medium": "Mittel", "hard": "Schwer" }, "start": "SPIEL STARTEN", "resume": "SPIEL FORTSETZEN", "newGame": "NEUES SPIEL", "playAgain": "NOCHMAL SPIELEN", "menu": "Menü", "skip": "Überspringen", "quit": "Beenden", "typeCapital": "Hauptstadt eingeben...", "typeRegion": "Region eingeben...", "tryAgain": "Nochmal versuchen", "target": "Ziel: {name}",
+    "feedback": { "perfect": "Perfekt!", "amazing": "Fantastisch!", "great": "Großartige Arbeit!", "good": "Gute Leistung!", "practice": "Weiter üben!" }
+  },
+  "RegionNames": {
+    "Alabama": "Alabama", "Alaska": "Alaska", "Arizona": "Arizona", "Arkansas": "Arkansas", "California": "Kalifornien", "Colorado": "Colorado", "Connecticut": "Connecticut", "Delaware": "Delaware", "Florida": "Florida", "Georgia": "Georgia", "Hawaii": "Hawaii", "Idaho": "Idaho", "Illinois": "Illinois", "Indiana": "Indiana", "Iowa": "Iowa", "Kansas": "Kansas", "Kentucky": "Kentucky", "Louisiana": "Louisiana", "Maine": "Maine", "Maryland": "Maryland", "Massachusetts": "Massachusetts", "Michigan": "Michigan", "Minnesota": "Minnesota", "Mississippi": "Mississippi", "Missouri": "Missouri", "Montana": "Montana", "Nebraska": "Nebraska", "Nevada": "Nevada", "New Hampshire": "New Hampshire", "New Jersey": "New Jersey", "New Mexico": "New Mexico", "New York": "New York", "North Carolina": "North Carolina", "North Dakota": "North Dakota", "Ohio": "Ohio", "Oklahoma": "Oklahoma", "Oregon": "Oregon", "Pennsylvania": "Pennsylvania", "Rhode Island": "Rhode Island", "South Carolina": "South Carolina", "South Dakota": "South Dakota", "Tennessee": "Tennessee", "Texas": "Texas", "Utah": "Utah", "Vermont": "Vermont", "Virginia": "Virginia", "Washington": "Washington", "West Virginia": "West Virginia", "Wisconsin": "Wisconsin", "Wyoming": "Wyoming"
+  },
+  "Common": { "unknown": "Unbekannt", "loading": "Wird geladen...", "back": "Zurück", "na": "N/A" },
+  "Metadata": { "title": "GeoGeek - Entdecke den Geografen in dir", "description": "Interaktiver Geografie-Entdecker und Ranglisten", "mapOf": "Karte von {continent}", "worldMapTitle": "Weltkarten-Entdecker" }
+}

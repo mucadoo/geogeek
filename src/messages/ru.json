@@ -1,0 +1,41 @@
+{
+  "HomePage": {
+    "heroTitle": "Освойте мир",
+    "heroSubtitle": "Погрузитесь в интерактивный атлас. Играйте в географические игры, проверяйте свои знания и исследуйте мировую статистику.",
+    "cta": "НАЧАТЬ ИССЛЕДОВАНИЕ",
+    "cards": {
+      "map": { "title": "Мировой исследователь", "desc": "Интерактивное исследование мира" },
+      "games": { "title": "Географический центр", "desc": "Проверьте свои знания регионов" },
+      "rankings": { "title": "Мировая статистика", "desc": "Посмотреть статистику стран" }
+    }
+  },
+  "Header": {
+    "games": "Игры", "map": "Карта", "explorer": "Исследователь", "rankings": "Статистика", "compare": "Сравнить", "about": "О нас"
+  },
+  "Map": {
+    "loading": "Загрузка...", "returnToContinent": "Вернуться к континенту", "returnToWorld": "Вернуться к миру"
+  },
+  "Games": {
+    "title": "Географический центр", "subtitle": "Выберите вызов", "description": "Завоюйте звание мастера-географа. Выберите игру, соревнуйтесь со временем и наберите идеальный балл!", "searchPlaceholder": "Поиск игр...",
+    "categories": { "all": "Все", "continents": "Континенты", "regions": "Регионы", "capitals": "Столицы" },
+    "itemsCount": "{count} элементов", "difficulty": "Сложность", "startQuiz": "НАЧАТЬ ВИКТОРИНУ", "noGamesFound": "Игры не найдены", "noGamesDescription": "Попробуйте изменить параметры поиска.", "clearFilters": "Очистить фильтры"
+  },
+  "Rankings": {
+    "title": "Мировая статистика", "searchPlaceholder": "Поиск страны...",
+    "table": { "rank": "Ранг", "country": "Страна", "value": "Значение", "population": "Население", "area": "Площадь (км²)", "density": "Плотность (/км²)", "hdi": "Индекс HDI", "gdp": "ВВП", "na": "Н/Д" },
+    "categories": { "population": "Население мира", "area": "Крупнейшие страны", "density": "Плотность населения", "hdi": "Индекс человеческого развития (HDI)", "gdp": "ВВП" }
+  },
+  "CountryDetails": {
+    "summary": "Резюме", "descriptionTitle": "История и культура", "readMore": "Читать далее →", "information": "Информация", "neighboringCountries": "Соседние страны", "viewOnMap": "Показать на карте",
+    "labels": { "capital": "Столица", "largestCity": "Крупнейший город", "languages": "Языки", "demonym": "Этноним", "government": "Правительство", "area": "Площадь", "population": "Население", "gdp": "ВВП", "hdi": "HDI", "currency": "Валюта", "timeZone": "Часовой пояс", "callingCode": "Телефонный код", "isoCode": "ISO-код" }
+  },
+  "Quiz": {
+    "score": "Счет", "timeLeft": "Осталось времени", "difficulty": { "easy": "Легко", "medium": "Средне", "hard": "Сложно" }, "start": "НАЧАТЬ ИГРУ", "resume": "ПРОДОЛЖИТЬ", "newGame": "НОВАЯ ИГРА", "playAgain": "ИГРАТЬ ЕЩЕ РАЗ", "menu": "Меню", "skip": "Пропустить", "quit": "Выход", "typeCapital": "Введите столицу...", "typeRegion": "Введите регион...", "tryAgain": "Попробуйте снова", "target": "Цель: {name}",
+    "feedback": { "perfect": "Идеально!", "amazing": "Потрясающе!", "great": "Отличная работа!", "good": "Хорошая попытка!", "practice": "Продолжайте практиковаться!" }
+  },
+  "RegionNames": {
+    "Alabama": "Алабама", "Alaska": "Аляска", "Arizona": "Аризона", "Arkansas": "Арканзас", "California": "Калифорния", "Colorado": "Колорадо", "Connecticut": "Коннектикут", "Delaware": "Делавэр", "Florida": "Флорида", "Georgia": "Джорджия", "Hawaii": "Гавайи", "Idaho": "Айдахо", "Illinois": "Иллинойс", "Indiana": "Индиана", "Iowa": "Айова", "Kansas": "Канзас", "Kentucky": "Кентукки", "Louisiana": "Луизиана", "Maine": "Мэн", "Maryland": "Мэриленд", "Massachusetts": "Массачусетс", "Michigan": "Мичиган", "Minnesota": "Миннесота", "Mississippi": "Миссисипи", "Missouri": "Миссури", "Montana": "Монтана", "Nebraska": "Небраска", "Nevada": "Невада", "New Hampshire": "Нью-Гэмпшир", "New Jersey": "Нью-Джерси", "New Mexico": "Нью-Мексико", "New York": "Нью-Йорк", "North Carolina": "Северная Каролина", "North Dakota": "Северная Дакота", "Ohio": "Огайо", "Oklahoma": "Оклахома", "Oregon": "Орегон", "Pennsylvania": "Пенсильвания", "Rhode Island": "Род-Айленд", "South Carolina": "Южная Каролина", "South Dakota": "Южная Дакота", "Tennessee": "Теннесси", "Texas": "Техас", "Utah": "Юта", "Vermont": "Вермонт", "Virginia": "Виргиния", "Washington": "Вашингтон", "West Virginia": "Западная Виргиния", "Wisconsin": "Висконсин", "Wyoming": "Вайоминг"
+  },
+  "Common": { "unknown": "Неизвестно", "loading": "Загрузка...", "back": "Назад", "na": "Н/Д" },
+  "Metadata": { "title": "GeoGeek - Исследуйте мир", "description": "Интерактивный географический справочник и рейтинг", "mapOf": "Карта {continent}", "worldMapTitle": "Мировой географический атлас" }
+}

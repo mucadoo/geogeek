@@ -33,10 +33,14 @@ const navItems: NavItem[] = [
 
 const languages = [
   { code: 'en', name: 'EN' },
-  { code: 'pt', name: 'PT' },
+  { code: 'de', name: 'DE' },
   { code: 'es', name: 'ES' },
   { code: 'fr', name: 'FR' },
   { code: 'it', name: 'IT' },
+  { code: 'ja', name: 'JA' },
+  { code: 'pt', name: 'PT' },
+  { code: 'ru', name: 'RU' },
+  { code: 'zh', name: 'ZH' },
 ];
 
 export default function Header() {

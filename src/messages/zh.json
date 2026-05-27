@@ -1,0 +1,41 @@
+{
+  "HomePage": {
+    "heroTitle": "掌握世界",
+    "heroSubtitle": "沉浸在交互式地图中。玩地理游戏，挑战你的知识，探索世界统计数据。",
+    "cta": "开始探索",
+    "cards": {
+      "map": { "title": "世界探索者", "desc": "交互式全球发现" },
+      "games": { "title": "地理中心", "desc": "测试你的区域知识" },
+      "rankings": { "title": "世界统计", "desc": "查看国家统计数据" }
+    }
+  },
+  "Header": {
+    "games": "游戏", "map": "地图", "explorer": "探索者", "rankings": "世界统计", "compare": "比较", "about": "关于"
+  },
+  "Map": {
+    "loading": "正在加载探索者...", "returnToContinent": "返回大陆", "returnToWorld": "返回世界"
+  },
+  "Games": {
+    "title": "地理中心", "subtitle": "选择你的挑战", "description": "赢得地理大师的称号。选择一个游戏，争分夺秒，尝试获得满分！", "searchPlaceholder": "搜索游戏...",
+    "categories": { "all": "全部", "continents": "大陆", "regions": "区域", "capitals": "首都" },
+    "itemsCount": "{count} 个项目", "difficulty": "难度", "startQuiz": "开始测验", "noGamesFound": "没有找到游戏", "noGamesDescription": "尝试调整搜索或类别过滤器。", "clearFilters": "清除所有过滤器"
+  },
+  "Rankings": {
+    "title": "世界统计", "searchPlaceholder": "搜索国家...",
+    "table": { "rank": "排名", "country": "国家", "value": "数值", "population": "人口", "area": "面积 (km²)", "density": "人口密度 (/km²)", "hdi": "HDI 分数", "gdp": "GDP", "na": "N/A" },
+    "categories": { "population": "世界人口", "area": "按面积划分的最大国家", "density": "人口密度", "hdi": "人类发展指数 (HDI)", "gdp": "GDP" }
+  },
+  "CountryDetails": {
+    "summary": "摘要", "descriptionTitle": "历史与文化", "readMore": "点击阅读更多 →", "information": "信息", "neighboringCountries": "邻国", "viewOnMap": "在地图上查看",
+    "labels": { "capital": "首都", "largestCity": "最大城市", "languages": "语言", "demonym": "国民名称", "government": "政府", "area": "面积", "population": "人口", "gdp": "GDP", "hdi": "HDI", "currency": "货币", "timeZone": "时区", "callingCode": "区号", "isoCode": "ISO 代码" }
+  },
+  "Quiz": {
+    "score": "分数", "timeLeft": "剩余时间", "difficulty": { "easy": "简单", "medium": "中等", "hard": "困难" }, "start": "开始游戏", "resume": "恢复游戏", "newGame": "新游戏", "playAgain": "再玩一次", "menu": "菜单", "skip": "跳过", "quit": "退出", "typeCapital": "输入首都...", "typeRegion": "输入区域...", "tryAgain": "重试", "target": "目标: {name}",
+    "feedback": { "perfect": "完美！", "amazing": "太棒了！", "great": "干得好！", "good": "不错的尝试！", "practice": "继续练习！" }
+  },
+  "RegionNames": {
+    "Alabama": "阿拉巴马州", "Alaska": "阿拉斯加州", "Arizona": "亚利桑那州", "Arkansas": "阿肯色州", "California": "加利福尼亚州", "Colorado": "科罗拉多州", "Connecticut": "康涅狄格州", "Delaware": "特拉华州", "Florida": "佛罗里达州", "Georgia": "佐治亚州", "Hawaii": "夏威夷州", "Idaho": "爱达荷州", "Illinois": "伊利诺伊州", "Indiana": "印第安纳州", "Iowa": "爱荷华州", "Kansas": "堪萨斯州", "Kentucky": "肯塔基州", "Louisiana": "路易斯安那州", "Maine": "缅因州", "Maryland": "马里兰州", "Massachusetts": "马萨诸塞州", "Michigan": "密歇根州", "Minnesota": "明尼苏达州", "Mississippi": "密西西比州", "Missouri": "密苏里州", "Montana": "蒙大拿州", "Nebraska": "内布拉斯加州", "Nevada": "内华达州", "New Hampshire": "新罕布什尔州", "New Jersey": "新泽西州", "New Mexico": "新墨西哥州", "New York": "纽约州", "North Carolina": "北卡罗来纳州", "North Dakota": "北达科他州", "Ohio": "俄亥俄州", "Oklahoma": "俄克拉荷马州", "Oregon": "俄勒冈州", "Pennsylvania": "宾夕法尼亚州", "Rhode Island": "罗德岛州", "South Carolina": "南卡罗来纳州", "South Dakota": "南达科他州", "Tennessee": "田纳西州", "Texas": "得克萨斯州", "Utah": "犹他州", "Vermont": "佛蒙特州", "Virginia": "弗吉尼亚州", "Washington": "华盛顿州", "West Virginia": "西弗吉尼亚州", "Wisconsin": "威斯康星州", "Wyoming": "怀俄明州"
+  },
+  "Common": { "unknown": "未知", "loading": "正在加载...", "back": "返回", "na": "N/A" },
+  "Metadata": { "title": "GeoGeek - 探索你内心的地理学家", "description": "交互式地理探索和排名", "mapOf": "{continent} 地图", "worldMapTitle": "世界地图探索者" }
+}
