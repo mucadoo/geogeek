@@ -14,6 +14,7 @@ import {
 import { Link, usePathname, routing } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { useGameStore } from '@/store/useGameStore';
+import UserMenu from '@/components/UserMenu';
 
 interface NavItem {
   href: string;
@@ -138,6 +139,8 @@ export default function Header() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <UserMenu />
           </div>
         </div>
       </div>

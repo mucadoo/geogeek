@@ -17,6 +17,7 @@ import GameMap from '@/components/GameMap';
 import { POINTS_MULTIPLIERS, PRESETS, AdvancedSettings, Difficulty } from '@/config/gameConstants';
 import { Link } from '@/i18n/routing';
 import { useGameStore, StateFeature, getFeedback, GameMode, GameType } from '@/store/useGameStore';
+import { useUserStore } from '@/store/useUserStore';
 import { Country } from '@/types';
 
 function cn(...inputs: ClassValue[]) {
@@ -58,6 +59,20 @@ export default function QuizLayout({
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [adv, setAdv] = useState<AdvancedSettings>(PRESETS.medium);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [guestName, setGuestName] = useState('');
+  const [isScoreRegistered, setIsScoreRegistered] = useState(false);
+
+  const { currentUser, updateUserScore, registerGuestScore } = useUserStore();
+
+  const handleRegisterScore = () => {
+    const finalPoints = useGameStore.getState().masteryPoints;
+    if (currentUser) {
+      updateUserScore(currentUser.id, finalPoints);
+    } else if (guestName.trim()) {
+      registerGuestScore(guestName.trim(), finalPoints);
+    }
+    setIsScoreRegistered(true);
+  };
 
   useEffect(() => {
     async function loadCountries() {
@@ -485,6 +500,46 @@ export default function QuizLayout({
                     <div className="flex justify-center gap-4 text-[10px] uppercase font-bold tracking-widest opacity-60">
                       <span>Weight: {useGameStore.getState().currentMultiplier}x</span>
                       {adv.gameType === 'survival' && <span>Mode: Survival</span>}
+                    </div>
+
+                    {/* SCORE REGISTRATION */}
+                    <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
+                      {isScoreRegistered ? (
+                        <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold animate-in zoom-in">
+                          <CheckCircle2 size={16} /> RECORD REGISTERED
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-4">
+                          {currentUser ? (
+                            <button 
+                              onClick={handleRegisterScore}
+                              className="bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-game-heading text-sm hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
+                            >
+                              <Trophy size={16} /> REGISTER RECORD FOR {currentUser.username}
+                            </button>
+                          ) : (
+                            <div className="flex flex-col gap-2">
+                              <p className="text-[10px] uppercase tracking-widest text-slate-400">Register as Guest</p>
+                              <div className="flex gap-2">
+                                <input 
+                                  type="text" 
+                                  value={guestName}
+                                  onChange={(e) => setGuestName(e.target.value)}
+                                  placeholder="Your Name..."
+                                  className="flex-grow bg-slate-50 dark:bg-slate-900 border border-[var(--card-border)] px-4 py-2 rounded-xl text-xs outline-none focus:border-primary"
+                                />
+                                <button 
+                                  onClick={handleRegisterScore}
+                                  disabled={!guestName.trim()}
+                                  className="bg-primary text-white px-4 py-2 rounded-xl font-game-heading text-sm disabled:opacity-50"
+                                >
+                                  SAVE
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                  </div>
                  <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>

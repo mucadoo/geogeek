@@ -339,7 +339,24 @@ export const useGameStore = create<GameState>()(
     {
       name: 'game-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ highScores: state.highScores }),
+      partialize: (state) => ({ 
+        highScores: state.highScores,
+        status: state.status,
+        difficulty: state.difficulty,
+        advancedSettings: state.advancedSettings,
+        gameMode: state.gameMode,
+        currentGameKey: state.currentGameKey,
+        capitalMap: state.capitalMap,
+        score: state.score,
+        masteryPoints: state.masteryPoints,
+        currentMultiplier: state.currentMultiplier,
+        timeLeft: state.timeLeft,
+        currentState: state.currentState,
+        remainingStates: state.remainingStates,
+        missedStates: state.missedStates,
+        correctlyGuessedIds: state.correctlyGuessedIds,
+        totalToGuess: state.totalToGuess,
+      }),
     }
   )
 );
