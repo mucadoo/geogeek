@@ -16,9 +16,10 @@ import { GameHUD } from '@/components/GameHUD';
 import GameMap from '@/components/GameMap';
 import { POINTS_MULTIPLIERS, PRESETS, AdvancedSettings, Difficulty } from '@/config/gameConstants';
 import { Link } from '@/i18n/routing';
-import { useGameStore, StateFeature, getFeedback, GameMode, GameType } from '@/store/useGameStore';
+import { useGameStore, StateFeature, GameMode, GameType } from '@/store/useGameStore';
 import { useUserStore } from '@/store/useUserStore';
 import { Country } from '@/types';
+import getFeedback from '@/lib/getFeedback';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
