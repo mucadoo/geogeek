@@ -1,5 +1,6 @@
-import { Star, Trophy } from 'lucide-react';
+import { Star, Trophy, Sparkles } from 'lucide-react';
 import React from 'react';
+import { useGameStore } from '@/store/useGameStore';
 
 interface GameHUDProps {
   score: number;
@@ -8,6 +9,8 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
+  const { masteryPoints, currentMultiplier } = useGameStore();
+  
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -18,9 +21,19 @@ export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
 
   return (
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 w-96 flex flex-col items-center gap-2">
-      {/* Timer */}
-      <div className="font-game-heading text-7xl text-[var(--foreground)] tabular-nums tracking-widest [text-shadow:0_2px_4px_rgba(0,0,0,0.2)]">
-        {formatTime(timeLeft)}
+      {/* Timer & Points Container */}
+      <div className="flex flex-col items-center">
+        <div className="font-game-heading text-7xl text-[var(--foreground)] tabular-nums tracking-widest [text-shadow:0_2px_4px_rgba(0,0,0,0.2)]">
+          {formatTime(timeLeft)}
+        </div>
+        
+        {/* Real-time Mastery Points */}
+        <div className="flex items-center gap-2 bg-primary/20 border border-primary px-4 py-1.5 rounded-full -mt-2 animate-in fade-in slide-in-from-top-2">
+          <Sparkles size={14} className="text-primary animate-pulse" />
+          <span className="font-game-mono text-xs font-bold text-primary tracking-tighter uppercase">
+            {masteryPoints.toLocaleString()} PTS ({currentMultiplier}x)
+          </span>
+        </div>
       </div>
       
       {/* Progress Bar */}

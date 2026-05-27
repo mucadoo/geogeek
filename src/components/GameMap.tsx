@@ -20,6 +20,8 @@ interface GameMapProps {
   capitalMap?: Record<string, string>;
   capitalCoordinates?: Record<string, [number, number]>;
   onRegionClick?: (id: string, name: string) => void;
+  hideBorders?: boolean;
+  noMapHints?: boolean;
 }
 
 const normalizeString = (str: string | null | undefined) => {
@@ -31,7 +33,9 @@ export default function GameMap({
   mapData, highlightedStateId, projection, validNames,
   width = 960, height = 600,
   showOnlyValid = false, gameMode = 'name', capitalMap = {}, capitalCoordinates = {},
-  onRegionClick
+  onRegionClick,
+  hideBorders = false,
+  noMapHints = false
 }: GameMapProps) {
   const { correctlyGuessedIds, lastGuessCorrect, lastSkippedState, autoZoom } = useGameStore();
   const pathGenerator = d3.geoPath().projection(projection);
@@ -66,7 +70,6 @@ export default function GameMap({
     const x = (x0 + x1) / 2;
     const y = (y0 + y1) / 2;
 
-    // Constrain the scale to comfortable bounds (e.g., zoom factor between 1x and 4x)
     const scale = Math.max(1, Math.min(4, 0.55 / Math.max(dx / width, dy / height)));
     const tx = width / 2 - scale * x;
     const ty = height / 2 - scale * y;
@@ -76,7 +79,7 @@ export default function GameMap({
       transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
       transformOrigin: '0px 0px',
     };
-  }, [highlightedStateId, allFeatures, pathGenerator, width, height]);
+  }, [highlightedStateId, allFeatures, pathGenerator, width, height, autoZoom]);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
@@ -110,7 +113,11 @@ export default function GameMap({
 
             let fillColor = "var(--map-fill)"; 
             if (isCorrect) fillColor = "var(--color-primary)"; 
-            if (isHighlighted && gameMode !== 'capital') fillColor = "var(--color-map-highlight)";
+            
+            // Apply highlight if not in noMapHints mode
+            if (!noMapHints && isHighlighted && gameMode !== 'capital') {
+              fillColor = "var(--color-map-highlight)";
+            }
 
             const isIncorrect = lastGuessCorrect === false && isHighlighted;
             const isSkipped = lastSkippedState?.id === stateId;
@@ -121,7 +128,7 @@ export default function GameMap({
                 key={stateId || i} 
                 d={pathData} 
                 fill={fillColor} 
-                stroke="var(--map-stroke)" 
+                stroke={hideBorders ? "transparent" : "var(--map-stroke)"} 
                 strokeWidth={0.5} 
                 vectorEffect="non-scaling-stroke"
                 className={`transition-colors duration-300 ${animationClass} ${onRegionClick ? 'cursor-pointer' : ''}`}

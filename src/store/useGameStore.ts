@@ -3,10 +3,10 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { ALIASES } from '@/config/aliases';
-import { DIFFICULTY_MULTIPLIERS } from '@/config/gameConstants';
+import { POINTS_MULTIPLIERS, AdvancedSettings, Difficulty as ConfigDifficulty } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
-export type Difficulty = 'easy' | 'medium' | 'hard';
+export type Difficulty = ConfigDifficulty;
 export type GameMode = 'name' | 'capital' | 'flag';
 export type GameType = 'standard' | 'survival';
 
@@ -22,14 +22,14 @@ export interface StateFeature {
 interface GameState {
   status: GameStatus;
   difficulty: Difficulty;
-  strictMode: boolean;
+  advancedSettings: AdvancedSettings;
   gameMode: GameMode;
-  gameType: GameType;
-  isMultipleChoice: boolean;
   options: string[];
   currentGameKey: string;
   capitalMap: Record<string, string>;
   score: number;
+  masteryPoints: number;
+  currentMultiplier: number;
   timeLeft: number;
   highScores: Record<string, number>;
   currentState: StateFeature | null;
@@ -46,24 +46,20 @@ interface GameState {
   startGame: (
     states: StateFeature[], 
     validNames: string[], 
-    duration: number, 
     difficulty: Difficulty,
+    advancedSettings: AdvancedSettings,
     gameKey: string,
     gameMode?: GameMode,
-    capitalMap?: Record<string, string>,
-    gameType?: GameType,
-    isMultipleChoice?: boolean
+    capitalMap?: Record<string, string>
   ) => void;
   submitGuess: (guess: string) => boolean;
   skipState: () => void;
   tick: () => void;
   setUserInput: (input: string) => void;
-  setStrictMode: (enabled: boolean) => void;
   setAutoZoom: (enabled: boolean) => void;
   resetGame: () => void;
 }
 
-const INITIAL_TIME = 300;
 const SURVIVAL_START_TIME = 15;
 const SURVIVAL_BONUS = 3;
 const SURVIVAL_PENALTY = 5;
@@ -115,15 +111,22 @@ export const useGameStore = create<GameState>()(
     (set, get) => ({
       status: 'idle',
       difficulty: 'medium',
-      strictMode: false,
+      advancedSettings: {
+        isMultipleChoice: false,
+        gameType: 'standard',
+        strictMatching: false,
+        noMapHints: false,
+        hideBorders: false,
+        timePerGuess: 20,
+      },
       gameMode: 'name',
-      gameType: 'standard',
-      isMultipleChoice: false,
       options: [],
       currentGameKey: '',
       capitalMap: {},
       score: 0,
-      timeLeft: INITIAL_TIME,
+      masteryPoints: 0,
+      currentMultiplier: 1,
+      timeLeft: 0,
       highScores: {},
       currentState: null,
       remainingStates: [],
@@ -136,14 +139,31 @@ export const useGameStore = create<GameState>()(
       totalToGuess: 0,
       autoZoom: true,
 
-      startGame: (states, validNames, duration, difficulty, gameKey, gameMode = 'name', capitalMap = {}, gameType = 'standard', isMultipleChoice = false) => {
+      startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}) => {
         const filtered = states.filter(s => {
           if (!s.properties.name) return false;
           return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
         });
 
         const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-        const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[difficulty];
+
+        // --- THE COMPLEX MULTIPLIER MATH ---
+        const { isMultipleChoice, gameType, strictMatching, noMapHints, hideBorders, timePerGuess } = advancedSettings;
+        
+        let m = 1.0;
+        m *= isMultipleChoice ? POINTS_MULTIPLIERS.input.choice : POINTS_MULTIPLIERS.input.typing;
+        m *= (gameType === 'survival') ? POINTS_MULTIPLIERS.mode.survival : POINTS_MULTIPLIERS.mode.standard;
+        
+        if (!isMultipleChoice && strictMatching) m *= POINTS_MULTIPLIERS.settings.strictMatching;
+        if (noMapHints) m *= POINTS_MULTIPLIERS.settings.noMapHints;
+        if (hideBorders) m *= POINTS_MULTIPLIERS.settings.hideBorders;
+        
+        // Time pressure multiplier: 20s is base (1x). 
+        // If 10s -> 2x. If 40s -> 0.5x.
+        const timeFactor = 20 / timePerGuess;
+        m *= timeFactor;
+
+        const totalMultiplier = Number(m.toFixed(2));
         
         const firstState = shuffled[0] || null;
         let initialOptions: string[] = [];
@@ -159,15 +179,15 @@ export const useGameStore = create<GameState>()(
         set({
           status: 'playing',
           difficulty,
-          strictMode: difficulty === 'hard',
+          advancedSettings,
           gameMode,
-          gameType,
-          isMultipleChoice,
           options: initialOptions,
           currentGameKey: gameKey,
           capitalMap,
           score: 0,
-          timeLeft: gameType === 'survival' ? SURVIVAL_START_TIME : Math.floor(duration * difficultyMultiplier),
+          masteryPoints: 0,
+          currentMultiplier: totalMultiplier,
+          timeLeft: gameType === 'survival' ? SURVIVAL_START_TIME : Math.floor(filtered.length * timePerGuess),
           remainingStates: shuffled.slice(1),
           currentState: firstState,
           missedStates: [],
@@ -181,11 +201,10 @@ export const useGameStore = create<GameState>()(
       },
       
       setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
-      setStrictMode: (strictMode) => set({ strictMode }),
       setAutoZoom: (autoZoom) => set({ autoZoom }),
 
       submitGuess: (guess) => {
-        const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, strictMode, currentGameKey, highScores, gameType, timeLeft, isMultipleChoice } = get();
+        const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings } = get();
         if (!currentState) return false;
 
         const regionName = currentState.properties.name;
@@ -196,7 +215,7 @@ export const useGameStore = create<GameState>()(
         const targetAliases = (ALIASES[normalizedTarget] || []).map(normalizeString);
 
         const checkMatch = (target: string) => {
-          if (strictMode) return normalizedGuess === target;
+          if (advancedSettings.strictMatching) return normalizedGuess === target;
           return normalizedGuess === target || isFuzzyMatch(normalizedGuess, target);
         };
 
@@ -205,21 +224,24 @@ export const useGameStore = create<GameState>()(
         if (isCorrect) {
           const newCorrectIds = [...correctlyGuessedIds, currentState.id];
           const newScore = score + 1;
+          const newPoints = Math.round(newScore * currentMultiplier * 10); 
+          
           const isFinished = remainingStates.length === 0;
-          const newTime = gameType === 'survival' ? timeLeft + SURVIVAL_BONUS : timeLeft;
+          const newTime = advancedSettings.gameType === 'survival' ? timeLeft + SURVIVAL_BONUS : timeLeft;
 
           if (isFinished) {
             const oldHighScore = highScores[currentGameKey] || 0;
-            const isHighScore = newScore > oldHighScore;
+            const isHighScore = newPoints > oldHighScore;
             set({ 
               status: 'finished', 
-              score: newScore, 
+              score: newScore,
+              masteryPoints: newPoints,
               currentState: null, 
               userInput: '', 
               lastGuessCorrect: true, 
               lastSkippedState: null, 
               correctlyGuessedIds: newCorrectIds,
-              highScores: isHighScore ? { ...highScores, [currentGameKey]: newScore } : highScores,
+              highScores: isHighScore ? { ...highScores, [currentGameKey]: newPoints } : highScores,
               isNewHighScore: isHighScore,
               timeLeft: newTime
             });
@@ -227,20 +249,15 @@ export const useGameStore = create<GameState>()(
             const nextState = remainingStates[0];
             let nextOptions: string[] = [];
             
-            if (isMultipleChoice) {
+            if (advancedSettings.isMultipleChoice) {
               const correct = gameMode === 'capital' ? (capitalMap[nextState.properties.name] || nextState.properties.name) : nextState.properties.name;
-              // Mix from remaining and correct to ensure unique options
-              const allPossibleOptions = [...remainingStates.map(s => gameMode === 'capital' ? (capitalMap[s.properties.name] || s.properties.name) : s.properties.name), 
-                                          ...correctlyGuessedIds.map(_id => {
-                                            // This is a bit inefficient but for small sets it's fine
-                                            return ""; // Fallback
-                                          })].filter(o => o && normalizeString(o) !== normalizeString(correct));
-              
+              const allPossibleOptions = [...remainingStates.map(s => gameMode === 'capital' ? (capitalMap[s.properties.name] || s.properties.name) : s.properties.name)].filter(o => o && normalizeString(o) !== normalizeString(correct));
               nextOptions = [correct, ...allPossibleOptions.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
             }
 
             set({
               score: newScore,
+              masteryPoints: newPoints,
               currentState: nextState,
               remainingStates: remainingStates.slice(1),
               userInput: '',
@@ -259,41 +276,37 @@ export const useGameStore = create<GameState>()(
       },
 
       skipState: () => {
-        const { currentState, remainingStates, missedStates, gameType, timeLeft, isMultipleChoice, gameMode, capitalMap } = get();
+        const { currentState, remainingStates, missedStates, timeLeft, gameMode, capitalMap, advancedSettings } = get();
         if (!currentState) return;
         
         const updatedRemaining =[...remainingStates, currentState];
         const newMissed = [...new Set([...missedStates, currentState])];
-        const newTime = gameType === 'survival' ? Math.max(0, timeLeft - SURVIVAL_PENALTY) : timeLeft;
+        const newTime = advancedSettings.gameType === 'survival' ? Math.max(0, timeLeft - SURVIVAL_PENALTY) : timeLeft;
 
-        if (newTime === 0 && gameType === 'survival') {
+        if (newTime === 0 && advancedSettings.gameType === 'survival') {
           set({ status: 'finished', timeLeft: 0, missedStates: newMissed });
           return;
         }
         
         const nextState = updatedRemaining[0];
         let nextOptions: string[] = [];
-        if (isMultipleChoice) {
+        if (advancedSettings.isMultipleChoice) {
           const correct = gameMode === 'capital' ? (capitalMap[nextState.properties.name] || nextState.properties.name) : nextState.properties.name;
           const others = updatedRemaining.filter(s => s.id !== nextState.id)
             .map(s => gameMode === 'capital' ? (capitalMap[s.properties.name] || s.properties.name) : s.properties.name);
           nextOptions = [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
         }
 
-        if (updatedRemaining.length === 0) {
-          set({ status: 'finished', currentState: null, userInput: '', lastGuessCorrect: null, lastSkippedState: null, missedStates: newMissed, timeLeft: newTime });
-        } else {
-          set({
-            currentState: nextState,
-            remainingStates: updatedRemaining.slice(1),
-            userInput: '',
-            lastGuessCorrect: null,
-            lastSkippedState: currentState,
-            missedStates: newMissed,
-            timeLeft: newTime,
-            options: nextOptions
-          });
-        }
+        set({
+          currentState: nextState,
+          remainingStates: updatedRemaining.slice(1),
+          userInput: '',
+          lastGuessCorrect: null,
+          lastSkippedState: currentState,
+          missedStates: newMissed,
+          timeLeft: newTime,
+          options: nextOptions
+        });
       },
 
       tick: () => {
@@ -310,6 +323,7 @@ export const useGameStore = create<GameState>()(
       resetGame: () => set({
         status: 'idle',
         score: 0,
+        masteryPoints: 0,
         currentState: null,
         remainingStates:[],
         missedStates: [],
