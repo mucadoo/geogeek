@@ -282,9 +282,9 @@ export default function Map({ slug }: MapProps) {
       onMouseLeave={() => setTooltip({ ...tooltip, show: false })}
     >
       {status === 'pending' && (
-        <div className="absolute inset-0 flex animate-pulse flex-col items-center justify-center gap-4">
+        <div className="absolute inset-0 flex animate-pulse flex-col items-center justify-center gap-4 bg-[var(--background)]">
           <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-          <p className="font-medium text-gray-500">{t('loading')}</p>
+          <p className="font-medium text-slate-500">{t('loading')}</p>
         </div>
       )}
 
@@ -293,7 +293,7 @@ export default function Map({ slug }: MapProps) {
           
           {/* View Toggles on World Map */}
           {!selectedContinent && !activeCountry && (
-            <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 flex gap-2 rounded-full border border-gray-100 bg-white/90 p-1.5 shadow-xl backdrop-blur-md">
+            <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 flex gap-2 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1.5 shadow-xl backdrop-blur-md">
               <button 
                 onClick={() => setExploreMode('continent')}
                 className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'continent' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
@@ -310,7 +310,7 @@ export default function Map({ slug }: MapProps) {
           )}
 
           <div
-            className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-gray-100 bg-white/95 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-gray-800 shadow-xl backdrop-blur transition-opacity duration-150"
+            className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/95 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-[var(--foreground)] shadow-xl backdrop-blur transition-opacity duration-150"
             style={{ left: tooltip.x, top: tooltip.y, opacity: tooltip.show ? 1 : 0 }}
           >
             {tooltip.content}
@@ -357,7 +357,7 @@ export default function Map({ slug }: MapProps) {
             <button
               onClick={handleBackClick}
               title={activeCountry ? t('returnToContinent') : t('returnToWorld')}
-              className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-white p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
+              className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
             >
               <Image 
                 src="/media/back_icon.svg" 

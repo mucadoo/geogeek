@@ -77,7 +77,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
         continentGeographies.map((continentData) => {
           const continent = continentData.continent;
           const isHovered = hoveredContinent === continent;
-          const fillColor = isHovered ? "var(--color-danger)" : "var(--map-fill)";
+          const fillColor = isHovered ? "var(--color-map-highlight)" : "var(--map-fill)";
           const pathData = pathGenerator(continentData.feature as any);
           
           if (!pathData) return null;
@@ -130,7 +130,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
             : hoveredCountry === numericId;
 
           let fillColor = "var(--map-fill)"; 
-          if (isHovered && isClickable) fillColor = "var(--color-danger)";
+          if (isHovered && isClickable) fillColor = "var(--color-map-highlight)";
           else if (masteryMode && alpha2) fillColor = getMasteryColor(alpha2);
 
           const pathData = pathGenerator(geo);

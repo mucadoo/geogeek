@@ -34,6 +34,7 @@
   --danger: var(--destructive);
   --map-fill: #ffffff;
   --map-stroke: #94a3b8;
+  --map-highlight: #ff5a5f;
   --ocean-bg: #d1dbd7;
 
   --chart-1: #00a8b5;
@@ -71,6 +72,7 @@
   --hud-bg: rgba(10, 10, 10, 0.75);
   --map-fill: #1e293b;
   --map-stroke: #334155;
+  --map-highlight: #ffcd42;
   --ocean-bg: #050505;
 }
 
@@ -86,6 +88,7 @@
   --color-danger: var(--danger);
   --color-map-fill: var(--map-fill);
   --color-map-stroke: var(--map-stroke);
+  --color-map-highlight: var(--map-highlight);
   --color-ocean-bg: var(--ocean-bg);
   --font-sans: var(--font-inter), sans-serif;
   --font-heading: var(--font-bebas), sans-serif;

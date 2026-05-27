@@ -110,7 +110,7 @@ export default function GameMap({
 
             let fillColor = "var(--map-fill)"; 
             if (isCorrect) fillColor = "var(--color-primary)"; 
-            if (isHighlighted && gameMode !== 'capital') fillColor = "var(--color-danger)";
+            if (isHighlighted && gameMode !== 'capital') fillColor = "var(--color-map-highlight)";
 
             const isIncorrect = lastGuessCorrect === false && isHighlighted;
             const isSkipped = lastSkippedState?.id === stateId;
@@ -154,8 +154,8 @@ export default function GameMap({
 
                 return (
                   <g key={`pin-${stateId}`}>
-                    <circle cx={coords[0]} cy={coords[1]} r={14} fill="none" stroke="var(--color-danger)" strokeWidth={2} className="animate-ping" style={{ transformOrigin: `${coords[0]}px ${coords[1]}px` }} />
-                    <circle cx={coords[0]} cy={coords[1]} r={6} fill="var(--color-danger)" stroke="white" strokeWidth={3} className="drop-shadow-lg" />
+                    <circle cx={coords[0]} cy={coords[1]} r={14} fill="none" stroke="var(--color-map-highlight)" strokeWidth={2} className="animate-ping" style={{ transformOrigin: `${coords[0]}px ${coords[1]}px` }} />
+                    <circle cx={coords[0]} cy={coords[1]} r={6} fill="var(--color-map-highlight)" stroke="white" strokeWidth={3} className="drop-shadow-lg" />
                   </g>
                 );
               })}
