@@ -24,8 +24,18 @@ export default function AnimatedBackground() {
   const isFullscreen = pathname.startsWith('/map') || (pathname.startsWith('/games/') && pathname !== '/games');
 
   useEffect(() => {
-    // DO NOT animate if we are on a fullscreen map page!
-    if (!mapData || !canvasRef.current || isFullscreen || !resolvedTheme) return;
+    // If we are on a fullscreen map page, we ensure the canvas is cleared and we stop the animation
+    if (isFullscreen) {
+      if (canvasRef.current) {
+        const context = canvasRef.current.getContext('2d');
+        if (context) {
+          context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        }
+      }
+      return;
+    }
+
+    if (!mapData || !canvasRef.current || !resolvedTheme) return;
 
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on base
@@ -183,7 +193,7 @@ export default function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 pointer-events-none"
+      className={`fixed inset-0 -z-10 pointer-events-none transition-opacity duration-500 ${isFullscreen ? 'opacity-0' : 'opacity-100'}`}
       style={{ width: '100vw', height: '100vh' }}
     />
   );
