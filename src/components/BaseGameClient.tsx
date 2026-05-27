@@ -15,7 +15,7 @@ interface BaseGameClientProps {
   gameKey: string;
   projectionConfig: ProjectionConfig;
   showOnlyValid?: boolean;
-  gameMode?: 'name' | 'capital';
+  gameMode?: 'name' | 'capital' | 'flag';
 }
 
 export default function BaseGameClient({
@@ -77,7 +77,7 @@ export default function BaseGameClient({
       validNames={localizedValidNames}
       duration={finalDuration}
       showOnlyValid={showOnlyValid}
-      gameMode={isCapitalMode ? 'capital' : 'name'}
+      gameMode={gameModeProp}
       capitalMap={capitalMap}
       capitalCoordinates={capitalCoordinates}
     />
