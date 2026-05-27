@@ -50,7 +50,9 @@ export default function Header() {
     setMounted(true);
   }, []);
 
-  if (status === 'playing') return null;
+  const isGameRoute = pathname.includes('/games/') && status === 'playing';
+
+  if (isGameRoute) return null;
 
   const onLanguageChange = (newLocale: string) => {
     document.cookie = `NEXT_LOCALE=${newLocale};max-age=31536000;path=/;SameSite=Lax`;
