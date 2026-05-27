@@ -5,8 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 // This cleans the messy external data so your components don't have to.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeTopoJson = (mapData: any) => {
-  // 1. Find the main object (e.g., "states", "uf", "default", etc.)
-  const objectKey = Object.keys(mapData.objects)[0];
+  // 1. Find the object with the most geometries (e.g., target "states" instead of "nation")
+  const objectKey = Object.keys(mapData.objects).reduce((a, b) => 
+    mapData.objects[a].geometries.length > mapData.objects[b].geometries.length ? a : b
+  );
   const geometries = mapData.objects[objectKey].geometries;
 
   // 2. Loop through and standardize every region

@@ -111,9 +111,13 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
         })
       ) : (
         (geographies as unknown as CountryFeature[]).map((geo, index) => {
-          const numericId = geo.id ? String(geo.id).padStart(3, '0') : `geo-${index}`;
-          const continent = NUMERIC_TO_CONTINENT[numericId] || 'Other';
-          const alpha2 = NUMERIC_TO_ALPHA2[numericId];
+          const rawId = geo.id ? String(geo.id) : `geo-${index}`;
+          
+          // Pad world ISOs to 3 digits, but leave sub-map regional IDs exactly as they are
+          const mapId = isSubMap ? rawId : rawId.padStart(3, '0');
+          
+          const continent = NUMERIC_TO_CONTINENT[mapId] || 'Other';
+          const alpha2 = NUMERIC_TO_ALPHA2[mapId];
           const countryName = geo.properties?.name || "Unknown";
           
           const isContinentMode = exploreMode === 'continent';
@@ -127,7 +131,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
 
           const isHovered = (isContinentMode && !selectedContinent) 
             ? hoveredContinent === continent 
-            : hoveredCountry === numericId;
+            : hoveredCountry === mapId;
 
           let fillColor = "var(--map-fill)"; 
           if (isHovered && isClickable) fillColor = "var(--color-map-highlight)";
@@ -138,7 +142,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
 
           return (
             <path
-              key={numericId}
+              key={mapId}
               d={pathData}
               fill={fillColor}
               stroke="var(--map-stroke)"
@@ -147,7 +151,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               className={`transition-all duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               onMouseEnter={(e) => {
                 if (!isClickable) return;
-                setHoveredCountry(numericId);
+                setHoveredCountry(mapId);
                 setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
               }}
               onMouseLeave={() => {
@@ -157,7 +161,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               onClick={() => {
                 if (!isClickable) return;
                 if (isSubMap && activeCountryIso) {
-                  router.push(`/map/${activeCountryIso}/${numericId}` as any);
+                  router.push(`/map/${activeCountryIso}/${mapId}` as any);
                 } else if (alpha2) {
                   NProgress.start();
                   router.push(`/map/${alpha2.toLowerCase()}` as any);
