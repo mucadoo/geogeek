@@ -188,8 +188,16 @@ export default function QuizLayout({
   };
 
   const handleRegionClick = (id: string, name: string) => {
-    if (gameStatus === 'playing') {
-      submitGuess(name);
+    if (gameStatus !== 'playing') return;
+
+    if (gameMode === 'reverse' || gameMode === 'flag') {
+        const success = submitGuess(name);
+        if (!success) {
+            // "Punitve" mode: wrong click is a skip
+            skipState();
+        }
+    } else {
+        submitGuess(name);
     }
   };
 
@@ -222,7 +230,7 @@ export default function QuizLayout({
             highlightedStateId={currentState?.id || null} 
             projection={projection} 
             validNames={validNames}
-            gameMode={gameMode}
+            gameMode={gameMode as any}
             capitalMap={capitalMap}
             capitalCoordinates={capitalCoordinates}
             showOnlyValid={showOnlyValid}

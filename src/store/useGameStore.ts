@@ -7,7 +7,7 @@ import { POINTS_MULTIPLIERS, AdvancedSettings, Difficulty as ConfigDifficulty } 
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
 export type Difficulty = ConfigDifficulty;
-export type GameMode = 'name' | 'capital' | 'flag';
+export type GameMode = 'name' | 'capital' | 'flag' | 'reverse';
 export type GameType = 'standard' | 'survival';
 
 export interface StateFeature {
