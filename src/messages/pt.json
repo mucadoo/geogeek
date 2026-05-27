@@ -164,6 +164,8 @@
       "hard": "Difícil"
     },
     "start": "INICIAR JOGO",
+    "resume": "RETOMAR JOGO",
+    "newGame": "NOVO JOGO",
     "playAgain": "JOGAR NOVAMENTE",
     "menu": "Menu",
     "skip": "Pular",

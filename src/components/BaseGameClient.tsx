@@ -69,6 +69,7 @@ export default function BaseGameClient({
 
   return (
     <QuizLayout
+      gameKey={gameKey}
       title={t(`gameData.${gameKey}.title`)}
       description={t(`gameData.${gameKey}.description`)}
       mapData={mapData}

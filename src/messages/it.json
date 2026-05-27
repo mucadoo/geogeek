@@ -163,6 +163,8 @@
       "hard": "Difficile"
     },
     "start": "INIZIA IL GIOCO",
+    "resume": "RIPRENDI GIOCO",
+    "newGame": "NUOVO GIOCO",
     "playAgain": "GIOCA ANCORA",
     "menu": "Menu",
     "skip": "Salta",

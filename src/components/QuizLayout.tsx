@@ -25,6 +25,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 interface QuizLayoutProps {
+  gameKey: string;
   title: string;
   description: string;
   mapData: Topology | undefined;
@@ -40,7 +41,7 @@ interface QuizLayoutProps {
 }
 
 export default function QuizLayout({
-  title, description, mapData, mapStatus, projection, validNames, gameMode = 'name', capitalMap = {},
+  gameKey, title, description, mapData, mapStatus, projection, validNames, gameMode = 'name', capitalMap = {},
   showOnlyValid = false, capitalCoordinates = {}
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
@@ -52,12 +53,22 @@ export default function QuizLayout({
     totalToGuess, timeLeft, tick, isNewHighScore,
     userInput, setUserInput, submitGuess, skipState, lastGuessCorrect,
     correctlyGuessedIds, missedStates, options,
-    autoZoom, setAutoZoom
+    autoZoom, setAutoZoom,
+    pauseGame, resumeGame, quitGame, savedGames, currentGameKey
   } = useGameStore();
+  
+  const savedGame = savedGames[gameKey];
+  const adv = useMemo(() => ({
+    isMultipleChoice: false,
+    gameType: 'standard' as const,
+    strictMatching: false,
+    noMapHints: false,
+    hideBorders: false,
+    timePerGuess: 20,
+  }), []);
+  const difficulty = 'medium' as const;
 
   const [allCountries, setAllCountries] = useState<Country[]>([]);
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
-  const [adv, setAdv] = useState<AdvancedSettings>(PRESETS.medium);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [isScoreRegistered, setIsScoreRegistered] = useState(false);
@@ -99,7 +110,20 @@ export default function QuizLayout({
     return country?.flagUrl;
   };
 
-  // High score effects
+  useEffect(() => {
+    if (gameStatus === 'playing' && currentGameKey !== gameKey) {
+      pauseGame();
+    }
+  }, [gameStatus, currentGameKey, gameKey, pauseGame]);
+
+  useEffect(() => {
+    return () => {
+      if (useGameStore.getState().status === 'playing') {
+        useGameStore.getState().pauseGame();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (gameStatus === 'finished' && score > 0 && score === totalToGuess) {
       confetti({
@@ -110,7 +134,6 @@ export default function QuizLayout({
     }
   }, [gameStatus, score, totalToGuess]);
 
-  // Handle auto-focus and auto-selection on incorrect guess for perfect UX
   useEffect(() => {
     if (gameStatus === 'playing' && inputRef.current && !adv.isMultipleChoice) {
       inputRef.current.focus();
@@ -129,61 +152,15 @@ export default function QuizLayout({
     return () => clearInterval(interval);
   }, [gameStatus, tick]);
 
-  useEffect(() => { return () => resetGame(); }, [resetGame]);
-
-  useEffect(() => {
-    const handleKeys = (e: KeyboardEvent) => {
-      if (gameStatus !== 'playing') return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        resetGame();
-      }
-      if (e.key === 'Tab' || (e.key === ' ' && e.ctrlKey)) {
-        e.preventDefault();
-        skipState();
-      }
-    };
-    window.addEventListener('keydown', handleKeys);
-    return () => window.removeEventListener('keydown', handleKeys);
-  }, [gameStatus, skipState, resetGame]);
-
-  // Preset Selection Logic
-  const handlePresetSelect = (preset: Exclude<Difficulty, 'custom'>) => {
-    setDifficulty(preset);
-    setAdv(PRESETS[preset]);
-  };
-
-  const updateAdv = (updates: Partial<AdvancedSettings>) => {
-    const newAdv = { ...adv, ...updates };
-    setAdv(newAdv);
-    
-    // Check if it still matches a preset
-    if (JSON.stringify(newAdv) === JSON.stringify(PRESETS['very-easy'])) setDifficulty('very-easy');
-    else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.easy)) setDifficulty('easy');
-    else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.medium)) setDifficulty('medium');
-    else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.hard)) setDifficulty('hard');
-    else if (JSON.stringify(newAdv) === JSON.stringify(PRESETS.blazing)) setDifficulty('blazing');
-    else setDifficulty('custom');
-  };
-
-  const currentMultiplier = useMemo(() => {
-    let m = 1.0;
-    m *= adv.isMultipleChoice ? POINTS_MULTIPLIERS.input.choice : POINTS_MULTIPLIERS.input.typing;
-    m *= (adv.gameType === 'survival') ? POINTS_MULTIPLIERS.mode.survival : POINTS_MULTIPLIERS.mode.standard;
-    if (!adv.isMultipleChoice && adv.strictMatching) m *= POINTS_MULTIPLIERS.settings.strictMatching;
-    if (adv.noMapHints) m *= POINTS_MULTIPLIERS.settings.noMapHints;
-    if (adv.hideBorders) m *= POINTS_MULTIPLIERS.settings.hideBorders;
-    const timeFactor = 20 / adv.timePerGuess;
-    m *= timeFactor;
-    return m.toFixed(2);
-  }, [adv]);
-
   const handleStartGame = () => {
     if (mapData) {
       const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const states = (feature(mapData, mapData.objects[objectKey]) as any).features as StateFeature[];
-      startGame(states, validNames, difficulty, adv, 'QUIZ_KEY', gameMode, capitalMap);
+      
+      if (savedGame) quitGame(); 
+      
+      startGame(states, validNames, difficulty, adv, gameKey, gameMode, capitalMap);
     }
   };
 
@@ -193,7 +170,6 @@ export default function QuizLayout({
     if (gameMode === 'reverse' || gameMode === 'flag') {
         const success = submitGuess(name);
         if (!success) {
-            // "Punitve" mode: wrong click is a skip
             skipState();
         }
     } else {
@@ -316,12 +292,13 @@ export default function QuizLayout({
                     )}
                   </div>
                 ) : (
-                  t('target', { name: getLocalizedName(currentState.properties.name) })
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  t('target', { name: getLocalizedName(currentState.properties.name) } as any)
                 )}
               </div>
             )}
 
-            {adv.isMultipleChoice ? (
+            {options.length > 0 ? (
               <div className="pointer-events-auto grid grid-cols-2 gap-3 w-full max-w-md">
                 {options.map((option, i) => (
                   <button
@@ -360,13 +337,13 @@ export default function QuizLayout({
                  </button>
               </div>
             )}
-            {lastGuessCorrect === false && !adv.isMultipleChoice && (
+            {lastGuessCorrect === false && options.length === 0 && (
               <span className="text-xs font-bold text-red-500 uppercase -mt-2 animate-pulse">{t('tryAgain')}</span>
             )}
 
             <div className="flex gap-2 pointer-events-auto">
               <button 
-                onClick={resetGame}
+                onClick={quitGame}
                 className="bg-red-500 text-white px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-red-600 transition-colors"
               >
                 Quit
@@ -403,100 +380,20 @@ export default function QuizLayout({
                  </div>
                  <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
                  <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
-
-                 <div className="mb-8 flex flex-col gap-6">
-                    {/* 1. PRESETS */}
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
-                        <h3 className="font-bebas text-xl tracking-widest text-slate-400 uppercase">1. Difficulty Pack</h3>
-                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold uppercase tracking-widest">
-                          <Sparkles size={10} className="animate-pulse" /> Match Weight: {currentMultiplier}x
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-4 justify-center">
-                        <DifficultyTicket title="Very Easy" description="60s / Guess" isSelected={difficulty === 'very-easy'} onClick={() => handlePresetSelect('very-easy')} />
-                        <DifficultyTicket title="Easy" description="30s / Guess" isSelected={difficulty === 'easy'} onClick={() => handlePresetSelect('easy')} />
-                        <DifficultyTicket title="Med" description="20s / Guess" isSelected={difficulty === 'medium'} onClick={() => handlePresetSelect('medium')} />
-                        <DifficultyTicket title="Hard" description="15s / Guess" isSelected={difficulty === 'hard'} onClick={() => handlePresetSelect('hard')} />
-                        <DifficultyTicket title="Blazing" description="5s / Guess" isSelected={difficulty === 'blazing'} onClick={() => handlePresetSelect('blazing')} />
-                        <button 
-                          onClick={() => setShowAdvanced(!showAdvanced)}
-                          className={cn(
-                            "flex flex-col items-center justify-center gap-1 px-6 py-3 rounded-2xl border-2 border-dashed transition-all min-w-24",
-                            difficulty === 'custom' ? "border-primary bg-primary/5 text-primary shadow-lg" : "border-[var(--card-border)] text-slate-400"
-                          )}
-                        >
-                          <Settings2 size={18} />
-                          <span className="font-bebas text-xs tracking-widest uppercase">Custom</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* 2. ADVANCED SETTINGS (Collapsible) */}
-                    <div className={cn("flex flex-col gap-6 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-[var(--card-border)] transition-all", showAdvanced ? "block" : "hidden")}>
-                        {/* Time Per Guess Slider */}
-                        <div className="flex flex-col gap-3">
-                          <div className="flex justify-between items-center">
-                            <label className="flex items-center gap-2 font-bebas text-sm text-slate-500 tracking-widest uppercase">
-                              <Timer size={14} /> Seconds Per Guess
-                            </label>
-                            <span className="font-mono text-sm font-bold text-primary">{adv.timePerGuess}s</span>
-                          </div>
-                          <input 
-                            type="range" min="5" max="60" step="5" value={adv.timePerGuess} 
-                            onChange={(e) => updateAdv({ timePerGuess: parseInt(e.target.value) })}
-                            className="w-full accent-primary h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                           {/* Game Type */}
-                           <button 
-                              onClick={() => updateAdv({ gameType: adv.gameType === 'survival' ? 'standard' : 'survival' })}
-                              className={cn("p-4 rounded-xl border-2 border-dashed text-left transition-all", adv.gameType === 'survival' ? "border-amber-500 bg-amber-500/10 text-amber-600" : "border-[var(--card-border)] text-slate-400")}
-                           >
-                              <div className="font-bebas text-lg tracking-widest uppercase mb-1">Survival Mode</div>
-                              <div className="text-[10px] font-game-mono opacity-80">+3s on correct, -5s on skip.</div>
-                           </button>
-                           {/* Input Mode */}
-                           <button 
-                              onClick={() => updateAdv({ isMultipleChoice: !adv.isMultipleChoice })}
-                              className={cn("p-4 rounded-xl border-2 border-dashed text-left transition-all", !adv.isMultipleChoice ? "border-primary bg-primary/10 text-primary" : "border-[var(--card-border)] text-slate-400")}
-                           >
-                              <div className="font-bebas text-lg tracking-widest uppercase mb-1">Manual Typing</div>
-                              <div className="text-[10px] font-game-mono opacity-80">1.5x Multiplier bonus.</div>
-                           </button>
-                        </div>
-
-                        {/* Extra Hard toggles */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                           <button 
-                             onClick={() => updateAdv({ strictMatching: !adv.strictMatching })}
-                             disabled={adv.isMultipleChoice}
-                             className={cn("flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-dashed transition-all", adv.strictMatching ? "border-red-500 bg-red-500/5 text-red-500" : "border-[var(--card-border)] text-slate-400 opacity-50")}
-                           >
-                              <Hash size={16} />
-                              <span className="font-bebas text-[10px] tracking-widest uppercase">Strict Type</span>
-                           </button>
-                           <button 
-                             onClick={() => updateAdv({ noMapHints: !adv.noMapHints })}
-                             className={cn("flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-dashed transition-all", adv.noMapHints ? "border-red-500 bg-red-500/5 text-red-500" : "border-[var(--card-border)] text-slate-400")}
-                           >
-                              <EyeOff size={16} />
-                              <span className="font-bebas text-[10px] tracking-widest uppercase">No Hints</span>
-                           </button>
-                           <button 
-                             onClick={() => updateAdv({ hideBorders: !adv.hideBorders })}
-                             className={cn("flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-dashed transition-all", adv.hideBorders ? "border-red-500 bg-red-500/5 text-red-500" : "border-[var(--card-border)] text-slate-400")}
-                           >
-                              <MapIcon size={16} />
-                              <span className="font-bebas text-[10px] tracking-widest uppercase">No Borders</span>
-                           </button>
-                        </div>
-                    </div>
-                 </div>
-
-                 <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">{t('start')}</button>
+                 {savedGame ? (
+                  <div className="flex gap-3 mt-8 flex-col sm:flex-row">
+                    <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
+                      {t('resume') || "RESUME GAME"}
+                    </button>
+                    <button onClick={handleStartGame} className="bg-[var(--card-bg)] text-slate-500 border-2 border-dashed border-[var(--card-border)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-lg hover:scale-105 hover:border-red-500 hover:text-red-500 transition-all shadow-sm">
+                      {t('newGame') || "NEW GAME"}
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg mt-8">
+                    {t('start')}
+                  </button>
+                )}
               </div>
            ) : (
               <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)]">
@@ -510,11 +407,7 @@ export default function QuizLayout({
                  <div className="mb-8 font-game-mono text-slate-500 space-y-2">
                     <p className="text-xl font-bold text-primary">Mastery Points: {useGameStore.getState().masteryPoints.toLocaleString()}</p>
                     <p className="text-sm">Accuracy: {score} / {totalToGuess} ({totalToGuess > 0 ? Math.round((score / totalToGuess) * 100) : 0}%)</p>
-                    <div className="flex justify-center gap-4 text-[10px] uppercase font-bold tracking-widest opacity-60">
-                      <span>Weight: {useGameStore.getState().currentMultiplier}x</span>
-                      {adv.gameType === 'survival' && <span>Mode: Survival</span>}
-                    </div>
-
+                    
                     {/* SCORE REGISTRATION */}
                     <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
                       {isScoreRegistered ? (

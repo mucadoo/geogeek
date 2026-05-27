@@ -163,6 +163,8 @@
       "hard": "Difficile"
     },
     "start": "COMMENCER LE JEU",
+    "resume": "REPRENDRE LA PARTIE",
+    "newGame": "NOUVELLE PARTIE",
     "playAgain": "REJOUER",
     "menu": "Menu",
     "skip": "Passer",

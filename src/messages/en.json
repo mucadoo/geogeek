@@ -163,6 +163,8 @@
       "hard": "Hard"
     },
     "start": "START GAME",
+    "resume": "RESUME GAME",
+    "newGame": "NEW GAME",
     "playAgain": "PLAY AGAIN",
     "menu": "Menu",
     "skip": "Skip",
