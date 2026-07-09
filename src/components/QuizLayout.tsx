@@ -370,130 +370,132 @@ export default function QuizLayout({
       )}
 
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--background)]/80 p-4 backdrop-blur-sm overflow-y-auto">
-           {gameStatus === 'idle' ? (
-              <div className="w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative my-auto">
-                 <Link href="/games" className="absolute top-6 left-6 text-slate-400 transition-colors hover:text-primary">
-                  <ArrowLeft size={24} />
-                 </Link>
-                 <div className="bg-[var(--primary)]/10 text-[var(--primary)] mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
-                   <Trophy size={32} />
-                 </div>
-                 <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
-                 <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
-                 
-                 <div className="text-left space-y-8">
-                   <section>
-                     <h3 className="text-xs font-game-heading text-slate-500 uppercase tracking-widest mb-4">Select Difficulty</h3>
-                     <div className="flex gap-4 overflow-x-auto pb-4">
-                        {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
-                          <DifficultyTicket key={d} title={d} description={d} isSelected={difficulty === d} onClick={() => handleDifficultyChange(d)} />
-                        ))}
-                        <DifficultyTicket title="custom" description="custom" isSelected={difficulty === 'custom'} onClick={() => setDifficulty('custom')} />
-                     </div>
-                   </section>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--background)]/80 backdrop-blur-sm p-4">
+           <div className="flex min-h-full items-center justify-center">
+             {gameStatus === 'idle' ? (
+                <div className="w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative">
+                   <Link href="/games" className="absolute top-6 left-6 text-slate-400 transition-colors hover:text-primary">
+                    <ArrowLeft size={24} />
+                   </Link>
+                   <div className="bg-[var(--primary)]/10 text-[var(--primary)] mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+                     <Trophy size={32} />
+                   </div>
+                   <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
+                   <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
+                   
+                   <div className="text-left space-y-8">
+                     <section>
+                       <h3 className="text-xs font-game-heading text-slate-500 uppercase tracking-widest mb-4">Select Difficulty</h3>
+                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
+                            <DifficultyTicket key={d} title={d} description={d} isSelected={difficulty === d} onClick={() => handleDifficultyChange(d)} />
+                          ))}
+                          <DifficultyTicket title="custom" description="custom" isSelected={difficulty === 'custom'} onClick={() => setDifficulty('custom')} />
+                       </div>
+                     </section>
 
-                   {difficulty === 'custom' && (
-                    <section className="border border-[var(--card-border)] rounded-2xl p-6 bg-[var(--background)]">
-                      <h3 className="font-game-heading text-primary uppercase tracking-widest text-sm mb-4">Advanced Configuration</h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm font-game-mono text-[var(--foreground)]">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="accent-primary" checked={adv.isMultipleChoice} onChange={(e) => setAdv({...adv, isMultipleChoice: e.target.checked})} />
-                          Multiple Choice
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="accent-primary" checked={adv.strictMatching} onChange={(e) => setAdv({...adv, strictMatching: e.target.checked})} />
-                          Strict Matching
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="accent-primary" checked={adv.noMapHints} onChange={(e) => setAdv({...adv, noMapHints: e.target.checked})} />
-                          No Map Hints
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="accent-primary" checked={adv.hideBorders} onChange={(e) => setAdv({...adv, hideBorders: e.target.checked})} />
-                          Hide Borders
-                        </label>
-                        <div className="col-span-2">
-                          <label className="block mb-1 text-xs text-slate-500">Time Per Guess (s)</label>
-                          <input type="number" value={adv.timePerGuess} onChange={(e) => setAdv({...adv, timePerGuess: parseInt(e.target.value)})} className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-3 outline-none focus:border-primary" />
+                     {difficulty === 'custom' && (
+                      <section className="border border-[var(--card-border)] rounded-2xl p-6 bg-[var(--background)]">
+                        <h3 className="font-game-heading text-primary uppercase tracking-widest text-sm mb-4">Advanced Configuration</h3>
+                        <div className="grid grid-cols-2 gap-4 text-sm font-game-mono text-[var(--foreground)]">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" className="accent-primary" checked={adv.isMultipleChoice} onChange={(e) => setAdv({...adv, isMultipleChoice: e.target.checked})} />
+                            Multiple Choice
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" className="accent-primary" checked={adv.strictMatching} onChange={(e) => setAdv({...adv, strictMatching: e.target.checked})} />
+                            Strict Matching
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" className="accent-primary" checked={adv.noMapHints} onChange={(e) => setAdv({...adv, noMapHints: e.target.checked})} />
+                            No Map Hints
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" className="accent-primary" checked={adv.hideBorders} onChange={(e) => setAdv({...adv, hideBorders: e.target.checked})} />
+                            Hide Borders
+                          </label>
+                          <div className="col-span-2">
+                            <label className="block mb-1 text-xs text-slate-500">Time Per Guess (s)</label>
+                            <input type="number" value={adv.timePerGuess} onChange={(e) => setAdv({...adv, timePerGuess: parseInt(e.target.value)})} className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-3 outline-none focus:border-primary" />
+                          </div>
                         </div>
-                      </div>
-                    </section>
-                   )}
-                 </div>
+                      </section>
+                     )}
+                   </div>
 
-                 {savedGame ? (
-                  <div className="flex gap-3 mt-8 flex-col sm:flex-row">
-                    <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
-                      {t('resume') || "RESUME GAME"}
-                    </button>
-                    <button onClick={handleStartGame} className="bg-[var(--card-bg)] text-slate-500 border-2 border-dashed border-[var(--card-border)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-lg hover:scale-105 hover:border-red-500 hover:text-red-500 transition-all shadow-sm">
-                      {t('newGame') || "NEW GAME"}
-                    </button>
-                  </div>
-                ) : (
-                  <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg mt-8">
-                    {t('start')}
-                  </button>
-                )}
-              </div>
-           ) : (
-              <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)]">
-                 <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
-                 {isNewHighScore && (
-                    <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-slate-900 shadow-lg uppercase tracking-wider inline-block">
-                      New High Score!
+                   {savedGame ? (
+                    <div className="flex gap-3 mt-8 flex-col sm:flex-row">
+                      <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
+                        {t('resume') || "RESUME GAME"}
+                      </button>
+                      <button onClick={handleStartGame} className="bg-[var(--card-bg)] text-slate-500 border-2 border-dashed border-[var(--card-border)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-lg hover:scale-105 hover:border-red-500 hover:text-red-500 transition-all shadow-sm">
+                        {t('newGame') || "NEW GAME"}
+                      </button>
                     </div>
+                  ) : (
+                    <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg mt-8">
+                      {t('start')}
+                    </button>
                   )}
-                 <h2 className="mb-6 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
-                 <div className="mb-8 font-game-mono text-slate-500 space-y-2">
-                    <p className="text-xl font-bold text-primary">Mastery Points: {useGameStore.getState().masteryPoints.toLocaleString()}</p>
-                    <p className="text-sm">Accuracy: {score} / {totalToGuess} ({totalToGuess > 0 ? Math.round((score / totalToGuess) * 100) : 0}%)</p>
-                    
-                    {/* SCORE REGISTRATION */}
-                    <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
-                      {isScoreRegistered ? (
-                        <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold animate-in zoom-in">
-                          <CheckCircle2 size={16} /> RECORD REGISTERED
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-4">
-                          {currentUser ? (
-                            <button 
-                              onClick={handleRegisterScore}
-                              className="bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-game-heading text-sm hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
-                            >
-                              <Trophy size={16} /> REGISTER RECORD FOR {currentUser.username}
-                            </button>
-                          ) : (
-                            <div className="flex flex-col gap-2">
-                              <p className="text-[10px] uppercase tracking-widest text-slate-400">Register as Guest</p>
-                              <div className="flex gap-2">
-                                <input 
-                                  type="text" 
-                                  value={guestName}
-                                  onChange={(e) => setGuestName(e.target.value)}
-                                  placeholder="Your Name..."
-                                  className="flex-grow bg-slate-50 dark:bg-slate-900 border border-[var(--card-border)] px-4 py-2 rounded-xl text-xs outline-none focus:border-primary"
-                                />
-                                <button 
-                                  onClick={handleRegisterScore}
-                                  disabled={!guestName.trim()}
-                                  className="bg-primary text-white px-4 py-2 rounded-xl font-game-heading text-sm disabled:opacity-50"
-                                >
-                                  SAVE
-                                </button>
+                </div>
+             ) : (
+                <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)]">
+                   <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
+                   {isNewHighScore && (
+                      <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-slate-900 shadow-lg uppercase tracking-wider inline-block">
+                        New High Score!
+                      </div>
+                    )}
+                   <h2 className="mb-6 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
+                   <div className="mb-8 font-game-mono text-slate-500 space-y-2">
+                      <p className="text-xl font-bold text-primary">Mastery Points: {useGameStore.getState().masteryPoints.toLocaleString()}</p>
+                      <p className="text-sm">Accuracy: {score} / {totalToGuess} ({totalToGuess > 0 ? Math.round((score / totalToGuess) * 100) : 0}%)</p>
+                      
+                      {/* SCORE REGISTRATION */}
+                      <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
+                        {isScoreRegistered ? (
+                          <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold animate-in zoom-in">
+                            <CheckCircle2 size={16} /> RECORD REGISTERED
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-4">
+                            {currentUser ? (
+                              <button 
+                                onClick={handleRegisterScore}
+                                className="bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-game-heading text-sm hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
+                              >
+                                <Trophy size={16} /> REGISTER RECORD FOR {currentUser.username}
+                              </button>
+                            ) : (
+                              <div className="flex flex-col gap-2">
+                                <p className="text-[10px] uppercase tracking-widest text-slate-400">Register as Guest</p>
+                                <div className="flex gap-2">
+                                  <input 
+                                    type="text" 
+                                    value={guestName}
+                                    onChange={(e) => setGuestName(e.target.value)}
+                                    placeholder="Your Name..."
+                                    className="flex-grow bg-slate-50 dark:bg-slate-900 border border-[var(--card-border)] px-4 py-2 rounded-xl text-xs outline-none focus:border-primary"
+                                  />
+                                  <button 
+                                    onClick={handleRegisterScore}
+                                    disabled={!guestName.trim()}
+                                    className="bg-primary text-white px-4 py-2 rounded-xl font-game-heading text-sm disabled:opacity-50"
+                                  >
+                                    SAVE
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                 </div>
-                 <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>
-                 <button onClick={resetGame} className="text-slate-500 font-game-heading uppercase tracking-widest">{t('menu')}</button>
-              </div>
-           )}
+                            )}
+                          </div>
+                        )}
+                      </div>
+                   </div>
+                   <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>
+                   <button onClick={resetGame} className="text-slate-500 font-game-heading uppercase tracking-widest">{t('menu')}</button>
+                </div>
+             )}
+           </div>
         </div>
       )}
     </main>
