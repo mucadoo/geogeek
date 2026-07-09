@@ -382,40 +382,45 @@ export default function QuizLayout({
                  <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
                  <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
                  
-                 <div className="flex gap-4 overflow-x-auto pb-4 mb-6">
-                    {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
-                      <DifficultyTicket key={d} title={d} description={d} isSelected={difficulty === d} onClick={() => handleDifficultyChange(d)} />
-                    ))}
-                    <DifficultyTicket title="custom" description="custom" isSelected={difficulty === 'custom'} onClick={() => setDifficulty('custom')} />
-                 </div>
+                 <div className="text-left space-y-8">
+                   <section>
+                     <h3 className="text-xs font-game-heading text-slate-500 uppercase tracking-widest mb-4">Select Difficulty</h3>
+                     <div className="flex gap-4 overflow-x-auto pb-4">
+                        {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
+                          <DifficultyTicket key={d} title={d} description={d} isSelected={difficulty === d} onClick={() => handleDifficultyChange(d)} />
+                        ))}
+                        <DifficultyTicket title="custom" description="custom" isSelected={difficulty === 'custom'} onClick={() => setDifficulty('custom')} />
+                     </div>
+                   </section>
 
-                 {difficulty === 'custom' && (
-                  <div className="text-left font-game-mono text-sm mb-6 p-4 border border-[var(--card-border)] rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                    <h3 className="mb-4 font-game-heading text-primary uppercase">Advanced Settings</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={adv.isMultipleChoice} onChange={(e) => setAdv({...adv, isMultipleChoice: e.target.checked})} />
-                        Multiple Choice
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={adv.strictMatching} onChange={(e) => setAdv({...adv, strictMatching: e.target.checked})} />
-                        Strict Matching
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={adv.noMapHints} onChange={(e) => setAdv({...adv, noMapHints: e.target.checked})} />
-                        No Map Hints
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={adv.hideBorders} onChange={(e) => setAdv({...adv, hideBorders: e.target.checked})} />
-                        Hide Borders
-                      </label>
-                      <label className="flex flex-col col-span-2">
-                        Time Per Guess (s)
-                        <input type="number" value={adv.timePerGuess} onChange={(e) => setAdv({...adv, timePerGuess: parseInt(e.target.value)})} className="border border-[var(--card-border)] rounded p-2" />
-                      </label>
-                    </div>
-                  </div>
-                 )}
+                   {difficulty === 'custom' && (
+                    <section className="border border-[var(--card-border)] rounded-2xl p-6 bg-[var(--background)]">
+                      <h3 className="font-game-heading text-primary uppercase tracking-widest text-sm mb-4">Advanced Configuration</h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm font-game-mono text-[var(--foreground)]">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" className="accent-primary" checked={adv.isMultipleChoice} onChange={(e) => setAdv({...adv, isMultipleChoice: e.target.checked})} />
+                          Multiple Choice
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" className="accent-primary" checked={adv.strictMatching} onChange={(e) => setAdv({...adv, strictMatching: e.target.checked})} />
+                          Strict Matching
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" className="accent-primary" checked={adv.noMapHints} onChange={(e) => setAdv({...adv, noMapHints: e.target.checked})} />
+                          No Map Hints
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" className="accent-primary" checked={adv.hideBorders} onChange={(e) => setAdv({...adv, hideBorders: e.target.checked})} />
+                          Hide Borders
+                        </label>
+                        <div className="col-span-2">
+                          <label className="block mb-1 text-xs text-slate-500">Time Per Guess (s)</label>
+                          <input type="number" value={adv.timePerGuess} onChange={(e) => setAdv({...adv, timePerGuess: parseInt(e.target.value)})} className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-3 outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    </section>
+                   )}
+                 </div>
 
                  {savedGame ? (
                   <div className="flex gap-3 mt-8 flex-col sm:flex-row">
