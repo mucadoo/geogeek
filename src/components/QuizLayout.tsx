@@ -59,15 +59,15 @@ export default function QuizLayout({
   } = useGameStore();
   
   const savedGame = savedGames[gameKey];
-  const adv = useMemo(() => ({
-    isMultipleChoice: false,
-    gameType: 'standard' as const,
-    strictMatching: false,
-    noMapHints: false,
-    hideBorders: false,
-    timePerGuess: 20,
-  }), []);
-  const difficulty = 'medium' as const;
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const [adv, setAdv] = useState<AdvancedSettings>(PRESETS['medium']);
+
+  const handleDifficultyChange = (newDifficulty: Difficulty) => {
+    setDifficulty(newDifficulty);
+    if (newDifficulty !== 'custom') {
+      setAdv(PRESETS[newDifficulty]);
+    }
+  };
 
   const [allCountries, setAllCountries] = useState<Country[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -381,6 +381,42 @@ export default function QuizLayout({
                  </div>
                  <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
                  <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
+                 
+                 <div className="flex gap-4 overflow-x-auto pb-4 mb-6">
+                    {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
+                      <DifficultyTicket key={d} title={d} description={d} isSelected={difficulty === d} onClick={() => handleDifficultyChange(d)} />
+                    ))}
+                    <DifficultyTicket title="custom" description="custom" isSelected={difficulty === 'custom'} onClick={() => setDifficulty('custom')} />
+                 </div>
+
+                 {difficulty === 'custom' && (
+                  <div className="text-left font-game-mono text-sm mb-6 p-4 border border-[var(--card-border)] rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                    <h3 className="mb-4 font-game-heading text-primary uppercase">Advanced Settings</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={adv.isMultipleChoice} onChange={(e) => setAdv({...adv, isMultipleChoice: e.target.checked})} />
+                        Multiple Choice
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={adv.strictMatching} onChange={(e) => setAdv({...adv, strictMatching: e.target.checked})} />
+                        Strict Matching
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={adv.noMapHints} onChange={(e) => setAdv({...adv, noMapHints: e.target.checked})} />
+                        No Map Hints
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={adv.hideBorders} onChange={(e) => setAdv({...adv, hideBorders: e.target.checked})} />
+                        Hide Borders
+                      </label>
+                      <label className="flex flex-col col-span-2">
+                        Time Per Guess (s)
+                        <input type="number" value={adv.timePerGuess} onChange={(e) => setAdv({...adv, timePerGuess: parseInt(e.target.value)})} className="border border-[var(--card-border)] rounded p-2" />
+                      </label>
+                    </div>
+                  </div>
+                 )}
+
                  {savedGame ? (
                   <div className="flex gap-3 mt-8 flex-col sm:flex-row">
                     <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
