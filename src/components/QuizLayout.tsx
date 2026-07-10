@@ -370,7 +370,7 @@ export default function QuizLayout({
       )}
 
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--background)]/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[150] overflow-y-auto bg-[var(--background)]/80 backdrop-blur-sm p-4">
            <div className="flex min-h-full items-center justify-center">
              {gameStatus === 'idle' ? (
                 <div className="w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative">
