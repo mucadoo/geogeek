@@ -370,20 +370,21 @@ export default function QuizLayout({
       )}
 
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
-        <div className="fixed top-[90px] inset-x-0 bottom-0 z-[60] overflow-y-auto bg-[var(--background)]/80 backdrop-blur-sm p-4">
-           <div className="flex w-full min-h-full items-center justify-center">
+        <div className="fixed top-[90px] inset-x-0 bottom-0 z-[60] bg-[var(--background)]/80 backdrop-blur-sm p-4 flex items-center justify-center">
              {gameStatus === 'idle' ? (
-                <div className="w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative">
-                   <Link href="/games" className="absolute top-6 left-6 text-slate-400 transition-colors hover:text-primary">
-                    <ArrowLeft size={24} />
-                   </Link>
-                   <div className="bg-[var(--primary)]/10 text-[var(--primary)] mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
-                     <Trophy size={32} />
+                <div className="flex flex-col w-full max-w-2xl max-h-full rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative overflow-hidden">
+                   <div className="flex-shrink-0 relative">
+                     <Link href="/games" className="absolute top-0 left-0 text-slate-400 transition-colors hover:text-primary">
+                      <ArrowLeft size={24} />
+                     </Link>
+                     <div className="bg-[var(--primary)]/10 text-[var(--primary)] mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+                       <Trophy size={32} />
+                     </div>
+                     <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
+                     <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
                    </div>
-                   <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
-                   <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
                    
-                   <div className="text-left space-y-8">
+                   <div className="flex-1 overflow-y-auto text-left space-y-8 pr-2">
                      <section>
                        <h3 className="text-xs font-game-heading text-slate-500 uppercase tracking-widest mb-4">Select Difficulty</h3>
                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -423,31 +424,36 @@ export default function QuizLayout({
                      )}
                    </div>
 
-                   {savedGame ? (
-                    <div className="flex gap-3 mt-8 flex-col sm:flex-row">
-                      <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
-                        {t('resume') || "RESUME GAME"}
+                   <div className="flex-shrink-0 pt-8">
+                     {savedGame ? (
+                      <div className="flex gap-3 flex-col sm:flex-row">
+                        <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
+                          {t('resume') || "RESUME GAME"}
+                        </button>
+                        <button onClick={handleStartGame} className="bg-[var(--card-bg)] text-slate-500 border-2 border-dashed border-[var(--card-border)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-lg hover:scale-105 hover:border-red-500 hover:text-red-500 transition-all shadow-sm">
+                          {t('newGame') || "NEW GAME"}
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
+                        {t('start')}
                       </button>
-                      <button onClick={handleStartGame} className="bg-[var(--card-bg)] text-slate-500 border-2 border-dashed border-[var(--card-border)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-lg hover:scale-105 hover:border-red-500 hover:text-red-500 transition-all shadow-sm">
-                        {t('newGame') || "NEW GAME"}
-                      </button>
-                    </div>
-                  ) : (
-                    <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg mt-8">
-                      {t('start')}
-                    </button>
-                  )}
+                    )}
+                   </div>
                 </div>
              ) : (
-                <div className="w-full max-w-lg rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)]">
-                   <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
-                   {isNewHighScore && (
-                      <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-slate-900 shadow-lg uppercase tracking-wider inline-block">
-                        New High Score!
-                      </div>
-                    )}
-                   <h2 className="mb-6 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
-                   <div className="mb-8 font-game-mono text-slate-500 space-y-2">
+                <div className="flex flex-col w-full max-w-lg max-h-full rounded-3xl bg-[var(--card-bg)] p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] overflow-hidden">
+                   <div className="flex-shrink-0">
+                     <Trophy size={64} className="mx-auto text-amber-500 mb-4" />
+                     {isNewHighScore && (
+                        <div className="mb-4 animate-bounce rounded-full bg-amber-400 px-6 py-2 text-sm font-bold text-slate-900 shadow-lg uppercase tracking-wider inline-block">
+                          New High Score!
+                        </div>
+                      )}
+                     <h2 className="mb-6 text-4xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t(`feedback.${getFeedback(score, totalToGuess)}`)}</h2>
+                   </div>
+
+                   <div className="flex-1 overflow-y-auto font-game-mono text-slate-500 space-y-2 pr-2">
                       <p className="text-xl font-bold text-primary">Mastery Points: {useGameStore.getState().masteryPoints.toLocaleString()}</p>
                       <p className="text-sm">Accuracy: {score} / {totalToGuess} ({totalToGuess > 0 ? Math.round((score / totalToGuess) * 100) : 0}%)</p>
                       
@@ -491,11 +497,13 @@ export default function QuizLayout({
                         )}
                       </div>
                    </div>
-                   <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>
-                   <button onClick={resetGame} className="text-slate-500 font-game-heading uppercase tracking-widest">{t('menu')}</button>
+
+                   <div className="flex-shrink-0 mt-8">
+                     <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>
+                     <button onClick={resetGame} className="text-slate-500 font-game-heading uppercase tracking-widest">{t('menu')}</button>
+                   </div>
                 </div>
              )}
-           </div>
         </div>
       )}
     </main>
