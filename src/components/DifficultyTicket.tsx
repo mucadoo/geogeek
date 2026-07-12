@@ -21,12 +21,12 @@ export default function DifficultyTicket({ title, description, isSelected, onCli
 
       {/* Perforated Ticket */}
       <div 
-        className={`relative w-48 h-20 bg-[var(--card-bg)] border-2 border-dashed flex items-center justify-center
+        className={`relative w-full h-16 bg-[var(--card-bg)] border-2 border-dashed flex items-center justify-center px-2
           ${isSelected ? 'border-primary' : 'border-[var(--card-border)]'}
           [mask-image:radial-gradient(circle_at_0%_50%,transparent_10px,black_10px),radial-gradient(circle_at_100%_50%,transparent_10px,black_10px)]
         `}
       >
-        <span className="font-game-heading text-2xl uppercase tracking-wider text-[var(--foreground)]">
+        <span className="font-game-heading text-xs md:text-sm uppercase tracking-wider text-[var(--foreground)] text-center">
           {title}
         </span>
       </div>
