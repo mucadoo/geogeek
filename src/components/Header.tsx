@@ -79,7 +79,7 @@ export default function Header() {
   };
 
   return (
-    <header className={cn("z-50 w-full flex h-[90px] items-center relative mx-auto max-w-[1400px]", isModalOpen ? "backdrop-blur-sm" : "")}>
+    <header className={cn("z-50 w-full flex h-[90px] items-center relative mx-auto max-w-[1400px]", isModalOpen ? "backdrop-blur-2xl" : "")}>
       <div className="mx-auto flex w-full items-center justify-between px-4 max-w-[1400px] transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Globe className="text-[var(--primary)]" size={32} strokeWidth={2.5} />
