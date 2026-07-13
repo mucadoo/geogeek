@@ -56,7 +56,6 @@ export default function Header() {
   }, []);
 
   const isGameRoute = pathname.includes('/games/') && status === 'playing';
-  const isModalOpen = status === 'idle' || status === 'finished';
 
   if (isGameRoute) return null;
 
@@ -79,7 +78,7 @@ export default function Header() {
   };
 
   return (
-    <header className={cn("z-50 w-full flex h-[90px] items-center relative mx-auto max-w-[1400px]", isModalOpen ? "backdrop-blur-2xl" : "")}>
+    <header className="z-50 w-full flex h-[90px] items-center relative mx-auto max-w-[1400px]">
       <div className="mx-auto flex w-full items-center justify-between px-4 max-w-[1400px] transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Globe className="text-[var(--primary)]" size={32} strokeWidth={2.5} />
