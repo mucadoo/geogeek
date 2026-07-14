@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { Inter, Bebas_Neue, JetBrains_Mono } from "next/font/google";
 import { notFound } from 'next/navigation';
 import { AbstractIntlMessages } from 'next-intl';
@@ -31,7 +32,7 @@ const mono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
   
   if (!routing.locales.includes(locale as typeof routing.locales[number])) {
@@ -48,11 +49,10 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   });
 
   return {
+    metadataBase: new URL(baseUrl),
     title: messages.Metadata.title,
     description: messages.Metadata.description,
     manifest: '/manifest.json',
-    themeColor: '#00a8b5',
-    viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
     robots: { index: true, follow: true },
     alternates: {
       canonical: `${baseUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}`,
@@ -72,6 +72,16 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
       ],
       type: 'website',
     },
+  };
+}
+
+export function generateViewport() {
+  return {
+    themeColor: '#00a8b5',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
   };
 }
 
