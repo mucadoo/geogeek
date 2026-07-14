@@ -78,7 +78,7 @@ export default function Header() {
   };
 
   return (
-    <header className="z-50 w-full flex h-[90px] items-center relative mx-auto max-w-[1400px]">
+    <header className="z-50 w-full flex h-[90px] items-center fixed top-0 left-0">
       <div className="mx-auto flex w-full items-center justify-between px-4 max-w-[1400px] transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Globe className="text-[var(--primary)]" size={32} strokeWidth={2.5} />

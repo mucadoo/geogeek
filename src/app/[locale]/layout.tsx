@@ -109,7 +109,9 @@ export default async function RootLayout({
             <AnimatedBackground /> 
             <SearchPalette />
             <Header />
-            {children}
+            <main className="flex-grow pt-[90px]">
+              {children}
+            </main>
           </Providers>
         </ThemeProvider>
       </body>
