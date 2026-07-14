@@ -198,7 +198,7 @@ export default function QuizLayout({
   }
 
   return (
-    <main className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-[var(--background)]">
+    <main className="relative z-0 min-h-screen w-full bg-[var(--background)]">
 
       <div className="absolute inset-0 z-0 h-full w-full">
         {mapData && (
