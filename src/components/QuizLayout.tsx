@@ -76,6 +76,17 @@ export default function QuizLayout({
 
   const { currentUser, updateUserScore, registerGuestScore } = useUserStore();
 
+  useEffect(() => {
+    if (gameStatus === 'idle' || gameStatus === 'finished') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [gameStatus]);
+
   const handleRegisterScore = () => {
     const finalPoints = useGameStore.getState().masteryPoints;
     if (currentUser) {
@@ -198,7 +209,7 @@ export default function QuizLayout({
   }
 
   return (
-    <main className="relative z-0 min-h-screen w-full bg-[var(--background)]">
+    <main className="relative z-0 min-h-full w-full bg-[var(--background)]">
 
       <div className="absolute inset-0 z-0 h-full w-full">
         {mapData && (

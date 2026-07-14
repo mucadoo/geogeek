@@ -102,18 +102,14 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${inter.variable} ${bebas.variable} ${mono.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen antialiased font-sans">
+      <body className="flex min-h-screen flex-col antialiased font-sans">
         <NextTopLoader color="#00a8b5" showSpinner={false} height={3} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Providers messages={messages} locale={locale}>
             <AnimatedBackground /> 
             <SearchPalette />
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-grow">
-                {children}
-              </main>
-            </div>
+            <Header />
+            {children}
           </Providers>
         </ThemeProvider>
       </body>
