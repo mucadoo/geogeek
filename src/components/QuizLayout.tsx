@@ -209,7 +209,7 @@ export default function QuizLayout({
   }
 
   return (
-    <div className="fixed top-[90px] inset-x-0 bottom-0 z-0 w-full bg-[var(--background)]">
+    <div className="fixed inset-0 z-0 w-full bg-[var(--background)]">
 
       <div className="absolute inset-0 z-0 h-full w-full">
         {mapData && (
