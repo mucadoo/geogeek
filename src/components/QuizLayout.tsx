@@ -519,6 +519,6 @@ export default function QuizLayout({
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
