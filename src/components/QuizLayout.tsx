@@ -77,7 +77,7 @@ export default function QuizLayout({
   const { currentUser, updateUserScore, registerGuestScore } = useUserStore();
 
   useEffect(() => {
-    if (gameStatus === 'idle' || gameStatus === 'finished') {
+    if (gameStatus === 'playing') {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -209,9 +209,9 @@ export default function QuizLayout({
   }
 
   return (
-    <div className="fixed inset-0 z-0 w-full bg-[var(--background)]">
+    <div className={cn("w-full bg-[var(--background)]", gameStatus === 'playing' ? "fixed inset-0 z-0" : "relative")}>
 
-      <div className="absolute inset-0 z-0 h-full w-full">
+      <div className="fixed inset-0 z-0 h-full w-full">
         {mapData && (
           <GameMap 
             mapData={mapData} 
@@ -381,8 +381,8 @@ export default function QuizLayout({
       )}
 
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
-        <div className="fixed inset-0 z-40 backdrop-blur-2xl overflow-y-auto">
-          <div className="min-h-full pt-[90px] flex items-center justify-center p-4">
+        <div className="relative z-40 backdrop-blur-2xl w-full">
+          <div className="min-h-[calc(100vh-90px)] flex items-center justify-center p-4 py-12">
              {gameStatus === 'idle' ? (
                 <div className="flex flex-col w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative overflow-hidden">
                    <div className="flex-shrink-0 relative">
