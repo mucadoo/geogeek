@@ -381,8 +381,10 @@ export default function QuizLayout({
       )}
 
       {(gameStatus === 'idle' || gameStatus === 'finished') && (
-        <div className="relative z-40 backdrop-blur-2xl w-full">
-          <div className="min-h-[calc(100vh-90px)] flex items-center justify-center p-4 py-12">
+        <>
+          <div className="fixed inset-0 z-30 backdrop-blur-2xl pointer-events-none" />
+          <div className="relative z-40 w-full">
+            <div className="min-h-[calc(100vh-90px)] flex items-center justify-center p-4 py-12">
              {gameStatus === 'idle' ? (
                 <div className="flex flex-col w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative overflow-hidden">
                    <div className="flex-shrink-0 relative">
@@ -518,6 +520,7 @@ export default function QuizLayout({
              )}
           </div>
         </div>
+      </>
       )}
     </div>
   );
