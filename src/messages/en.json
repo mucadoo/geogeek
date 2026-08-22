@@ -24,7 +24,8 @@
     "explorer": "Explorer",
     "rankings": "World Stats",
     "compare": "Compare",
-    "about": "About"
+    "about": "About",
+    "leaderboard": "Leaderboard"
   },
   "Map": {
     "loading": "Loading Explorer...",
@@ -108,6 +109,26 @@
       "south-america-flags": {
         "title": "South America Flags",
         "description": "Test your knowledge of South American national flags."
+      },
+      "world-countries": {
+        "title": "World Countries",
+        "description": "Every country on Earth, one map. How many can you find?"
+      },
+      "europe-capitals": {
+        "title": "Europe Capitals",
+        "description": "Name the capital of every European country."
+      },
+      "europe-capitals-reverse": {
+        "title": "Europe Capitals (Reverse)",
+        "description": "We show the capital — you find the country."
+      },
+      "us-capitals-reverse": {
+        "title": "US Capitals (Reverse)",
+        "description": "We show the capital — you find the state."
+      },
+      "flag-game": {
+        "title": "World Flags",
+        "description": "Every flag on the planet. The ultimate flag challenge."
       }
     }
   },

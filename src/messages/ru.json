@@ -10,7 +10,7 @@
     }
   },
   "Header": {
-    "games": "Игры", "map": "Карта", "explorer": "Исследователь", "rankings": "Статистика", "compare": "Сравнить", "about": "О нас"
+    "games": "Игры", "map": "Карта", "explorer": "Исследователь", "rankings": "Статистика", "compare": "Сравнить", "about": "О нас", "leaderboard": "Таблица лидеров"
   },
   "Map": {
     "loading": "Загрузка...", "returnToContinent": "Вернуться к континенту", "returnToWorld": "Вернуться к миру"

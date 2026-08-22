@@ -10,7 +10,7 @@
     }
   },
   "Header": {
-    "games": "游戏", "map": "地图", "explorer": "探索者", "rankings": "世界统计", "compare": "比较", "about": "关于"
+    "games": "游戏", "map": "地图", "explorer": "探索者", "rankings": "世界统计", "compare": "比较", "about": "关于", "leaderboard": "排行榜"
   },
   "Map": {
     "loading": "正在加载探索者...", "returnToContinent": "返回大陆", "returnToWorld": "返回世界"

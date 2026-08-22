@@ -24,7 +24,8 @@
     "explorer": "Explorador",
     "rankings": "Estatísticas Mundiais",
     "compare": "Comparar",
-    "about": "Sobre"
+    "about": "Sobre",
+    "leaderboard": "Classificação"
   },
   "Map": {
     "loading": "Carregando Explorador...",
@@ -108,6 +109,26 @@
       "south-america-flags": {
         "title": "Bandeiras da América do Sul",
         "description": "Teste seu conhecimento das bandeiras nacionais sul-americanas."
+      },
+      "world-countries": {
+        "title": "Países do Mundo",
+        "description": "Todos os países do planeta, em um único mapa. Quantos você consegue encontrar?"
+      },
+      "europe-capitals": {
+        "title": "Capitais da Europa",
+        "description": "Nomeie a capital de cada país europeu."
+      },
+      "europe-capitals-reverse": {
+        "title": "Capitais da Europa (Reverso)",
+        "description": "Mostramos a capital, você encontra o país."
+      },
+      "us-capitals-reverse": {
+        "title": "Capitais dos EUA (Reverso)",
+        "description": "Mostramos a capital, você encontra o estado."
+      },
+      "flag-game": {
+        "title": "Bandeiras do Mundo",
+        "description": "Todas as bandeiras do planeta. O desafio definitivo."
       }
     }
   },

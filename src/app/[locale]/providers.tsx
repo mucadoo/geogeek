@@ -2,18 +2,25 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider, AbstractIntlMessages } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function Providers({ 
-  children, 
-  messages, 
-  locale 
-}: { 
+import { useUserStore } from '@/store/useUserStore';
+
+export default function Providers({
+  children,
+  messages,
+  locale
+}: {
   children: React.ReactNode;
   messages: AbstractIntlMessages;
   locale: string;
 }) {
   const [queryClient] = useState(() => new QueryClient());
+  const hydrate = useUserStore((state) => state.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale} timeZone="UTC">

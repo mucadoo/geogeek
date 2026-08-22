@@ -153,6 +153,10 @@ build/
 .env*.local
 .env
 
+# Local SQLite fallback DB (used when TURSO_DATABASE_URL is unset)
+local.db
+local.db-*
+
 # IDE
 .idea/
 .vscode/

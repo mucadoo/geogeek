@@ -11,9 +11,11 @@ export default function LoginPage() {
   const t = useTranslations('Auth');
   const router = useRouter();
   const { login, currentUser } = useUserStore();
-  
+
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // If already logged in, redirect to home
   useEffect(() => {
@@ -22,16 +24,19 @@ export default function LoginPage() {
     }
   }, [currentUser, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!username.trim()) {
-      setError('Please enter a username');
+    if (!username.trim() || !password) {
+      setError('Please enter your username and password');
       return;
     }
 
-    const result = login(username.trim());
+    setIsSubmitting(true);
+    const result = await login(username.trim(), password);
+    setIsSubmitting(false);
+
     if (result.success) {
       router.push('/');
     } else {
@@ -81,6 +86,24 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="font-bebas text-sm text-slate-400 tracking-widest uppercase ml-1">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <KeyRound size={18} />
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password..."
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-[var(--card-border)] rounded-2xl font-game-mono text-sm outline-none focus:border-[var(--primary)] transition-all"
+                />
+              </div>
+            </div>
+
             {error && (
               <div className="flex items-center gap-2 text-red-500 bg-red-500/10 border border-red-500/20 p-4 rounded-xl animate-in shake duration-300">
                 <AlertCircle size={16} />
@@ -90,9 +113,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-[var(--primary)] text-white py-4 rounded-2xl font-game-heading text-xl tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[var(--primary)]/20"
+              disabled={isSubmitting}
+              className="w-full bg-[var(--primary)] text-white py-4 rounded-2xl font-game-heading text-xl tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[var(--primary)]/20 disabled:opacity-50 disabled:hover:scale-100"
             >
-              LOGIN
+              {isSubmitting ? 'LOGGING IN...' : 'LOGIN'}
             </button>
           </form>
 

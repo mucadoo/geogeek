@@ -10,7 +10,7 @@
     }
   },
   "Header": {
-    "games": "Spiele", "map": "Karte", "explorer": "Entdecker", "rankings": "Weltstatistiken", "compare": "Vergleichen", "about": "Über uns"
+    "games": "Spiele", "map": "Karte", "explorer": "Entdecker", "rankings": "Weltstatistiken", "compare": "Vergleichen", "about": "Über uns", "leaderboard": "Bestenliste"
   },
   "Map": {
     "loading": "Lade Entdecker...", "returnToContinent": "Zurück zum Kontinent", "returnToWorld": "Zurück zur Welt"

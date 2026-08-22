@@ -24,7 +24,8 @@
     "explorer": "Explorateur",
     "rankings": "Classements",
     "compare": "Comparer",
-    "about": "À propos"
+    "about": "À propos",
+    "leaderboard": "Classement"
   },
   "Map": {
     "loading": "Chargement...",
@@ -108,6 +109,26 @@
       "south-america-flags": {
         "title": "Drapeaux d'Amérique du Sud",
         "description": "Testez vos connaissances sur les drapeaux nationaux sud-américains."
+      },
+      "world-countries": {
+        "title": "Pays du Monde",
+        "description": "Tous les pays du globe, sur une seule carte. Combien pouvez-vous trouver ?"
+      },
+      "europe-capitals": {
+        "title": "Capitales d'Europe",
+        "description": "Nommez la capitale de chaque pays européen."
+      },
+      "europe-capitals-reverse": {
+        "title": "Capitales d'Europe (Inversé)",
+        "description": "On affiche la capitale, vous trouvez le pays."
+      },
+      "us-capitals-reverse": {
+        "title": "Capitales des États-Unis (Inversé)",
+        "description": "On affiche la capitale, vous trouvez l'État."
+      },
+      "flag-game": {
+        "title": "Drapeaux du Monde",
+        "description": "Tous les drapeaux de la planète. Le défi ultime."
       }
     }
   },

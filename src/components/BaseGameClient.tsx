@@ -7,6 +7,17 @@ import QuizLayout from '@/components/QuizLayout';
 import { useGameConfig } from '@/hooks/useGameConfig';
 import { ProjectionConfig, useGameProjection } from '@/hooks/useGameProjection';
 
+// Maps a capital/reverse gameKey to the config key holding its
+// region-name -> capital-name lookup table. Add an entry here whenever a
+// new capital-based game is wired up.
+const CAPITAL_CONFIG_KEYS: Record<string, string> = {
+  'us-capitals': 'US_CAPITALS',
+  'sa-capitals': 'SOUTH_AMERICA_CAPITALS',
+  'europe-capitals': 'EUROPE_CAPITALS',
+  'europe-capitals-reverse': 'EUROPE_CAPITALS',
+  'us-capitals-reverse': 'US_CAPITALS',
+};
+
 interface BaseGameClientProps {
   useMapData: () => { data: any; status: 'pending' | 'success' | 'error' };
   configKey: string;
@@ -15,7 +26,7 @@ interface BaseGameClientProps {
   gameKey: string;
   projectionConfig: ProjectionConfig;
   showOnlyValid?: boolean;
-  gameMode?: 'name' | 'capital' | 'flag';
+  gameMode?: 'name' | 'capital' | 'flag' | 'reverse';
 }
 
 export default function BaseGameClient({
@@ -50,11 +61,11 @@ export default function BaseGameClient({
     return names;
   }, [tRegions, config, configKey]);
 
-  // Dynamically resolve capitals variables for capital modes
-  const isCapitalMode = gameKey.includes('capitals') || gameModeProp === 'capital';
-  const capitalMap = isCapitalMode
-    ? (gameKey === 'us-capitals' ? config?.US_CAPITALS : config?.SOUTH_AMERICA_CAPITALS)
-    : undefined;
+  // Dynamically resolve capitals variables for capital/reverse modes. Each
+  // capital-driven gameKey maps to the config key holding its
+  // region-name -> capital-name lookup table.
+  const isCapitalMode = gameKey.includes('capitals') || gameModeProp === 'capital' || gameModeProp === 'reverse';
+  const capitalMap = isCapitalMode ? config?.[CAPITAL_CONFIG_KEYS[gameKey]] : undefined;
   const capitalCoordinates = isCapitalMode ? config?.CAPITAL_COORDINATES : undefined;
 
   if (mapStatus === 'pending' || configStatus === 'pending') {

@@ -71,10 +71,11 @@ export default function QuizLayout({
 
   const [allCountries, setAllCountries] = useState<Country[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [guestName, setGuestName] = useState('');
   const [isScoreRegistered, setIsScoreRegistered] = useState(false);
+  const [isSubmittingScore, setIsSubmittingScore] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const { currentUser, updateUserScore, registerGuestScore } = useUserStore();
+  const { currentUser, submitScore } = useUserStore();
 
   useEffect(() => {
     if (gameStatus === 'playing') {
@@ -87,14 +88,23 @@ export default function QuizLayout({
     };
   }, [gameStatus]);
 
-  const handleRegisterScore = () => {
+  const handleRegisterScore = async () => {
+    if (!currentUser) return;
     const finalPoints = useGameStore.getState().masteryPoints;
-    if (currentUser) {
-      updateUserScore(currentUser.id, finalPoints);
+    setSubmitError('');
+    setIsSubmittingScore(true);
+    const result = await submitScore({
+      gameKey,
+      score,
+      totalToGuess,
+      masteryPoints: finalPoints,
+      difficulty,
+    });
+    setIsSubmittingScore(false);
+    if (result.success) {
       setIsScoreRegistered(true);
-    } else if (guestName.trim()) {
-      registerGuestScore(guestName.trim(), finalPoints);
-      setIsScoreRegistered(true);
+    } else {
+      setSubmitError(result.error || 'Failed to save score');
     }
   };
 
@@ -286,22 +296,27 @@ export default function QuizLayout({
         <div className="pointer-events-none absolute bottom-8 left-0 right-0 z-10 px-6 md:bottom-12">
           <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
 
-            {(gameMode === 'capital' || gameMode === 'flag') && currentState && (
+            {(gameMode === 'capital' || gameMode === 'flag' || gameMode === 'reverse') && currentState && (
               <div className="pointer-events-auto animate-in slide-in-from-bottom-2 rounded-xl bg-[var(--foreground)] px-6 py-4 flex flex-col items-center gap-4 text-sm font-bold text-[var(--background)] shadow-xl">
                 {gameMode === 'flag' ? (
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-xs uppercase tracking-widest opacity-60">Locate this flag:</span>
                     {getFlagUrl(currentState.properties.name) ? (
-                      <Image 
-                        src={getFlagUrl(currentState.properties.name)!} 
-                        alt="Target flag" 
+                      <Image
+                        src={getFlagUrl(currentState.properties.name)!}
+                        alt="Target flag"
                         width={160}
                         height={80}
-                        className="h-20 w-auto rounded border border-white/20 shadow-md object-contain" 
+                        className="h-20 w-auto rounded border border-white/20 shadow-md object-contain"
                       />
                     ) : (
                       <div className="h-20 w-32 bg-white/10 rounded flex items-center justify-center italic text-xs">Flag missing</div>
                     )}
+                  </div>
+                ) : gameMode === 'reverse' ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs uppercase tracking-widest opacity-60">Find the region with this capital:</span>
+                    <span className="text-xl">{capitalMap[currentState.properties.name] || currentState.properties.name}</span>
                   </div>
                 ) : (
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -470,44 +485,48 @@ export default function QuizLayout({
                    <div className="flex-1 overflow-y-auto font-game-mono text-slate-500 space-y-2 pr-2">
                       <p className="text-xl font-bold text-primary">Mastery Points: {useGameStore.getState().masteryPoints.toLocaleString()}</p>
                       <p className="text-sm">Accuracy: {score} / {totalToGuess} ({totalToGuess > 0 ? Math.round((score / totalToGuess) * 100) : 0}%)</p>
-                      
+
+                      {missedStates.length > 0 && (
+                        <div className="mt-6 pt-6 border-t border-[var(--card-border)] text-left">
+                          <h3 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">
+                            <AlertCircle size={14} /> Missed ({missedStates.length})
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {missedStates.map((state) => (
+                              <span key={state.id} className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs text-amber-600 dark:text-amber-400">
+                                {getLocalizedName(state.properties.name)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* SCORE REGISTRATION */}
                       <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
                         {isScoreRegistered ? (
                           <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold animate-in zoom-in">
-                            <CheckCircle2 size={16} /> RECORD REGISTERED
+                            <CheckCircle2 size={16} /> SAVED TO LEADERBOARD
                           </div>
-                        ) : (
-                          <div className="flex flex-col gap-4">
-                            {currentUser ? (
-                              <button 
-                                onClick={handleRegisterScore}
-                                className="bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-game-heading text-sm hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
-                              >
-                                <Trophy size={16} /> REGISTER RECORD FOR {currentUser.username}
-                              </button>
-                            ) : (
-                              <div className="flex flex-col gap-2">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-400">Register as Guest</p>
-                                <div className="flex gap-2">
-                                  <input 
-                                    type="text" 
-                                    value={guestName}
-                                    onChange={(e) => setGuestName(e.target.value)}
-                                    placeholder="Your Name..."
-                                    className="flex-grow bg-slate-50 dark:bg-slate-900 border border-[var(--card-border)] px-4 py-2 rounded-xl text-xs outline-none focus:border-primary"
-                                  />
-                                  <button 
-                                    onClick={handleRegisterScore}
-                                    disabled={!guestName.trim()}
-                                    className="bg-primary text-white px-4 py-2 rounded-xl font-game-heading text-sm disabled:opacity-50"
-                                  >
-                                    SAVE
-                                  </button>
-                                </div>
-                              </div>
+                        ) : currentUser ? (
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={handleRegisterScore}
+                              disabled={isSubmittingScore}
+                              className="bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-game-heading text-sm hover:bg-primary/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Trophy size={16} /> {isSubmittingScore ? 'SAVING...' : `SAVE TO LEADERBOARD AS ${currentUser.username}`}
+                            </button>
+                            {submitError && (
+                              <p className="text-[10px] text-red-500 uppercase tracking-widest text-center">{submitError}</p>
                             )}
                           </div>
+                        ) : (
+                          <Link
+                            href="/login"
+                            className="bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-game-heading text-sm hover:bg-primary/20 transition-all flex items-center justify-center gap-2"
+                          >
+                            <Trophy size={16} /> LOG IN TO SAVE THIS SCORE
+                          </Link>
                         )}
                       </div>
                    </div>

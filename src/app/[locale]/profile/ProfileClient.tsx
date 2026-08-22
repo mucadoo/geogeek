@@ -1,22 +1,46 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
+import { UserCircle, Edit2, Trash2, Trophy, Sparkles, Check, X, AlertCircle, History } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/routing';
-import { useUserStore } from '@/store/useUserStore';
-import { useGameStore } from '@/store/useGameStore';
-import { UserCircle, Edit2, Trash2, Trophy, Sparkles, Check, X, AlertCircle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+
+import { useRouter } from '@/i18n/routing';
+import { useGameStore } from '@/store/useGameStore';
+import { useUserStore } from '@/store/useUserStore';
+
+interface GameRun {
+  id: string;
+  gameKey: string;
+  score: number;
+  totalToGuess: number;
+  masteryPoints: number;
+  difficulty: string;
+  createdAt: number;
+}
 
 export default function ProfileClient() {
   const t = useTranslations('Games'); // Reusing Games translations for game titles
   const router = useRouter();
-  
+
   const { currentUser, updateUsername, deleteAccount } = useUserStore();
   const { highScores } = useGameStore();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { data: profileData } = useQuery({
+    queryKey: ['profile', currentUser?.id],
+    queryFn: async () => {
+      const res = await fetch('/api/profile');
+      if (!res.ok) throw new Error('Failed to load profile');
+      return res.json() as Promise<{ runs: GameRun[] }>;
+    },
+    enabled: !!currentUser,
+  });
 
   // Redirect to home if not logged in
   useEffect(() => {
@@ -29,7 +53,7 @@ export default function ProfileClient() {
 
   if (!currentUser) return null;
 
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
     setError('');
     if (editName.trim() === currentUser.username) {
       setIsEditing(false);
@@ -40,7 +64,10 @@ export default function ProfileClient() {
       return;
     }
 
-    const result = updateUsername(editName.trim());
+    setIsSaving(true);
+    const result = await updateUsername(editName.trim());
+    setIsSaving(false);
+
     if (result.success) {
       setIsEditing(false);
     } else {
@@ -48,9 +75,10 @@ export default function ProfileClient() {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete your profile? This cannot be undone.")) {
-      deleteAccount();
+      setIsDeleting(true);
+      await deleteAccount();
     }
   };
 
@@ -96,8 +124,8 @@ export default function ProfileClient() {
                 />
                 {error && <span className="text-[10px] text-red-500 uppercase tracking-widest font-bold">{error}</span>}
                 <div className="flex gap-2 w-full mt-2">
-                  <button onClick={handleSaveName} className="flex-1 bg-primary text-white py-2 rounded-lg flex justify-center hover:bg-teal-500 transition-colors"><Check size={18} /></button>
-                  <button onClick={() => setIsEditing(false)} className="flex-1 bg-red-500/10 text-red-500 py-2 rounded-lg flex justify-center hover:bg-red-500/20 transition-colors"><X size={18} /></button>
+                  <button onClick={handleSaveName} disabled={isSaving} className="flex-1 bg-primary text-white py-2 rounded-lg flex justify-center hover:bg-teal-500 transition-colors disabled:opacity-50"><Check size={18} /></button>
+                  <button onClick={() => setIsEditing(false)} disabled={isSaving} className="flex-1 bg-red-500/10 text-red-500 py-2 rounded-lg flex justify-center hover:bg-red-500/20 transition-colors disabled:opacity-50"><X size={18} /></button>
                 </div>
               </div>
             ) : (
@@ -125,11 +153,12 @@ export default function ProfileClient() {
             <h3 className="font-bebas text-xl text-red-500 tracking-widest mb-4 flex items-center gap-2">
               <AlertCircle size={18} /> Danger Zone
             </h3>
-            <button 
+            <button
               onClick={handleDelete}
-              className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 border border-red-500/20 py-3 rounded-xl font-game-mono text-xs uppercase font-bold tracking-widest hover:bg-red-500 hover:text-white transition-all"
+              disabled={isDeleting}
+              className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 border border-red-500/20 py-3 rounded-xl font-game-mono text-xs uppercase font-bold tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
             >
-              <Trash2 size={16} /> Delete Account
+              <Trash2 size={16} /> {isDeleting ? 'Deleting...' : 'Delete Account'}
             </button>
           </div>
         </div>
@@ -171,6 +200,36 @@ export default function ProfileClient() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Recent Activity: synced runs from the account, works across devices */}
+          <div className="game-card mt-8 p-8 bg-[var(--card-bg)]/80 backdrop-blur-md border border-[var(--card-border)] rounded-3xl">
+            <h3 className="font-bebas text-3xl tracking-widest text-[var(--foreground)] uppercase mb-6 flex items-center gap-3">
+              <History className="text-accent" /> Recent Activity
+            </h3>
+
+            {profileData?.runs && profileData.runs.length > 0 ? (
+              <div className="space-y-2">
+                {profileData.runs.map((run) => {
+                  let title = run.gameKey;
+                  try { title = t(`gameData.${run.gameKey}.title` as any) || run.gameKey; } catch { /* ignore */ }
+
+                  return (
+                    <div key={run.id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--card-border)]">
+                      <div className="flex flex-col">
+                        <span className="font-game-mono text-xs text-[var(--foreground)] uppercase tracking-widest">{title}</span>
+                        <span className="font-game-mono text-[10px] text-slate-400">{new Date(run.createdAt * 1000).toLocaleDateString()} &middot; {run.score}/{run.totalToGuess} &middot; {run.difficulty}</span>
+                      </div>
+                      <span className="font-game-heading text-primary">{run.masteryPoints.toLocaleString()} PTS</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="font-game-mono text-sm text-slate-400 text-center py-6">
+                No synced runs yet. Finish a game and save your score to see it here.
+              </p>
+            )}
           </div>
         </div>
 

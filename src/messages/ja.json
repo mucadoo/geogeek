@@ -10,7 +10,7 @@
     }
   },
   "Header": {
-    "games": "ゲーム", "map": "地図", "explorer": "エクスプローラー", "rankings": "統計", "compare": "比較", "about": "GeoGeekについて"
+    "games": "ゲーム", "map": "地図", "explorer": "エクスプローラー", "rankings": "統計", "compare": "比較", "about": "GeoGeekについて", "leaderboard": "ランキング"
   },
   "Map": {
     "loading": "探索中...", "returnToContinent": "大陸選択に戻る", "returnToWorld": "世界地図に戻る"
