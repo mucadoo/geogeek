@@ -331,25 +331,31 @@ export default function Map({ slug }: MapProps) {
                   isSubMap={isSubMap} 
                 />
               )}
-              {(activeCountry as any)?.capitalCoordinates && (
-                <g>
-                  <circle 
-                    cx={projection((activeCountry as any).capitalCoordinates)?.[0]} 
-                    cy={projection((activeCountry as any).capitalCoordinates)?.[1]} 
-                    r={4} 
-                    fill="var(--primary)" 
-                    stroke="white" 
-                    strokeWidth={1} 
-                  />
-                  <text 
-                    x={(projection((activeCountry as any).capitalCoordinates)?.[0] || 0) + 8} 
-                    y={(projection((activeCountry as any).capitalCoordinates)?.[1] || 0) + 4} 
-                    className="font-game-mono text-xs fill-[var(--foreground)]"
-                  >
-                    {getLocalizedValue((activeCountry as any).capital, locale)}
-                  </text>
-                </g>
-              )}
+              {(() => {
+                const coords = (activeCountry as any)?.capitalCoordinates as { lat: number; lng: number } | null | undefined;
+                if (!coords) return null;
+                const projected = projection([coords.lng, coords.lat]);
+                if (!projected) return null;
+                return (
+                  <g>
+                    <circle
+                      cx={projected[0]}
+                      cy={projected[1]}
+                      r={4}
+                      fill="var(--primary)"
+                      stroke="white"
+                      strokeWidth={1}
+                    />
+                    <text
+                      x={projected[0] + 8}
+                      y={projected[1] + 4}
+                      className="font-game-mono text-xs fill-[var(--foreground)]"
+                    >
+                      {getLocalizedValue((activeCountry as any).capital, locale)}
+                    </text>
+                  </g>
+                );
+              })()}
             </g>
           </svg>
 

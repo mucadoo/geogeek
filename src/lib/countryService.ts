@@ -16,9 +16,14 @@ const client = new WikiGeoClient({ dataSource: 'remote' });
 // fall back to the runtime's built-in CLDR data via Intl.DisplayNames keyed
 // off isoCode (same technique QuizLayout already uses for region names) —
 // no hand-maintained translation content required. Other de/ja/zh/ru fields
-// (capital, currency, etc.) fall back to the English value; wiki-geo-data
-// has no cca3/borders relation at all, so getNeighbors() always uses its
-// description-text fallback match below.
+// (capital, currency, etc.) fall back to the English value.
+//
+// The installed SDK version is checked against MIN_ENRICHED_SDK_VERSION
+// below: older installs (and the 'remote' GitHub Pages snapshot they'd
+// otherwise pull) predate the borders/capitalCoordinates/isoCode3 fields, so
+// in that case - or if the network fetch itself fails - we read the bundled
+// public/data/fallback-countries.json snapshot instead, which already has
+// them from a local scrape.
 function regionDisplayName(isoCode: string, locale: string): string | null {
   try {
     return new Intl.DisplayNames([locale], { type: 'region' }).of(isoCode.toUpperCase()) || null;
@@ -83,14 +88,12 @@ function buildCountry(wiki: any): Country {
 
   return {
     isoCode: iso2,
-    // wiki-geo-data has no cca3/land-border relation data.
-    cca3: '',
-    borders: [],
+    cca3: wiki.isoCode3 || '',
+    borders: wiki.borders || [],
     name,
     capital,
-    // wiki-geo-data has no capital-city coordinates; GameMap already falls
-    // back to the region polygon's centroid when this is null.
-    capitalCoordinates: null,
+    // GameMap already falls back to the region polygon's centroid when this is null.
+    capitalCoordinates: wiki.capitalCoordinates || null,
     flagUrl: wiki.flagUrl || (iso2 ? `https://flagcdn.com/${iso2.toLowerCase()}.svg` : ''),
     areaKm2: area,
     population,
@@ -110,8 +113,53 @@ function buildCountry(wiki: any): Country {
   } as any;
 }
 
+// First npm version of @mucadoo/wiki-geo-data expected to ship the enriched
+// schema (borders resolved to isoCode, capitalCoordinates, isoCode3, etc.).
+// The registry is still on 0.1.17, which predates it - bump this once a
+// version containing that schema is actually published.
+const MIN_ENRICHED_SDK_VERSION = [0, 1, 18] as const;
+
+function isVersionAtLeast(version: string, min: readonly number[]): boolean {
+  const parts = version.split('.').map((p) => parseInt(p, 10));
+  for (let i = 0; i < min.length; i++) {
+    const part = parts[i] || 0;
+    if (part !== min[i]) return part > min[i];
+  }
+  return true;
+}
+
+async function installedSdkIsEnriched(): Promise<boolean> {
+  try {
+    const pkgPath = path.join(process.cwd(), 'node_modules/@mucadoo/wiki-geo-data/package.json');
+    const raw = await fs.readFile(pkgPath, 'utf-8');
+    const { version } = JSON.parse(raw) as { version: string };
+    return isVersionAtLeast(version, MIN_ENRICHED_SDK_VERSION);
+  } catch {
+    // Can't verify the installed version - don't trust it.
+    return false;
+  }
+}
+
+async function readFallbackCountries(): Promise<Country[]> {
+  const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
+  try {
+    const data = await fs.readFile(fallbackPath, 'utf-8');
+    const json = JSON.parse(data);
+    const fallbackCountries = json.data || json;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return fallbackCountries.map((wiki: any) => buildCountry(wiki));
+  } catch (err) {
+    console.error('Failed to read fallback countries file:', err);
+    return [];
+  }
+}
+
 const getCountriesData = unstable_cache(
   async (): Promise<Country[]> => {
+    if (!(await installedSdkIsEnriched())) {
+      return readFallbackCountries();
+    }
+
     try {
       // wiki-geo-data's client already falls back to its own bundled dataset
       // on network failure, so this virtually never throws.
@@ -120,17 +168,7 @@ const getCountriesData = unstable_cache(
       return wikiCountries.map((wiki) => buildCountry(wiki));
     } catch (error) {
       console.error('Error fetching country data, using bundled fallback file:', error);
-      const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
-      try {
-        const data = await fs.readFile(fallbackPath, 'utf-8');
-        const json = JSON.parse(data);
-        const fallbackCountries = json.data || json;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return fallbackCountries.map((wiki: any) => buildCountry(wiki));
-      } catch (err) {
-        console.error('Failed to read fallback countries file:', err);
-        return [];
-      }
+      return readFallbackCountries();
     }
   },
   ['countries-data-wiki-only'],
@@ -157,13 +195,22 @@ export const countryService = {
     );
     if (!country) return [];
 
-    // wiki-geo-data has no land-border relation data, so this is matched by
-    // checking which other countries' names appear in this one's own
-    // description text (e.g. "...bordered by France to the north...").
+    const borderIsoCodes = new Set(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((country as any).borders || []).map((b: { isoCode?: string | null }) => b.isoCode?.toUpperCase()).filter(Boolean)
+    );
+    if (borderIsoCodes.size > 0) {
+      return countries.filter(c => c.isoCode && borderIsoCodes.has(c.isoCode.toUpperCase()));
+    }
+
+    // Fallback for the rare case borders resolved to nothing (e.g. a bundled
+    // snapshot from before the borders relation existed): match which other
+    // countries' names appear in this one's own description text (e.g.
+    // "...bordered by France to the north...").
     const description = (country.description[locale as keyof Country['description']] || country.description.en || '').toLowerCase();
     return countries.filter(c => {
       const name = ((c.name && (c.name[locale as keyof Country['name']] || c.name.en)) || '').toLowerCase();
-      return name !== ((country.name && (country.name[locale as keyof Country['name']] || country.name.en)) || '').toLowerCase() && 
+      return name !== ((country.name && (country.name[locale as keyof Country['name']] || country.name.en)) || '').toLowerCase() &&
              description.includes(name);
     });
   },
