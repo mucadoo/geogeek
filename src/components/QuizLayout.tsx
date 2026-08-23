@@ -4,7 +4,7 @@ import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
 import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Sparkles, Settings2, Timer, EyeOff, Hash, Map as MapIcon } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { feature } from 'topojson-client';
@@ -16,10 +16,11 @@ import { GameHUD } from '@/components/GameHUD';
 import GameMap from '@/components/GameMap';
 import { POINTS_MULTIPLIERS, PRESETS, AdvancedSettings, Difficulty } from '@/config/gameConstants';
 import { Link } from '@/i18n/routing';
+import getFeedback from '@/lib/getFeedback';
+import { getLocalizedCountryName } from '@/lib/i18n-utils';
 import { useGameStore, StateFeature, GameMode, GameType } from '@/store/useGameStore';
 import { useUserStore } from '@/store/useUserStore';
 import { Country } from '@/types';
-import getFeedback from '@/lib/getFeedback';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -39,14 +40,18 @@ interface QuizLayoutProps {
   capitalMap?: Record<string, string>;
   showOnlyValid?: boolean;
   capitalCoordinates?: Record<string, [number, number]>;
+  /** Raw region/country name -> its translation in the current locale, so
+   *  answer-checking accepts the localized name too. */
+  localizedNames?: Record<string, string>;
 }
 
 export default function QuizLayout({
   gameKey, title, description, mapData, mapStatus, projection, validNames, gameMode = 'name', capitalMap = {},
-  showOnlyValid = false, capitalCoordinates = {}
+  showOnlyValid = false, capitalCoordinates = {}, localizedNames = {}
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
   const tRegions = useTranslations('RegionNames');
+  const locale = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { 
@@ -71,6 +76,7 @@ export default function QuizLayout({
 
   const [allCountries, setAllCountries] = useState<Country[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isLearning, setIsLearning] = useState(false);
   const [isScoreRegistered, setIsScoreRegistered] = useState(false);
   const [isSubmittingScore, setIsSubmittingScore] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -116,20 +122,51 @@ export default function QuizLayout({
     loadCountries();
   }, []);
 
-  const getLocalizedName = (name: string) => {
-    try {
-      return tRegions(name);
-    } catch {
-      return name;
-    }
-  };
-
   const getFlagUrl = (name: string) => {
-    const country = allCountries.find(c => 
-      c.name.en === name || 
+    const country = allCountries.find(c =>
+      c.name.en === name ||
       Object.values(c.name).some(v => v === name)
     );
     return country?.flagUrl;
+  };
+
+  // Sovereign-country games (World/Africa/Asia/Europe/Oceania/...) have no
+  // RegionNames entries at all — those only cover the curated US/Brazil/
+  // Italy/France/Canada/Australia/South-America lists. For everything else,
+  // fall back to the country dataset's own localized name (covers en/pt/fr/
+  // it/es) and, failing that, the browser/runtime's built-in CLDR data via
+  // Intl.DisplayNames (covers every locale the site ships, including de/ja/
+  // ru/zh) keyed off the country's ISO code — no hand-maintained
+  // translation content required.
+  const countryLocalizedNames = useMemo(() => {
+    if (!allCountries.length) return {};
+    const map: Record<string, string> = {};
+    allCountries.forEach((c) => {
+      const rawName = c.name.en;
+      if (!rawName || localizedNames[rawName]) return; // RegionNames already covers it
+      // wiki-geo-data only translates en/pt/fr/it/es directly; for any other
+      // locale (de/ja/ru/zh/...), fall through to Intl.DisplayNames by NOT
+      // passing a countries list — passing one would short-circuit back to
+      // the (missing) direct translation instead of using CLDR data.
+      const directTranslation = c.name[locale as keyof typeof c.name];
+      const localized = directTranslation || (c.isoCode ? getLocalizedCountryName(c.isoCode, locale) : null);
+      if (localized && localized !== rawName) map[rawName] = localized;
+    });
+    return map;
+  }, [allCountries, locale, localizedNames]);
+
+  const allLocalizedNames = useMemo(
+    () => ({ ...countryLocalizedNames, ...localizedNames }),
+    [countryLocalizedNames, localizedNames]
+  );
+
+  const getLocalizedName = (name: string) => {
+    if (allLocalizedNames[name]) return allLocalizedNames[name];
+    // next-intl doesn't throw for a missing key by default — it returns the
+    // fully-qualified key path (e.g. "RegionNames.Pakistan") as the string,
+    // so a try/catch never catches it.
+    if (!tRegions.has(name)) return name;
+    return tRegions(name);
   };
 
   useEffect(() => {
@@ -178,11 +215,16 @@ export default function QuizLayout({
     if (mapData) {
       const objectKey = mapData.objects.regions ? 'regions' : (mapData.objects.countries ? 'countries' : Object.keys(mapData.objects)[0]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const states = (feature(mapData, mapData.objects[objectKey]) as any).features as StateFeature[];
+      const rawStates = (feature(mapData, mapData.objects[objectKey]) as any).features as StateFeature[];
+      // A few territories in the world-atlas topology (Kosovo, Somaliland,
+      // Northern Cyprus) have no numeric `id` at all, so they'd all collide
+      // on the string "undefined" downstream — fall back to the feature's
+      // own name, which is unique across the dataset.
+      const states = rawStates.map((s) => (s.id == null ? { ...s, id: s.properties.name } : s));
+
+      if (savedGame) quitGame();
       
-      if (savedGame) quitGame(); 
-      
-      startGame(states, validNames, difficulty, adv, gameKey, gameMode, capitalMap);
+      startGame(states, validNames, difficulty, adv, gameKey, gameMode, capitalMap, allLocalizedNames);
     }
   };
 
@@ -205,7 +247,8 @@ export default function QuizLayout({
     const geo = feature(mapData, mapData.objects[objectKey]) as any;
 
     return correctlyGuessedIds.slice(-4).reverse().map((id) => {
-      const feat = geo.features.find((f: any) => String(f.id) === id);
+      // Match the id-fallback used when building game states (see handleStartGame).
+      const feat = geo.features.find((f: any) => String(f.id ?? f.properties?.name) === id);
       return feat ? feat.properties.name : 'Unknown';
     });
   }, [mapData, correctlyGuessedIds]);
@@ -235,6 +278,8 @@ export default function QuizLayout({
             onRegionClick={handleRegionClick}
             hideBorders={adv.hideBorders}
             noMapHints={adv.noMapHints}
+            showLabels={isLearning}
+            getLabel={getLocalizedName}
           />
         )}
       </div>
@@ -277,17 +322,11 @@ export default function QuizLayout({
             <h3 className="font-game-heading text-lg tracking-wider text-red-500 border-b border-[var(--card-border)] pb-2 flex items-center gap-2">
               <AlertCircle size={16} /> SKIPPED ({missedStates.length})
             </h3>
-            <div className="flex flex-col gap-2.5">
-              {missedStates.length === 0 ? (
-                <span className="text-xs font-game-mono text-slate-400 italic">None yet</span>
-              ) : (
-                missedStates.slice(-4).reverse().map((state) => (
-                  <div key={state.id} className="flex items-center gap-2 text-xs font-game-mono text-slate-600 dark:text-slate-300">
-                    <span className="text-amber-500 font-bold">➔</span> {getLocalizedName(state.properties.name)}
-                  </div>
-                ))
-              )}
-            </div>
+            {/* Names intentionally withheld during play — skipping shouldn't
+                reveal the answer. Full list appears in the end-of-run review. */}
+            <p className="text-xs font-game-mono text-slate-400 italic">
+              {missedStates.length === 0 ? 'None yet' : "You'll see these at the end."}
+            </p>
           </div>
         </>
       )}
@@ -395,7 +434,7 @@ export default function QuizLayout({
         </div>
       )}
 
-      {(gameStatus === 'idle' || gameStatus === 'finished') && (
+      {(gameStatus === 'idle' || gameStatus === 'finished') && !isLearning && (
         <>
           <div className="fixed inset-0 z-30 backdrop-blur-2xl pointer-events-none" />
           <div className="relative z-40 w-full">
@@ -468,6 +507,12 @@ export default function QuizLayout({
                         {t('start')}
                       </button>
                     )}
+                    <button
+                      onClick={() => setIsLearning(true)}
+                      className="mt-3 w-full py-3 rounded-2xl font-game-heading uppercase tracking-widest text-sm text-slate-500 border border-dashed border-[var(--card-border)] hover:border-primary hover:text-primary transition-all"
+                    >
+                      Study the Map First
+                    </button>
                    </div>
                 </div>
              ) : (
@@ -540,6 +585,28 @@ export default function QuizLayout({
           </div>
         </div>
       </>
+      )}
+
+      {gameStatus === 'idle' && isLearning && (
+        <div className="pointer-events-none fixed bottom-8 left-0 right-0 z-30 flex justify-center px-6">
+          <div className="pointer-events-auto flex items-center gap-4 rounded-2xl bg-[var(--card-bg)]/95 backdrop-blur-md border border-[var(--card-border)] px-6 py-4 shadow-2xl">
+            <span className="hidden sm:block font-game-mono text-xs text-slate-500 max-w-[220px]">
+              Hover a region for its name. Ready when you are.
+            </span>
+            <button
+              onClick={() => setIsLearning(false)}
+              className="rounded-xl px-5 py-2.5 font-game-heading uppercase tracking-widest text-sm text-slate-500 border border-[var(--card-border)] hover:text-primary hover:border-primary transition-all"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => { setIsLearning(false); handleStartGame(); }}
+              className="rounded-xl bg-[var(--primary)] px-6 py-2.5 font-game-heading uppercase tracking-widest text-sm text-white shadow-lg hover:scale-105 transition-all"
+            >
+              Start Quiz
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

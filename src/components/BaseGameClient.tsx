@@ -16,6 +16,10 @@ const CAPITAL_CONFIG_KEYS: Record<string, string> = {
   'europe-capitals': 'EUROPE_CAPITALS',
   'europe-capitals-reverse': 'EUROPE_CAPITALS',
   'us-capitals-reverse': 'US_CAPITALS',
+  'africa-capitals': 'AFRICA_CAPITALS',
+  'africa-capitals-reverse': 'AFRICA_CAPITALS',
+  'asia-capitals': 'ASIA_CAPITALS',
+  'asia-capitals-reverse': 'ASIA_CAPITALS',
 };
 
 interface BaseGameClientProps {
@@ -51,14 +55,28 @@ export default function BaseGameClient({
     const regionNames = config[configKey];
     const names = [...regionNames];
     regionNames.forEach((name: string) => {
-      try {
+      if (tRegions.has(name)) {
         const localized = tRegions(name);
         if (localized !== name) names.push(localized);
-      } catch {
-        /* ignore */
       }
     });
     return names;
+  }, [tRegions, config, configKey]);
+
+  // Raw region/country name -> its translation in the current locale.
+  // Passed down so answer-checking accepts the localized name too, not
+  // just the raw English one baked into the underlying map data.
+  const localizedNames = useMemo(() => {
+    if (!config || !config[configKey]) return {};
+    const regionNames: string[] = config[configKey];
+    const map: Record<string, string> = {};
+    regionNames.forEach((name: string) => {
+      if (tRegions.has(name)) {
+        const localized = tRegions(name);
+        if (localized !== name) map[name] = localized;
+      }
+    });
+    return map;
   }, [tRegions, config, configKey]);
 
   // Dynamically resolve capitals variables for capital/reverse modes. Each
@@ -87,6 +105,7 @@ export default function BaseGameClient({
       mapStatus={mapStatus}
       projection={projection}
       validNames={localizedValidNames}
+      localizedNames={localizedNames}
       duration={finalDuration}
       showOnlyValid={showOnlyValid}
       gameMode={gameModeProp}

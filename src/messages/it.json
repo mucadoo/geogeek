@@ -122,6 +122,22 @@
         "title": "Capitali d'Europa (Inverso)",
         "description": "Mostriamo la capitale, tu trovi il paese."
       },
+      "africa-capitals": {
+        "title": "Capitali d'Africa",
+        "description": "Indica la capitale di ogni paese africano."
+      },
+      "africa-capitals-reverse": {
+        "title": "Capitali d'Africa (Inverso)",
+        "description": "Mostriamo la capitale, tu trovi il paese."
+      },
+      "asia-capitals": {
+        "title": "Capitali d'Asia",
+        "description": "Indica la capitale di ogni paese asiatico."
+      },
+      "asia-capitals-reverse": {
+        "title": "Capitali d'Asia (Inverso)",
+        "description": "Mostriamo la capitale, tu trovi il paese."
+      },
       "us-capitals-reverse": {
         "title": "Capitali USA (Inverso)",
         "description": "Mostriamo la capitale, tu trovi lo stato."

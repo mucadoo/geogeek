@@ -27,6 +27,7 @@ export interface SavedGame {
   gameMode: GameMode;
   options: string[];
   capitalMap: Record<string, string>;
+  localizedNames: Record<string, string>;
   score: number;
   masteryPoints: number;
   currentMultiplier: number;
@@ -46,6 +47,7 @@ interface GameState {
   options: string[];
   currentGameKey: string;
   capitalMap: Record<string, string>;
+  localizedNames: Record<string, string>;
   score: number;
   masteryPoints: number;
   currentMultiplier: number;
@@ -70,7 +72,8 @@ interface GameState {
     advancedSettings: AdvancedSettings,
     gameKey: string,
     gameMode?: GameMode,
-    capitalMap?: Record<string, string>
+    capitalMap?: Record<string, string>,
+    localizedNames?: Record<string, string>
   ) => void;
   resumeGame: (gameKey: string) => void;
   pauseGame: () => void;
@@ -130,6 +133,7 @@ export const useGameStore = create<GameState>()(
                 gameMode: newState.gameMode,
                 options: newState.options,
                 capitalMap: newState.capitalMap,
+                localizedNames: newState.localizedNames,
                 score: newState.score,
                 masteryPoints: newState.masteryPoints,
                 currentMultiplier: newState.currentMultiplier,
@@ -168,6 +172,7 @@ export const useGameStore = create<GameState>()(
         options: [],
         currentGameKey: '',
         capitalMap: {},
+        localizedNames: {},
         score: 0,
         masteryPoints: 0,
         currentMultiplier: 1,
@@ -185,7 +190,7 @@ export const useGameStore = create<GameState>()(
         totalToGuess: 0,
         autoZoom: true,
 
-        startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}) => {
+        startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}, localizedNames = {}) => {
           const filtered = states.filter(s => {
             if (!s.properties.name) return false;
             return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
@@ -224,6 +229,7 @@ export const useGameStore = create<GameState>()(
             options: initialOptions,
             currentGameKey: gameKey,
             capitalMap,
+            localizedNames,
             score: 0,
             masteryPoints: 0,
             currentMultiplier: totalMultiplier,
@@ -251,6 +257,7 @@ export const useGameStore = create<GameState>()(
               gameMode: saved.gameMode,
               options: saved.options,
               capitalMap: saved.capitalMap,
+              localizedNames: saved.localizedNames || {},
               score: saved.score,
               masteryPoints: saved.masteryPoints,
               currentMultiplier: saved.currentMultiplier,
@@ -277,20 +284,23 @@ export const useGameStore = create<GameState>()(
           set((state) => {
              const newSaved = { ...state.savedGames };
              if (key) delete newSaved[key];
+
+             // Quitting mid-run should land on the same end-of-run results
+             // screen as finishing or timing out — not silently reset to
+             // the idle start screen with the score wiped.
+             const oldHighScore = state.highScores[key] || 0;
+             const isHighScore = state.masteryPoints > oldHighScore;
+
              return {
-               status: 'idle',
+               status: 'finished',
                savedGames: newSaved,
-               score: 0,
-               masteryPoints: 0,
                currentState: null,
                remainingStates: [],
-               missedStates: [],
-               correctlyGuessedIds: [],
                userInput: '',
                lastGuessCorrect: null,
                lastSkippedState: null,
-               totalToGuess: 0,
-               isNewHighScore: false,
+               highScores: isHighScore ? { ...state.highScores, [key]: state.masteryPoints } : state.highScores,
+               isNewHighScore: isHighScore,
                options: []
              };
           });
@@ -301,7 +311,7 @@ export const useGameStore = create<GameState>()(
 
         submitGuess: (guess) => {
           const state = get();
-          const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings } = state;
+          const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, localizedNames, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings } = state;
           if (!currentState) return false;
 
           const regionName = currentState.properties.name;
@@ -310,13 +320,22 @@ export const useGameStore = create<GameState>()(
           const normalizedGuess = normalizeString(guess);
           const normalizedTarget = normalizeString(targetAnswer);
           const targetAliases = (ALIASES[normalizedTarget] || []).map(normalizeString);
+          // The map/UI displays the current locale's translated name (when
+          // one exists) via RegionNames — accept that as a correct answer
+          // too, not just the raw English name baked into the map data.
+          // Capitals aren't in the RegionNames dataset, so this only
+          // applies outside capital mode.
+          const localizedName = gameMode !== 'capital' ? localizedNames?.[regionName] : undefined;
+          const normalizedLocalizedTarget = localizedName ? normalizeString(localizedName) : null;
 
           const checkMatch = (target: string) => {
             if (advancedSettings.strictMatching) return normalizedGuess === target;
             return normalizedGuess === target || isFuzzyMatch(normalizedGuess, target);
           };
 
-          const isCorrect = checkMatch(normalizedTarget) || targetAliases.some(checkMatch);
+          const isCorrect = checkMatch(normalizedTarget)
+            || targetAliases.some(checkMatch)
+            || (normalizedLocalizedTarget != null && checkMatch(normalizedLocalizedTarget));
 
           if (isCorrect) {
             const newCorrectIds = [...correctlyGuessedIds, currentState.id];

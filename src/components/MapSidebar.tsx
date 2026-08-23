@@ -59,11 +59,8 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
   };
 
   const getLocalizedRegionName = (name: string) => {
-    try {
-      return tRegions(name as any);
-    } catch {
-      return name;
-    }
+    if (!tRegions.has(name as any)) return name;
+    return tRegions(name as any);
   };
 
   useEffect(() => {

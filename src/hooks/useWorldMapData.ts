@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json';
 
 const fetchMapData = async () => {
   const response = await fetch(GEO_URL);

@@ -1,19 +1,44 @@
 'use client';
 
 import * as d3 from 'd3';
-import { Scale, ArrowLeftRight } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { Scale, ArrowLeftRight, BarChart3 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import React, { useMemo, useState, useEffect } from 'react';
 import { feature } from 'topojson-client';
 
 import { getAllCountriesAction } from '@/app/actions';
 import { ALPHA2_TO_NUMERIC } from '@/config/mapConstants';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
-import { getLocalizedCountryName } from '@/lib/i18n-utils';
+import { formatLargeNumber } from '@/lib/formatters';
+import { getLocalizedCountryName, getLocalizedValue } from '@/lib/i18n-utils';
 import { Country } from '@/types';
+
+interface StatRow {
+  label: string;
+  valueA: string;
+  valueB: string;
+  // When both are provided, the higher value is highlighted as the "winner".
+  rawA?: number | null;
+  rawB?: number | null;
+}
+
+function StatRow({ row }: { row: StatRow }) {
+  const hasWinner = row.rawA != null && row.rawB != null && row.rawA !== row.rawB;
+  const aWins = hasWinner && row.rawA! > row.rawB!;
+  const bWins = hasWinner && row.rawB! > row.rawA!;
+
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-dashed border-[var(--card-border)] py-3 last:border-0">
+      <span className={`text-right text-sm font-bold ${aWins ? 'text-emerald-500' : 'text-[var(--foreground)]'}`}>{row.valueA}</span>
+      <span className="text-center text-[10px] uppercase tracking-widest text-slate-400 whitespace-nowrap px-2">{row.label}</span>
+      <span className={`text-left text-sm font-bold ${bWins ? 'text-amber-500' : 'text-[var(--foreground)]'}`}>{row.valueB}</span>
+    </div>
+  );
+}
 
 export default function CompareClient() {
   const locale = useLocale();
+  const t = useTranslations('CountryDetails.labels');
   const { data: mapData } = useWorldMapData();
   const [allCountries, setAllCountries] = useState<Country[]>([]);
   const [countryA, setCountryA] = useState<string>('US');
@@ -35,6 +60,46 @@ export default function CompareClient() {
 
   const countryDataA = useMemo(() => allCountries.find(c => c.isoCode === countryA), [allCountries, countryA]);
   const countryDataB = useMemo(() => allCountries.find(c => c.isoCode === countryB), [allCountries, countryB]);
+
+  const statRows: StatRow[] = useMemo(() => {
+    if (!countryDataA || !countryDataB) return [];
+
+    const densityA = countryDataA.population && countryDataA.areaKm2 ? countryDataA.population / countryDataA.areaKm2 : null;
+    const densityB = countryDataB.population && countryDataB.areaKm2 ? countryDataB.population / countryDataB.areaKm2 : null;
+
+    return [
+      {
+        label: t('population'),
+        valueA: countryDataA.population ? countryDataA.population.toLocaleString(locale) : 'N/A',
+        valueB: countryDataB.population ? countryDataB.population.toLocaleString(locale) : 'N/A',
+        rawA: countryDataA.population, rawB: countryDataB.population,
+      },
+      {
+        label: 'Density (per km²)',
+        valueA: densityA ? densityA.toFixed(1) : 'N/A',
+        valueB: densityB ? densityB.toFixed(1) : 'N/A',
+        rawA: densityA, rawB: densityB,
+      },
+      {
+        label: t('gdp'),
+        valueA: countryDataA.gdp ? '$' + formatLargeNumber(countryDataA.gdp, locale) : 'N/A',
+        valueB: countryDataB.gdp ? '$' + formatLargeNumber(countryDataB.gdp, locale) : 'N/A',
+        rawA: countryDataA.gdp, rawB: countryDataB.gdp,
+      },
+      {
+        label: t('hdi'),
+        valueA: countryDataA.hdi ? countryDataA.hdi.toFixed(3) : 'N/A',
+        valueB: countryDataB.hdi ? countryDataB.hdi.toFixed(3) : 'N/A',
+        rawA: countryDataA.hdi, rawB: countryDataB.hdi,
+      },
+      { label: t('capital'), valueA: getLocalizedValue(countryDataA.capital, locale), valueB: getLocalizedValue(countryDataB.capital, locale) },
+      { label: t('largestCity'), valueA: getLocalizedValue(countryDataA.largestCity, locale), valueB: getLocalizedValue(countryDataB.largestCity, locale) },
+      { label: t('languages'), valueA: getLocalizedValue(countryDataA.officialLanguage, locale), valueB: getLocalizedValue(countryDataB.officialLanguage, locale) },
+      { label: t('government'), valueA: getLocalizedValue(countryDataA.government, locale), valueB: getLocalizedValue(countryDataB.government, locale) },
+      { label: t('currency'), valueA: getLocalizedValue(countryDataA.currency, locale), valueB: getLocalizedValue(countryDataB.currency, locale) },
+      { label: t('timeZone'), valueA: getLocalizedValue(countryDataA.timeZone, locale), valueB: getLocalizedValue(countryDataB.timeZone, locale) },
+    ];
+  }, [countryDataA, countryDataB, locale, t]);
 
   const paths = useMemo(() => {
     if (!mapData) return { pathA: '', pathB: '' };
@@ -68,7 +133,7 @@ export default function CompareClient() {
           Country Comparison
         </h1>
         <p className="mx-auto max-w-2xl text-lg font-game-mono text-gray-500">
-          Compare the actual land area of countries without Mercator projection distortion.
+          True size, population, GDP, HDI and more — side by side, without Mercator distortion.
         </p>
       </header>
 
@@ -163,6 +228,30 @@ export default function CompareClient() {
             </div>
 
             {/* Overlap View Toggle (Optional future improvement) */}
+        </div>
+      </div>
+
+      {/* Full Stat Comparison */}
+      <div className="mx-auto mt-8 max-w-4xl">
+        <div className="game-card p-6 md:p-8 border-2 border-dashed border-[var(--card-border)]">
+          <h2 className="mb-6 flex items-center justify-center gap-2 font-bebas text-2xl tracking-widest text-primary">
+            <BarChart3 size={20} /> FULL COMPARISON
+          </h2>
+
+          {countryDataA && countryDataB ? (
+            <div>
+              <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 pb-3 border-b border-[var(--card-border)]">
+                <span className="text-right font-bebas text-lg tracking-wider text-emerald-500">{getLocalizedCountryName(countryA, locale)}</span>
+                <span className="w-6" />
+                <span className="text-left font-bebas text-lg tracking-wider text-amber-500">{getLocalizedCountryName(countryB, locale)}</span>
+              </div>
+              {statRows.map((row) => (
+                <StatRow key={row.label} row={row} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-xs text-slate-500 italic">Select two countries to compare.</p>
+          )}
         </div>
       </div>
     </main>
