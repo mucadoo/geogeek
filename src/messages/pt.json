@@ -236,6 +236,15 @@
       "blitz": "Blitz",
       "custom": "Personalizado"
     },
+    "difficultyDesc": {
+      "veryEasy": "Múltipla escolha · 60s cada",
+      "easy": "Múltipla escolha · 30s cada",
+      "medium": "Digite a resposta · 20s cada",
+      "hard": "Sobrevivência, digitando · 15s cada",
+      "blazing": "Sobrevivência, sem dicas · 5s cada",
+      "blitz": "Sprint de 60s: responda o máximo que puder",
+      "custom": "Configure suas próprias regras abaixo"
+    },
     "start": "INICIAR JOGO",
     "resume": "RETOMAR JOGO",
     "newGame": "NOVO JOGO",

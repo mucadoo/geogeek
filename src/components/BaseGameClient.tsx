@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import QuizLayout from '@/components/QuizLayout';
 import { useGameConfig } from '@/hooks/useGameConfig';
 import { ProjectionConfig, useGameProjection } from '@/hooks/useGameProjection';
+import { getRegionNameTranslations } from '@/lib/regionNameTranslations';
 
 // Maps a capital/reverse gameKey to the config key holding its
 // region-name -> capital-name lookup table. Add an entry here whenever a
@@ -73,19 +74,18 @@ export default function BaseGameClient({
     return names;
   }, [tRegions, baseNames]);
 
-  // Raw region/country name -> its translation in the current locale.
-  // Passed down so answer-checking accepts the localized name too, not
-  // just the raw English one baked into the underlying map data.
+  // Raw region name -> every one of its translations across all 9 supported
+  // locales (from the static RegionNames catalog). Passed down so
+  // answer-checking accepts a guess typed in any of them, not just the
+  // current UI locale - see QuizLayout/useGameStore.
   const localizedNames = useMemo(() => {
-    const map: Record<string, string> = {};
+    const map: Record<string, string[]> = {};
     baseNames.forEach((name: string) => {
-      if (tRegions.has(name)) {
-        const localized = tRegions(name);
-        if (localized !== name) map[name] = localized;
-      }
+      const variants = getRegionNameTranslations(name);
+      if (variants.length) map[name] = variants;
     });
     return map;
-  }, [tRegions, baseNames]);
+  }, [baseNames]);
 
   // Dynamically resolve capitals variables for capital/reverse modes. Each
   // capital-driven gameKey maps to the config key holding its

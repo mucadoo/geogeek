@@ -235,6 +235,15 @@
       "blitz": "Blitz",
       "custom": "Custom"
     },
+    "difficultyDesc": {
+      "veryEasy": "Multiple choice · 60s each",
+      "easy": "Multiple choice · 30s each",
+      "medium": "Type the answer · 20s each",
+      "hard": "Survival, type the answer · 15s each",
+      "blazing": "Survival, no hints · 5s each",
+      "blitz": "60s sprint, answer as many as you can",
+      "custom": "Set your own rules below"
+    },
     "start": "START GAME",
     "resume": "RESUME GAME",
     "newGame": "NEW GAME",

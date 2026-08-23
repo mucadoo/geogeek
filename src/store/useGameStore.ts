@@ -27,7 +27,8 @@ export interface SavedGame {
   gameMode: GameMode;
   options: string[];
   capitalMap: Record<string, string>;
-  localizedNames: Record<string, string>;
+  localizedNames: Record<string, string[]>;
+  capitalLocalizedNames: Record<string, string[]>;
   score: number;
   masteryPoints: number;
   currentMultiplier: number;
@@ -48,7 +49,8 @@ interface GameState {
   options: string[];
   currentGameKey: string;
   capitalMap: Record<string, string>;
-  localizedNames: Record<string, string>;
+  localizedNames: Record<string, string[]>;
+  capitalLocalizedNames: Record<string, string[]>;
   score: number;
   masteryPoints: number;
   currentMultiplier: number;
@@ -70,14 +72,15 @@ interface GameState {
   streak: number;
 
   startGame: (
-    states: StateFeature[], 
-    validNames: string[], 
+    states: StateFeature[],
+    validNames: string[],
     difficulty: Difficulty,
     advancedSettings: AdvancedSettings,
     gameKey: string,
     gameMode?: GameMode,
     capitalMap?: Record<string, string>,
-    localizedNames?: Record<string, string>
+    localizedNames?: Record<string, string[]>,
+    capitalLocalizedNames?: Record<string, string[]>
   ) => void;
   resumeGame: (gameKey: string) => void;
   pauseGame: () => void;
@@ -139,6 +142,7 @@ export const useGameStore = create<GameState>()(
                 options: newState.options,
                 capitalMap: newState.capitalMap,
                 localizedNames: newState.localizedNames,
+                capitalLocalizedNames: newState.capitalLocalizedNames,
                 score: newState.score,
                 masteryPoints: newState.masteryPoints,
                 currentMultiplier: newState.currentMultiplier,
@@ -179,6 +183,7 @@ export const useGameStore = create<GameState>()(
         currentGameKey: '',
         capitalMap: {},
         localizedNames: {},
+        capitalLocalizedNames: {},
         score: 0,
         masteryPoints: 0,
         currentMultiplier: 1,
@@ -198,7 +203,7 @@ export const useGameStore = create<GameState>()(
         soundEnabled: true,
         streak: 0,
 
-        startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}, localizedNames = {}) => {
+        startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}, localizedNames = {}, capitalLocalizedNames = {}) => {
           const filtered = states.filter(s => {
             if (!s.properties.name) return false;
             return validNames.some(name => normalizeString(s.properties.name) === normalizeString(name));
@@ -238,6 +243,7 @@ export const useGameStore = create<GameState>()(
             currentGameKey: gameKey,
             capitalMap,
             localizedNames,
+            capitalLocalizedNames,
             score: 0,
             masteryPoints: 0,
             currentMultiplier: totalMultiplier,
@@ -267,6 +273,7 @@ export const useGameStore = create<GameState>()(
               options: saved.options,
               capitalMap: saved.capitalMap,
               localizedNames: saved.localizedNames || {},
+              capitalLocalizedNames: saved.capitalLocalizedNames || {},
               score: saved.score,
               masteryPoints: saved.masteryPoints,
               currentMultiplier: saved.currentMultiplier,
@@ -322,7 +329,7 @@ export const useGameStore = create<GameState>()(
 
         submitGuess: (guess) => {
           const state = get();
-          const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, localizedNames, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings, streak } = state;
+          const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, localizedNames, capitalLocalizedNames, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings, streak } = state;
           if (!currentState) return false;
 
           const regionName = currentState.properties.name;
@@ -331,13 +338,20 @@ export const useGameStore = create<GameState>()(
           const normalizedGuess = normalizeString(guess);
           const normalizedTarget = normalizeString(targetAnswer);
           const targetAliases = (ALIASES[normalizedTarget] || []).map(normalizeString);
-          // The map/UI displays the current locale's translated name (when
-          // one exists) via RegionNames — accept that as a correct answer
-          // too, not just the raw English name baked into the map data.
-          // Capitals aren't in the RegionNames dataset, so this only
-          // applies outside capital mode.
-          const localizedName = gameMode !== 'capital' ? localizedNames?.[regionName] : undefined;
-          const normalizedLocalizedTarget = localizedName ? normalizeString(localizedName) : null;
+          // The guess is accepted in any of the 9 supported languages, not
+          // just the raw (English) name baked into the map data: both the
+          // country/region's name and, in capital mode, its capital's name
+          // are looked up across every locale (wiki-geo-data for sovereign
+          // countries and capitals, the static RegionNames catalog for
+          // sub-national regions - see QuizLayout/BaseGameClient). A saved
+          // game from before this map held plain strings, not arrays -
+          // coerce defensively so resuming one doesn't crash.
+          const localizedMap = gameMode === 'capital' ? capitalLocalizedNames : localizedNames;
+          const rawLocalizedTargets = localizedMap?.[gameMode === 'capital' ? targetAnswer : regionName];
+          const localizedTargets = Array.isArray(rawLocalizedTargets)
+            ? rawLocalizedTargets
+            : (rawLocalizedTargets ? [rawLocalizedTargets as unknown as string] : []);
+          const normalizedLocalizedTargets = localizedTargets.map(normalizeString);
 
           const checkMatch = (target: string) => {
             if (advancedSettings.strictMatching) return normalizedGuess === target;
@@ -346,7 +360,7 @@ export const useGameStore = create<GameState>()(
 
           const isCorrect = checkMatch(normalizedTarget)
             || targetAliases.some(checkMatch)
-            || (normalizedLocalizedTarget != null && checkMatch(normalizedLocalizedTarget));
+            || normalizedLocalizedTargets.some(checkMatch);
 
           if (isCorrect) {
             const newCorrectIds = [...correctlyGuessedIds, currentState.id];

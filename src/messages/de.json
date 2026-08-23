@@ -113,6 +113,7 @@
       "blitz": "Blitz",
       "custom": "Benutzerdefiniert"
     },
+    "difficultyDesc": { "veryEasy": "Multiple Choice · 60s pro Frage", "easy": "Multiple Choice · 30s pro Frage", "medium": "Antwort eintippen · 20s pro Frage", "hard": "Survival, eintippen · 15s pro Frage", "blazing": "Survival, ohne Hinweise · 5s pro Frage", "blitz": "60s-Sprint: so viele wie möglich beantworten", "custom": "Eigene Regeln unten festlegen" },
     "start": "SPIEL STARTEN",
     "resume": "SPIEL FORTSETZEN",
     "newGame": "NEUES SPIEL",

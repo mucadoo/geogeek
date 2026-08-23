@@ -2,14 +2,21 @@ import React from 'react';
 
 interface DifficultyTicketProps {
   title: string;
-  description: string;
   isSelected: boolean;
   onClick: () => void;
 }
 
-export default function DifficultyTicket({ title, description, isSelected, onClick }: DifficultyTicketProps) {
+// Description text intentionally lives outside the ticket (QuizLayout shows
+// it once, for the selected difficulty only) - repeating it under all 7
+// tickets at once was the main source of clutter on the start screen.
+export default function DifficultyTicket({ title, isSelected, onClick }: DifficultyTicketProps) {
   return (
-    <div className="flex flex-col items-center gap-2 cursor-pointer group" onClick={onClick}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={isSelected}
+      className="flex flex-col items-center gap-1.5 group"
+    >
       {/* Floating Checkmark */}
       <div className={`transition-all duration-300 ${isSelected ? 'opacity-100 -translate-y-1' : 'opacity-0 -translate-y-4'}`}>
         <div className="bg-primary text-white rounded-full p-1">
@@ -20,9 +27,9 @@ export default function DifficultyTicket({ title, description, isSelected, onCli
       </div>
 
       {/* Perforated Ticket */}
-      <div 
-        className={`relative w-full h-16 bg-[var(--card-bg)] border-2 border-dashed flex items-center justify-center px-2
-          ${isSelected ? 'border-primary' : 'border-[var(--card-border)]'}
+      <div
+        className={`relative w-full h-14 bg-[var(--card-bg)] border-2 border-dashed flex items-center justify-center px-2 transition-colors
+          ${isSelected ? 'border-primary' : 'border-[var(--card-border)] group-hover:border-primary/50'}
           [mask-image:radial-gradient(circle_at_0%_50%,transparent_10px,black_10px),radial-gradient(circle_at_100%_50%,transparent_10px,black_10px)]
         `}
       >
@@ -30,11 +37,6 @@ export default function DifficultyTicket({ title, description, isSelected, onCli
           {title}
         </span>
       </div>
-
-      {/* Description */}
-      <span className="font-game-mono text-xs text-[var(--foreground)] opacity-60 uppercase tracking-tight">
-        {description}
-      </span>
-    </div>
+    </button>
   );
 }

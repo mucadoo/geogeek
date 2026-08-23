@@ -47,9 +47,10 @@ interface QuizLayoutProps {
   capitalMap?: Record<string, string>;
   showOnlyValid?: boolean;
   capitalCoordinates?: Record<string, [number, number]>;
-  /** Raw region/country name -> its translation in the current locale, so
-   *  answer-checking accepts the localized name too. */
-  localizedNames?: Record<string, string>;
+  /** Raw region/country name -> every one of its translations across all 9
+   *  supported locales, so answer-checking accepts a guess typed in any of
+   *  them, not just the current UI locale. */
+  localizedNames?: Record<string, string[]>;
   /** Daily Challenge etc: adds a "Copy Results" share button to the finish screen. */
   shareResults?: boolean;
 }
@@ -155,41 +156,64 @@ export default function QuizLayout({
   // Sovereign-country games (World/Africa/Asia/Europe/Oceania/...) have no
   // RegionNames entries at all — those only cover the curated US/Brazil/
   // Italy/France/Canada/Australia/South-America lists. For everything else,
-  // fall back to the country dataset's own localized name (covers en/pt/fr/
-  // it/es) and, failing that, the browser/runtime's built-in CLDR data via
-  // Intl.DisplayNames (covers every locale the site ships, including de/ja/
-  // ru/zh) keyed off the country's ISO code — no hand-maintained
-  // translation content required.
-  const countryLocalizedNames = useMemo(() => {
-    if (!allCountries.length) return {};
-    const map: Record<string, string> = {};
-    allCountries.forEach((c) => {
-      const rawName = c.name.en;
-      if (!rawName || localizedNames[rawName]) return; // RegionNames already covers it
-      // wiki-geo-data only translates en/pt/fr/it/es directly; for any other
-      // locale (de/ja/ru/zh/...), fall through to Intl.DisplayNames by NOT
-      // passing a countries list — passing one would short-circuit back to
-      // the (missing) direct translation instead of using CLDR data.
-      const directTranslation = c.name[locale as keyof typeof c.name];
-      const localized = directTranslation || (c.isoCode ? getLocalizedCountryName(c.isoCode, locale) : null);
-      if (localized && localized !== rawName) map[rawName] = localized;
-    });
-    return map;
-  }, [allCountries, locale, localizedNames]);
-
-  const allLocalizedNames = useMemo(
-    () => ({ ...countryLocalizedNames, ...localizedNames }),
-    [countryLocalizedNames, localizedNames]
-  );
-
+  // display uses the country dataset's own localized name, now translated
+  // directly for all 9 locales by wiki-geo-data; the browser/runtime's
+  // built-in CLDR data via Intl.DisplayNames is kept only as a defensive
+  // fallback for a record missing one of them.
   const getLocalizedName = (name: string) => {
-    if (allLocalizedNames[name]) return allLocalizedNames[name];
+    const country = allCountries.find((c) => c.name.en === name);
+    if (country) {
+      const directTranslation = country.name[locale as keyof typeof country.name];
+      const localized = directTranslation || (country.isoCode ? getLocalizedCountryName(country.isoCode, locale) : null);
+      if (localized) return localized;
+    }
     // next-intl doesn't throw for a missing key by default — it returns the
     // fully-qualified key path (e.g. "RegionNames.Pakistan") as the string,
     // so a try/catch never catches it.
     if (!tRegions.has(name)) return name;
     return tRegions(name);
   };
+
+  // Every accepted spelling of a region/country name, across all 9 locales,
+  // for answer-checking (not just the current UI locale's - see useGameStore
+  // submitGuess). Sovereign countries come from wiki-geo-data (now natively
+  // translated in all 9); sub-national regions (US states, Brazil states,
+  // etc.) come in via the `localizedNames` prop, which BaseGameClient builds
+  // from the static RegionNames catalog. The two key sets never overlap.
+  const countryNameVariants = useMemo(() => {
+    if (!allCountries.length) return {};
+    const map: Record<string, string[]> = {};
+    allCountries.forEach((c) => {
+      const rawName = c.name.en;
+      if (!rawName) return;
+      const variants = new Set<string>();
+      Object.values(c.name).forEach((v) => { if (v && v !== rawName) variants.add(v); });
+      if (variants.size) map[rawName] = [...variants];
+    });
+    return map;
+  }, [allCountries]);
+
+  const allLocalizedNames = useMemo(
+    () => ({ ...countryNameVariants, ...localizedNames }),
+    [countryNameVariants, localizedNames]
+  );
+
+  // Same idea, but for capital names (name-mode has no equivalent - a
+  // capital's translations only ever matter when guessing the capital
+  // itself). Keyed by the capital's English name so it lines up with
+  // whatever capitalMap (wiki-geo-data or a static config) already uses.
+  const capitalLocalizedNames = useMemo(() => {
+    if (!allCountries.length) return {};
+    const map: Record<string, string[]> = {};
+    allCountries.forEach((c) => {
+      const rawCapital = c.capital.en;
+      if (!rawCapital || rawCapital === 'N/A') return;
+      const variants = new Set<string>();
+      Object.values(c.capital).forEach((v) => { if (v && v !== rawCapital && v !== 'N/A') variants.add(v); });
+      if (variants.size) map[rawCapital] = [...variants];
+    });
+    return map;
+  }, [allCountries]);
 
   useEffect(() => {
     if (gameStatus === 'playing' && currentGameKey !== gameKey) {
@@ -262,7 +286,7 @@ export default function QuizLayout({
 
       if (savedGame) quitGame();
       
-      startGame(states, validNames, difficulty, adv, gameKey, gameMode, capitalMap, allLocalizedNames);
+      startGame(states, validNames, difficulty, adv, gameKey, gameMode, capitalMap, allLocalizedNames, capitalLocalizedNames);
     }
   };
 
@@ -500,7 +524,7 @@ export default function QuizLayout({
                      <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
                    </div>
                    
-                   <div className="flex-1 overflow-y-auto text-left space-y-8 pr-2">
+                   <div className="flex-1 overflow-y-auto text-left space-y-6 pr-2">
                      <section>
                        <h3 className="text-xs font-game-heading text-slate-500 uppercase tracking-widest mb-4">{t('selectDifficulty')}</h3>
                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -508,43 +532,55 @@ export default function QuizLayout({
                             <DifficultyTicket
                               key={d}
                               title={t(`difficulty.${DIFFICULTY_MESSAGE_KEY[d]}`)}
-                              description={t(`difficultyDesc.${DIFFICULTY_MESSAGE_KEY[d]}`)}
                               isSelected={difficulty === d}
                               onClick={() => handleDifficultyChange(d)}
                             />
                           ))}
                           <DifficultyTicket
                             title={t('difficulty.custom')}
-                            description={t('difficultyDesc.custom')}
                             isSelected={difficulty === 'custom'}
                             onClick={() => setDifficulty('custom')}
                           />
                        </div>
+                       {/* One description for the current pick, instead of
+                           repeating one under all 7 tickets at once. */}
+                       <p className="mt-4 text-center font-game-mono text-xs text-slate-500">
+                         {t(`difficultyDesc.${DIFFICULTY_MESSAGE_KEY[difficulty]}`)}
+                       </p>
                      </section>
 
                      {difficulty === 'custom' && (
-                      <section className="border border-[var(--card-border)] rounded-2xl p-6 bg-[var(--background)]">
-                        <h3 className="font-game-heading text-primary uppercase tracking-widest text-sm mb-4">{t('advancedConfiguration')}</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm font-game-mono text-[var(--foreground)]">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" className="accent-primary" checked={adv.isMultipleChoice} onChange={(e) => setAdv({...adv, isMultipleChoice: e.target.checked})} />
-                            {t('multipleChoice')}
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" className="accent-primary" checked={adv.strictMatching} onChange={(e) => setAdv({...adv, strictMatching: e.target.checked})} />
-                            {t('strictMatching')}
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" className="accent-primary" checked={adv.noMapHints} onChange={(e) => setAdv({...adv, noMapHints: e.target.checked})} />
-                            {t('noMapHints')}
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" className="accent-primary" checked={adv.hideBorders} onChange={(e) => setAdv({...adv, hideBorders: e.target.checked})} />
-                            {t('hideBorders')}
-                          </label>
-                          <div className="col-span-2">
-                            <label className="block mb-1 text-xs text-slate-500">{t('timePerGuess')}</label>
-                            <input type="number" value={adv.timePerGuess} onChange={(e) => setAdv({...adv, timePerGuess: parseInt(e.target.value)})} className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-3 outline-none focus:border-primary" />
+                      <section className="border border-[var(--card-border)] rounded-2xl p-5 bg-[var(--background)] animate-in fade-in slide-in-from-top-2 duration-200">
+                        <h3 className="font-game-heading text-primary uppercase tracking-widest text-xs mb-3">{t('advancedConfiguration')}</h3>
+                        <div className="grid grid-cols-2 gap-2 text-xs font-game-mono">
+                          {([
+                            ['isMultipleChoice', t('multipleChoice')],
+                            ['strictMatching', t('strictMatching')],
+                            ['noMapHints', t('noMapHints')],
+                            ['hideBorders', t('hideBorders')],
+                          ] as const).map(([key, label]) => (
+                            <label
+                              key={key}
+                              className="flex items-center gap-2 rounded-xl border border-[var(--card-border)] px-3 py-2.5 cursor-pointer transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary text-[var(--foreground)]"
+                            >
+                              <input
+                                type="checkbox"
+                                className="accent-primary"
+                                checked={adv[key]}
+                                onChange={(e) => setAdv({ ...adv, [key]: e.target.checked })}
+                              />
+                              {label}
+                            </label>
+                          ))}
+                          <div className="col-span-2 flex items-center justify-between gap-3 rounded-xl border border-[var(--card-border)] px-3 py-2.5">
+                            <label className="text-slate-500 shrink-0">{t('timePerGuess')}</label>
+                            <input
+                              type="number"
+                              min={1}
+                              value={adv.timePerGuess}
+                              onChange={(e) => setAdv({ ...adv, timePerGuess: parseInt(e.target.value) || 1 })}
+                              className="w-20 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg px-2 py-1 text-right outline-none focus:border-primary"
+                            />
                           </div>
                         </div>
                       </section>

@@ -235,6 +235,15 @@
       "blitz": "Blitz",
       "custom": "Personalizado"
     },
+    "difficultyDesc": {
+      "veryEasy": "Opción múltiple · 60s cada una",
+      "easy": "Opción múltiple · 30s cada una",
+      "medium": "Escribe la respuesta · 20s cada una",
+      "hard": "Supervivencia, escribiendo · 15s cada una",
+      "blazing": "Supervivencia, sin pistas · 5s cada una",
+      "blitz": "Sprint de 60s: responde tantas como puedas",
+      "custom": "Configura tus propias reglas abajo"
+    },
     "start": "INICIAR JUEGO",
     "resume": "REANUDAR JUEGO",
     "newGame": "NUEVO JUEGO",

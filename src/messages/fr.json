@@ -235,6 +235,15 @@
       "blitz": "Blitz",
       "custom": "Personnalisé"
     },
+    "difficultyDesc": {
+      "veryEasy": "Choix multiple · 60s chacune",
+      "easy": "Choix multiple · 30s chacune",
+      "medium": "Tapez la réponse · 20s chacune",
+      "hard": "Survie, à taper · 15s chacune",
+      "blazing": "Survie, sans indices · 5s chacune",
+      "blitz": "Sprint de 60s : répondez au maximum",
+      "custom": "Réglez vos propres règles ci-dessous"
+    },
     "start": "COMMENCER LE JEU",
     "resume": "REPRENDRE LA PARTIE",
     "newGame": "NOUVELLE PARTIE",

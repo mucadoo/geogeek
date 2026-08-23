@@ -113,6 +113,7 @@
       "blitz": "闪电战",
       "custom": "自定义"
     },
+    "difficultyDesc": { "veryEasy": "多选题·每题60秒", "easy": "多选题·每题30秒", "medium": "输入答案·每题20秒", "hard": "生存模式，输入答案·每题15秒", "blazing": "生存模式，无提示·每题5秒", "blitz": "60秒冲刺，尽可能多答", "custom": "在下方设置你自己的规则" },
     "start": "开始游戏",
     "resume": "恢复游戏",
     "newGame": "新游戏",

@@ -11,12 +11,11 @@ const client = new WikiGeoClient({ dataSource: 'remote' });
 
 // @mucadoo/wiki-geo-data (Wikipedia-sourced) is the sole data source: no
 // external API, no signup, no rate limit, and its client already falls back
-// to its own bundled local snapshot on network failure. Its directly
-// supported locales are en/pt/fr/it/es; for de/ja/zh/ru, country *names*
-// fall back to the runtime's built-in CLDR data via Intl.DisplayNames keyed
-// off isoCode (same technique QuizLayout already uses for region names) —
-// no hand-maintained translation content required. Other de/ja/zh/ru fields
-// (capital, currency, etc.) fall back to the English value.
+// to its own bundled local snapshot on network failure. It now translates
+// all 9 of the app's locales directly (en/pt/fr/it/es/de/ja/ru/zh); the
+// runtime's built-in CLDR data via Intl.DisplayNames (same technique
+// QuizLayout uses for region names without a wiki-geo-data entry) is kept
+// only as a defensive fallback for a record missing one of those locales.
 //
 // The installed SDK version is checked against MIN_ENRICHED_SDK_VERSION
 // below: older installs (and the 'remote' GitHub Pages snapshot they'd
@@ -44,10 +43,10 @@ function buildCountry(wiki: any): Country {
     es: wiki.name?.es || wiki.name?.en || '',
     fr: wiki.name?.fr || wiki.name?.en || '',
     it: wiki.name?.it || wiki.name?.en || '',
-    de: regionDisplayName(iso2, 'de') || wiki.name?.en || '',
-    ja: regionDisplayName(iso2, 'ja') || wiki.name?.en || '',
-    zh: regionDisplayName(iso2, 'zh') || wiki.name?.en || '',
-    ru: regionDisplayName(iso2, 'ru') || wiki.name?.en || '',
+    de: wiki.name?.de || regionDisplayName(iso2, 'de') || wiki.name?.en || '',
+    ja: wiki.name?.ja || regionDisplayName(iso2, 'ja') || wiki.name?.en || '',
+    zh: wiki.name?.zh || regionDisplayName(iso2, 'zh') || wiki.name?.en || '',
+    ru: wiki.name?.ru || regionDisplayName(iso2, 'ru') || wiki.name?.en || '',
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +55,7 @@ function buildCountry(wiki: any): Country {
     capitalNames.map((n) => n[locale]).filter(Boolean).join(', ') || capitalNames.map((n) => n.en).filter(Boolean).join(', ') || 'N/A';
   const capital = {
     en: capitalFor('en'), pt: capitalFor('pt'), es: capitalFor('es'), fr: capitalFor('fr'), it: capitalFor('it'),
-    de: capitalFor('en'), ja: capitalFor('en'), zh: capitalFor('en'), ru: capitalFor('en'),
+    de: capitalFor('de'), ja: capitalFor('ja'), zh: capitalFor('zh'), ru: capitalFor('ru'),
   };
 
   // The wiki scraper's currency/time-zone links include the bare
