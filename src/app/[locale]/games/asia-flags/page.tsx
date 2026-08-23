@@ -1,5 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
+
 import AsiaFlagsClient from './AsiaFlagsClient';
+
 import { routing } from '@/i18n/routing';
 
 export function generateStaticParams() {

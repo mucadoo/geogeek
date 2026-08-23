@@ -1,5 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
+
 import OceaniaFlagsClient from './OceaniaFlagsClient';
+
 import { routing } from '@/i18n/routing';
 
 export function generateStaticParams() {

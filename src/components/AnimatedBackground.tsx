@@ -1,13 +1,13 @@
 'use client';
 
 import * as d3 from 'd3';
-import { usePathname } from '@/i18n/routing';
 import { useTheme } from 'next-themes';
 import React, { useEffect, useRef } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
 import { useWorldMapData } from '@/hooks/useWorldMapData';
+import { usePathname } from '@/i18n/routing';
 
 // Helper to generate random coordinates on Earth
 const randomCoords = (): [number, number] =>[

@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { ArrowLeft, UserPlus, UserCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React, { useState, useEffect } from 'react';
 
 import { Link, useRouter } from '@/i18n/routing';

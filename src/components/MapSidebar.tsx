@@ -228,38 +228,38 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
                 <div 
                   className="relative group cursor-pointer" 
                   onClick={() => router.push(`/map/${data.isoCode?.toLowerCase()}`)}
-                  title={`Back to ${getLocalizedValue(data.name, locale)}`}
+                  title={t('backToCountry')}
                 >
-                  <Image 
-                    src={data.flagUrl} 
-                    alt={`${getLocalizedValue(data.name, locale)} flag`} 
+                  <Image
+                    src={data.flagUrl}
+                    alt={`${getLocalizedValue(data.name, locale)} flag`}
                     width={160}
                     height={100}
                     className="h-24 w-auto object-contain shadow-xl rounded-lg border border-[var(--card-border)] transition-transform group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity">
-                    <span className="text-[10px] text-white font-bold uppercase tracking-wider">Back to Country</span>
+                    <span className="text-[10px] text-white font-bold uppercase tracking-wider">{t('backToCountry')}</span>
                   </div>
                 </div>
               ) : (
                 <div className="h-24 w-36 bg-slate-100 dark:bg-slate-900 flex items-center justify-center rounded-lg border border-dashed border-[var(--card-border)] text-slate-400">
-                  No Flag
+                  {t('noFlag')}
                 </div>
               )}
               <span className="text-[10px] text-slate-400 font-mono uppercase tracking-widest mt-2">
-                Region of {getLocalizedValue(data.name, locale)}
+                {t('regionOf', { name: getLocalizedValue(data.name, locale) })}
               </span>
             </div>
 
             <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
-              <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">Quick Facts</h3>
+              <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('quickFacts')}</h3>
               <div className="space-y-3">
                 {[
-                  { label: "Parent Country", value: getLocalizedValue(data.name, locale), onClick: () => router.push(`/map/${data.isoCode?.toLowerCase()}`) },
-                  { label: "Region ID", value: activeRegionId || 'N/A' },
-                  { label: "Country Capital", value: getLocalizedValue(data.capital, locale) },
-                  { label: "Official Language", value: getLocalizedValue(data.officialLanguage, locale) },
-                  { label: "Currency", value: getLocalizedValue(data.currency, locale) },
+                  { label: t('parentCountry'), value: getLocalizedValue(data.name, locale), onClick: () => router.push(`/map/${data.isoCode?.toLowerCase()}`) },
+                  { label: t('regionId'), value: activeRegionId || 'N/A' },
+                  { label: t('countryCapital'), value: getLocalizedValue(data.capital, locale) },
+                  { label: t('officialLanguage'), value: getLocalizedValue(data.officialLanguage, locale) },
+                  { label: t('labels.currency'), value: getLocalizedValue(data.currency, locale) },
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-slate-100 dark:border-slate-800/50 pb-2 last:border-0">
                     <span className="font-bebas text-slate-400 text-xs tracking-wider uppercase">{row.label}</span>

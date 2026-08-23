@@ -7,6 +7,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { feature } from 'topojson-client';
 
+import MapPolygons from './MapPolygons';
+import MapSidebar from './MapSidebar';
+
 import { getCountryByIsoAction } from '@/app/actions';
 import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
@@ -14,9 +17,6 @@ import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
 import { Country } from '@/types';
-
-import MapPolygons from './MapPolygons';
-import MapSidebar from './MapSidebar';
 
 interface MapProps {
   slug?: string;

@@ -11,11 +11,7 @@ const pwaConfig = withPWA({
 });
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: {
-    unoptimized: true,
-  },
-};
+const nextConfig = {};
 
-// @ts-ignore
+// @ts-expect-error next-pwa's type defs don't line up with the current NextConfig type
 export default withNextIntl(pwaConfig(nextConfig));

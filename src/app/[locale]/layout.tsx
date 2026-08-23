@@ -53,6 +53,14 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
     title: messages.Metadata.title,
     description: messages.Metadata.description,
     manifest: '/manifest.json',
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '64x64 32x32 24x24 16x16', type: 'image/x-icon' },
+        { url: '/media/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/media/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      apple: '/apple-icon.png',
+    },
     robots: { index: true, follow: true },
     alternates: {
       canonical: `${baseUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}`,

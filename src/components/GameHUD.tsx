@@ -1,5 +1,7 @@
 import { Star, Trophy, Sparkles, Flame } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import React from 'react';
+
 import { useGameStore } from '@/store/useGameStore';
 
 interface GameHUDProps {
@@ -9,6 +11,7 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
+  const t = useTranslations('Quiz');
   const { masteryPoints, currentMultiplier, streak } = useGameStore();
   
   const formatTime = (seconds: number) => {
@@ -32,7 +35,7 @@ export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
         <div key={masteryPoints} className="flex items-center gap-2 bg-primary/20 border border-primary px-4 py-1.5 rounded-full -mt-2 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-300">
           <Sparkles size={14} className="text-primary animate-pulse" />
           <span className="font-game-mono text-xs font-bold text-primary tracking-tighter uppercase">
-            {masteryPoints.toLocaleString()} PTS ({currentMultiplier}x)
+            {masteryPoints.toLocaleString()} {t('pts')} ({currentMultiplier}x)
           </span>
         </div>
 
@@ -42,7 +45,7 @@ export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
           <div key={streak} className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500 px-3 py-1 rounded-full mt-2 animate-in zoom-in duration-300">
             <Flame size={12} className="text-amber-500" />
             <span className="font-game-mono text-[10px] font-bold text-amber-500 tracking-tighter uppercase">
-              {streak} Streak
+              {streak} {t('streakLabel')}
             </span>
           </div>
         )}

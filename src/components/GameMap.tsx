@@ -177,8 +177,19 @@ export default function GameMap({
                 stroke={strokeColor}
                 strokeWidth={strokeW}
                 vectorEffect="non-scaling-stroke"
-                className={`transition-colors duration-300 ${animationClass} ${onRegionClick ? 'cursor-pointer' : ''}`}
+                className={`transition-colors duration-300 outline-none focus-visible:stroke-[var(--color-map-highlight)] focus-visible:stroke-[2] ${animationClass} ${onRegionClick ? 'cursor-pointer' : ''}`}
                 onClick={() => onRegionClick?.(stateId, stateName)}
+                {...(onRegionClick ? {
+                  role: 'button' as const,
+                  tabIndex: 0,
+                  'aria-label': getLabel(stateName),
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onRegionClick(stateId, stateName);
+                    }
+                  },
+                } : {})}
               >
                 {showLabels && <title>{getLabel(stateName)}</title>}
               </path>

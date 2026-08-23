@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { countryService } from '@/lib/countryService';
 
 export async function GET() {

@@ -1,7 +1,10 @@
 import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
+import { games } from '@/config/gamesList';
 import { db, ensureSchema } from '@/lib/db';
+
+const KNOWN_GAME_KEYS = new Set([...games.map((g) => g.id), 'daily-challenge']);
 
 interface LeaderboardRow {
   username: string;
@@ -14,6 +17,10 @@ interface LeaderboardRow {
 
 export async function GET(request: Request, { params }: { params: Promise<{ gameKey: string }> }) {
   const { gameKey } = await params;
+
+  if (!KNOWN_GAME_KEYS.has(gameKey)) {
+    return NextResponse.json({ error: 'Unknown game.' }, { status: 404 });
+  }
 
   await ensureSchema();
 

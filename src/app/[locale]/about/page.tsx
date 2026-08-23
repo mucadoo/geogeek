@@ -1,7 +1,7 @@
 import { BookOpen, Lightbulb, Users, Globe } from 'lucide-react';
-import { SiGithub } from 'react-icons/si'; // Keep SiGithub for the project repo link
 import { getTranslations } from 'next-intl/server';
 import { setRequestLocale } from 'next-intl/server';
+import { SiGithub } from 'react-icons/si'; // Keep SiGithub for the project repo link
 
 import { routing } from '@/i18n/routing';
 import { Link } from '@/i18n/routing'; // Import Link for internal navigation

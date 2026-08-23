@@ -11,10 +11,10 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import UserMenu from '@/components/UserMenu';
 import { Link, usePathname, routing } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { useGameStore } from '@/store/useGameStore';
-import UserMenu from '@/components/UserMenu';
 
 interface NavItem {
   href: string;
@@ -117,7 +117,7 @@ export default function Header() {
               <button
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
                 className="flex items-center justify-center p-2.5 bg-[var(--card-bg)]/70 backdrop-blur-md rounded-full text-[var(--foreground)]/70 hover:text-[var(--primary)] hover:bg-[var(--card-bg)] border border-transparent transition-all shadow-sm"
-                aria-label="Toggle theme"
+                aria-label={t('toggleTheme')}
               >
                 {resolvedTheme === 'dark' ? <Sun size={18} className="text-[var(--primary)]" /> : <Moon size={18} className="text-[var(--primary)]" />}
               </button>

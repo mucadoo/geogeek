@@ -1,130 +1,139 @@
 import 'server-only';
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
+
 import { WikiGeoClient } from '@mucadoo/wiki-geo-data';
 import { unstable_cache } from 'next/cache';
+
 import { Country, RankingType } from '@/types';
 
 const client = new WikiGeoClient({ dataSource: 'remote' });
 
+// @mucadoo/wiki-geo-data (Wikipedia-sourced) is the sole data source: no
+// external API, no signup, no rate limit, and its client already falls back
+// to its own bundled local snapshot on network failure. Its directly
+// supported locales are en/pt/fr/it/es; for de/ja/zh/ru, country *names*
+// fall back to the runtime's built-in CLDR data via Intl.DisplayNames keyed
+// off isoCode (same technique QuizLayout already uses for region names) —
+// no hand-maintained translation content required. Other de/ja/zh/ru fields
+// (capital, currency, etc.) fall back to the English value; wiki-geo-data
+// has no cca3/borders relation at all, so getNeighbors() always uses its
+// description-text fallback match below.
+function regionDisplayName(isoCode: string, locale: string): string | null {
+  try {
+    return new Intl.DisplayNames([locale], { type: 'region' }).of(isoCode.toUpperCase()) || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Normalizes one wiki-geo-data record into the flat, locale-keyed `Country`
+ *  shape the rest of the app consumes. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildCountry(wiki: any): Country {
+  const iso2 = (wiki.isoCode || '').toUpperCase();
+
+  const name = {
+    en: wiki.name?.en || '',
+    pt: wiki.name?.pt || wiki.name?.en || '',
+    es: wiki.name?.es || wiki.name?.en || '',
+    fr: wiki.name?.fr || wiki.name?.en || '',
+    it: wiki.name?.it || wiki.name?.en || '',
+    de: regionDisplayName(iso2, 'de') || wiki.name?.en || '',
+    ja: regionDisplayName(iso2, 'ja') || wiki.name?.en || '',
+    zh: regionDisplayName(iso2, 'zh') || wiki.name?.en || '',
+    ru: regionDisplayName(iso2, 'ru') || wiki.name?.en || '',
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const capitalNames = ((wiki.capital || []) as any[]).map((c) => c.name).filter(Boolean);
+  const capitalFor = (locale: string) =>
+    capitalNames.map((n) => n[locale]).filter(Boolean).join(', ') || capitalNames.map((n) => n.en).filter(Boolean).join(', ') || 'N/A';
+  const capital = {
+    en: capitalFor('en'), pt: capitalFor('pt'), es: capitalFor('es'), fr: capitalFor('fr'), it: capitalFor('it'),
+    de: capitalFor('en'), ja: capitalFor('en'), zh: capitalFor('en'), ru: capitalFor('en'),
+  };
+
+  // The wiki scraper's currency/time-zone links include the bare
+  // symbol/punctuation and connector words as their own separate entries
+  // (e.g. currency: "U.S. dollar", "(", "$", ")"; time zone: "UTC", "to",
+  // "−4", "−12" for a source string like "UTC−4 to UTC−12") — keep only
+  // entries that read as an actual name (currency) or offset (time zone).
+  const currencyText = ((wiki.currency || []) as { name?: { en?: string } }[])
+    .map((c) => c.name?.en)
+    .filter((n): n is string => !!n && /[A-Za-z]{2,}/.test(n))
+    .join(', ');
+  const currency = { en: currencyText || 'N/A' };
+
+  const timeZoneOffsets = ((wiki.timeZone || []) as { name?: { en?: string } }[])
+    .map((t) => t.name?.en)
+    .filter((n): n is string => !!n && /\d/.test(n));
+  const timeZone = { en: timeZoneOffsets.length ? `UTC ${timeZoneOffsets.join(', ')}` : 'N/A' };
+
+  const callingCode = { en: ((wiki.callingCode || []) as string[]).join(', ') || 'N/A' };
+
+  const officialLanguage = {
+    en: ((wiki.officialLanguage || []) as { name?: { en?: string } }[]).map((l) => l.name?.en).filter(Boolean).join(', ') || 'N/A',
+  };
+
+  const demonym = { en: wiki.demonym?.[0]?.name?.en || 'N/A' };
+
+  const area = wiki.areaKm2 || 0;
+  const population = wiki.population || 0;
+
+  return {
+    isoCode: iso2,
+    // wiki-geo-data has no cca3/land-border relation data.
+    cca3: '',
+    borders: [],
+    name,
+    capital,
+    // wiki-geo-data has no capital-city coordinates; GameMap already falls
+    // back to the region polygon's centroid when this is null.
+    capitalCoordinates: null,
+    flagUrl: wiki.flagUrl || (iso2 ? `https://flagcdn.com/${iso2.toLowerCase()}.svg` : ''),
+    areaKm2: area,
+    population,
+    officialLanguage,
+    demonym,
+    currency,
+    timeZone,
+    callingCode,
+    internetTld: wiki.internetTld || [],
+    densityKm2: area > 0 ? population / area : 0,
+    gdp: wiki.gdp || null,
+    hdi: wiki.hdi || null,
+    description: wiki.description || { en: 'No description available.' },
+    government: wiki.government || [],
+    largestCity: wiki.largestCity || [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
+}
+
 const getCountriesData = unstable_cache(
   async (): Promise<Country[]> => {
     try {
-      // 1. Fetch from Wiki-Geo client dynamically
+      // wiki-geo-data's client already falls back to its own bundled dataset
+      // on network failure, so this virtually never throws.
       const wikiResponse = await client.getFullDatabase();
       const wikiCountries = wikiResponse.data || [];
-      
-      const wikiMap = wikiCountries.reduce((acc: Record<string, any>, item: any) => {
-        if (item.isoCode) acc[item.isoCode.toUpperCase()] = item;
-        return acc;
-      }, {});
-
-      // 2. Fetch fresh geographical assets from REST Countries
-      const restResponse = await fetch('https://restcountries.com/v3.1/all');
-      if (!restResponse.ok) throw new Error('REST Countries API returned error');
-      const restCountries = await restResponse.json();
-
-      // 3. Merging in memory by ISO matching
-      return restCountries.map((item: any) => {
-        const iso2 = (item.cca2 || '').toUpperCase();
-        const wiki = wikiMap[iso2] || {};
-
-        // Localized Name mapping (prioritize REST Countries translations, fallback to wiki client)
-        const name = {
-          en: item.name?.common || wiki.name?.en || '',
-          pt: item.translations?.por?.common || wiki.name?.pt || item.name?.common || '',
-          es: item.translations?.spa?.common || wiki.name?.es || item.name?.common || '',
-          fr: item.translations?.fra?.common || wiki.name?.fr || item.name?.common || '',
-          it: item.translations?.ita?.common || wiki.name?.it || item.name?.common || '',
-          de: item.translations?.deu?.common || wiki.name?.de || item.name?.common || '',
-          ja: item.translations?.jpn?.common || wiki.name?.ja || item.name?.common || '',
-          zh: item.translations?.zho?.common || wiki.name?.zh || item.name?.common || '',
-          ru: item.translations?.rus?.common || wiki.name?.ru || item.name?.common || '',
-        };
-
-        const capital = {
-          en: item.capital ? item.capital.join(', ') : (wiki.capital?.en || 'N/A'),
-          pt: item.capital ? item.capital.join(', ') : (wiki.capital?.pt || 'N/A'),
-          es: item.capital ? item.capital.join(', ') : (wiki.capital?.es || 'N/A'),
-          fr: item.capital ? item.capital.join(', ') : (wiki.capital?.fr || 'N/A'),
-          it: item.capital ? item.capital.join(', ') : (wiki.capital?.it || 'N/A'),
-          de: item.capital ? item.capital.join(', ') : (wiki.capital?.de || 'N/A'),
-          ja: item.capital ? item.capital.join(', ') : (wiki.capital?.ja || 'N/A'),
-          zh: item.capital ? item.capital.join(', ') : (wiki.capital?.zh || 'N/A'),
-          ru: item.capital ? item.capital.join(', ') : (wiki.capital?.ru || 'N/A'),
-        };
-
-        const currency = {
-          en: item.currencies 
-            ? Object.values(item.currencies).map((c: any) => `${c.name} (${c.symbol || ''})`).join(', ') 
-            : (wiki.currency?.en || 'N/A'),
-        };
-
-        const timeZone = {
-          en: item.timezones ? item.timezones.join(', ') : (wiki.timeZone?.en || 'N/A'),
-        };
-
-        const callingCode = {
-          en: item.idd && item.idd.root 
-            ? `${item.idd.root}${item.idd.suffixes ? item.idd.suffixes[0] || '' : ''}` 
-            : (wiki.callingCode?.en || 'N/A'),
-        };
-
-        const officialLanguage = {
-          en: item.languages ? Object.values(item.languages).join(', ') : (wiki.officialLanguage?.en || 'N/A'),
-        };
-
-        const demonym = {
-          en: item.demonyms?.eng ? item.demonyms.eng.m || item.demonyms.eng.f : (wiki.demonym?.en || 'N/A'),
-        };
-
-        // Standardize coordinates for map projections [longitude, latitude]
-        const capitalCoordinates = item.capitalInfo?.latlng && item.capitalInfo.latlng.length === 2
-          ? [item.capitalInfo.latlng[1], item.capitalInfo.latlng[0]] // Swap [lat, lng] to [lng, lat]
-          : (wiki.capitalCoordinates || null);
-
-        const area = item.area || wiki.areaKm2 || 0;
-        const population = item.population || wiki.population || 0;
-
-        return {
-          isoCode: iso2,
-          cca3: (item.cca3 || '').toUpperCase(), // Preserved for direct border relationship queries
-          borders: item.borders || [],
-          name,
-          capital,
-          flagUrl: item.flags?.svg || item.flags?.png || wiki.flagUrl || '',
-          areaKm2: area,
-          population: population,
-          officialLanguage,
-          demonym,
-          currency,
-          timeZone,
-          callingCode,
-          capitalCoordinates,
-          densityKm2: area > 0 ? population / area : 0,
-          
-          // WikiGeoScraper properties loaded dynamically
-          gdp: wiki.gdp || null,
-          hdi: wiki.hdi || null,
-          description: wiki.description || { en: 'No description available.' },
-          government: wiki.government || { en: 'N/A' },
-          largestCity: wiki.largestCity || { en: 'N/A' },
-        };
-      });
+      return wikiCountries.map((wiki) => buildCountry(wiki));
     } catch (error) {
-      console.error('Error fetching hybrid country API metrics, using fallback file:', error);
+      console.error('Error fetching country data, using bundled fallback file:', error);
       const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');
       try {
         const data = await fs.readFile(fallbackPath, 'utf-8');
         const json = JSON.parse(data);
-        return json.data || json;
+        const fallbackCountries = json.data || json;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return fallbackCountries.map((wiki: any) => buildCountry(wiki));
       } catch (err) {
         console.error('Failed to read fallback countries file:', err);
         return [];
       }
     }
   },
-  ['countries-data-rest-wiki'],
+  ['countries-data-wiki-only'],
   { revalidate: 3600 }
 );
 
@@ -140,34 +149,17 @@ export const countryService = {
 
   getNeighbors: async (countryName: string, locale: string = 'en'): Promise<Country[]> => {
     const countries = await getCountriesData();
-    
+
     // Find our focus country
-    const country = countries.find(c => 
-      c.name[locale as keyof Country['name']] === countryName || 
+    const country = countries.find(c =>
+      c.name[locale as keyof Country['name']] === countryName ||
       c.name.en === countryName
     );
     if (!country) return [];
 
-    // Map CCA3 codes in memory for rapid lookup
-    const cca3ToCca2Map = countries.reduce((acc, c) => {
-      if ((c as any).cca3 && c.isoCode) {
-        acc[(c as any).cca3.toUpperCase()] = c.isoCode.toUpperCase();
-      }
-      return acc;
-    }, {} as Record<string, string>);
-
-    // If borders array is empty, fallback safely to descriptive matching
-    const borders = (country as any).borders || [];
-    if (borders.length > 0) {
-      return borders
-        .map((borderCode: string) => {
-          const matchedIso = cca3ToCca2Map[borderCode.toUpperCase()];
-          return countries.find(c => c.isoCode === matchedIso);
-        })
-        .filter(Boolean) as Country[];
-    }
-
-    // Secondary fallback matching (string checking description)
+    // wiki-geo-data has no land-border relation data, so this is matched by
+    // checking which other countries' names appear in this one's own
+    // description text (e.g. "...bordered by France to the north...").
     const description = (country.description[locale as keyof Country['description']] || country.description.en || '').toLowerCase();
     return countries.filter(c => {
       const name = ((c.name && (c.name[locale as keyof Country['name']] || c.name.en)) || '').toLowerCase();
