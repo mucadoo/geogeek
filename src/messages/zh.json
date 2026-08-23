@@ -56,8 +56,8 @@
   },
   "Rankings": {
     "title": "世界统计", "searchPlaceholder": "搜索国家...",
-    "table": { "rank": "排名", "country": "国家", "value": "数值", "population": "人口", "area": "面积 (km²)", "density": "人口密度 (/km²)", "hdi": "HDI 分数", "gdp": "GDP", "na": "N/A" },
-    "categories": { "population": "世界人口", "area": "按面积划分的最大国家", "density": "人口密度", "hdi": "人类发展指数 (HDI)", "gdp": "GDP" }
+    "table": { "rank": "排名", "country": "国家", "value": "数值", "population": "人口", "area": "面积 (km²)", "density": "人口密度 (/km²)", "hdi": "HDI 分数", "gdp": "GDP", "gdpPerCapita": "人均GDP", "lifeExpectancy": "预期寿命（岁）", "internetUsage": "互联网普及率（%）", "unemployment": "失业率（%）", "na": "N/A" },
+    "categories": { "population": "世界人口", "area": "按面积划分的最大国家", "density": "人口密度", "hdi": "人类发展指数 (HDI)", "gdp": "GDP", "gdp-per-capita": "人均GDP", "life-expectancy": "预期寿命", "internet-usage": "互联网普及率", "unemployment-rate": "失业率" }
   },
   "CountryDetails": {
     "summary": "摘要",
@@ -83,11 +83,22 @@
       "area": "面积",
       "population": "人口",
       "gdp": "GDP",
+      "gdpPerCapita": "人均GDP",
       "hdi": "HDI",
+      "lifeExpectancy": "预期寿命",
+      "internetUsage": "互联网普及率",
+      "unemploymentRate": "失业率",
       "currency": "货币",
       "timeZone": "时区",
       "callingCode": "区号",
-      "isoCode": "ISO 代码"
+      "isoCode": "ISO 代码",
+      "continent": "大洲",
+      "drivingSide": "行车方向",
+      "drivingSideLeft": "靠左行驶",
+      "drivingSideRight": "靠右行驶",
+      "motto": "格言",
+      "anthem": "国歌",
+      "leaders": "领导人"
     }
   },
   "Quiz": {

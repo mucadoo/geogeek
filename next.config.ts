@@ -11,7 +11,14 @@ const pwaConfig = withPWA({
 });
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'flagcdn.com' },
+      { protocol: 'https', hostname: 'en.wikipedia.org' },
+    ],
+  },
+};
 
 // @ts-expect-error next-pwa's type defs don't line up with the current NextConfig type
 export default withNextIntl(pwaConfig(nextConfig));

@@ -18,7 +18,7 @@ export const getLocalizedCountryName = (isoCode: string, locale: string, countri
   }
 };
 
-export const getLocalizedValue = (value: LocalizedString | LinkedValue[] | string | string[] | null | undefined, locale: string): string => {
+export const getLocalizedValue = (value: Partial<LocalizedString> | LinkedValue[] | string | string[] | null | undefined, locale: string): string => {
   if (!value) return 'N/A';
   if (typeof value === 'string') return value;
   if (Array.isArray(value)) {

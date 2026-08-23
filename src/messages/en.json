@@ -164,13 +164,21 @@
       "area": "Area (km²)",
       "density": "Pop Density (/km²)",
       "hdi": "HDI Score", "gdp": "GDP",
+      "gdpPerCapita": "GDP per Capita",
+      "lifeExpectancy": "Life Expectancy (yrs)",
+      "internetUsage": "Internet Usage (%)",
+      "unemployment": "Unemployment Rate (%)",
       "na": "N/A"
     },
     "categories": {
       "population": "World Population",
       "area": "Largest Countries by Area",
       "density": "Population Density",
-      "hdi": "Human Development Index (HDI)", "gdp": "GDP"
+      "hdi": "Human Development Index (HDI)", "gdp": "GDP",
+      "gdp-per-capita": "GDP per Capita",
+      "life-expectancy": "Life Expectancy",
+      "internet-usage": "Internet Usage",
+      "unemployment-rate": "Unemployment Rate"
     }
   },
   "CountryDetails": {
@@ -197,11 +205,22 @@
       "area": "Area",
       "population": "Population",
       "gdp": "GDP",
+      "gdpPerCapita": "GDP per Capita",
       "hdi": "HDI",
+      "lifeExpectancy": "Life Expectancy",
+      "internetUsage": "Internet Usage",
+      "unemploymentRate": "Unemployment Rate",
       "currency": "Currency",
       "timeZone": "Time Zone",
       "callingCode": "Calling code",
-      "isoCode": "ISO Code"
+      "isoCode": "ISO Code",
+      "continent": "Continent",
+      "drivingSide": "Driving Side",
+      "drivingSideLeft": "Left",
+      "drivingSideRight": "Right",
+      "motto": "Motto",
+      "anthem": "Anthem",
+      "leaders": "Leaders"
     }
   },
   "Quiz": {

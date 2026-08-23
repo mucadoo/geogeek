@@ -113,8 +113,10 @@ export default function RankingDetailClient({
     const percentage = (maxValue > 0 && !isNaN(val)) ? (val / maxValue) * 100 : 0;
     
     let displayValue = val.toLocaleString(locale);
-    if (slug === 'gdp') displayValue = '$' + formatLargeNumber(val, locale); // Use formatLargeNumber for GDP
+    if (slug === 'gdp' || slug === 'gdp-per-capita') displayValue = '$' + formatLargeNumber(val, locale);
     if (slug === 'hdi') displayValue = val.toFixed(3);
+    if (slug === 'life-expectancy') displayValue = val.toFixed(1);
+    if (slug === 'internet-usage' || slug === 'unemployment-rate') displayValue = val.toFixed(1) + '%';
 
     return (
       <div className="flex flex-col items-end gap-1.5">

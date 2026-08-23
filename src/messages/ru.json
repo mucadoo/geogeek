@@ -56,8 +56,8 @@
   },
   "Rankings": {
     "title": "Мировая статистика", "searchPlaceholder": "Поиск страны...",
-    "table": { "rank": "Ранг", "country": "Страна", "value": "Значение", "population": "Население", "area": "Площадь (км²)", "density": "Плотность (/км²)", "hdi": "Индекс HDI", "gdp": "ВВП", "na": "Н/Д" },
-    "categories": { "population": "Население мира", "area": "Крупнейшие страны", "density": "Плотность населения", "hdi": "Индекс человеческого развития (HDI)", "gdp": "ВВП" }
+    "table": { "rank": "Ранг", "country": "Страна", "value": "Значение", "population": "Население", "area": "Площадь (км²)", "density": "Плотность (/км²)", "hdi": "Индекс HDI", "gdp": "ВВП", "gdpPerCapita": "ВВП на душу населения", "lifeExpectancy": "Продолжительность жизни (лет)", "internetUsage": "Использование интернета (%)", "unemployment": "Уровень безработицы (%)", "na": "Н/Д" },
+    "categories": { "population": "Население мира", "area": "Крупнейшие страны", "density": "Плотность населения", "hdi": "Индекс человеческого развития (HDI)", "gdp": "ВВП", "gdp-per-capita": "ВВП на душу населения", "life-expectancy": "Продолжительность жизни", "internet-usage": "Использование интернета", "unemployment-rate": "Уровень безработицы" }
   },
   "CountryDetails": {
     "summary": "Резюме",
@@ -83,11 +83,22 @@
       "area": "Площадь",
       "population": "Население",
       "gdp": "ВВП",
+      "gdpPerCapita": "ВВП на душу населения",
       "hdi": "HDI",
+      "lifeExpectancy": "Продолжительность жизни",
+      "internetUsage": "Использование интернета",
+      "unemploymentRate": "Уровень безработицы",
       "currency": "Валюта",
       "timeZone": "Часовой пояс",
       "callingCode": "Телефонный код",
-      "isoCode": "ISO-код"
+      "isoCode": "ISO-код",
+      "continent": "Континент",
+      "drivingSide": "Сторона движения",
+      "drivingSideLeft": "Левостороннее",
+      "drivingSideRight": "Правостороннее",
+      "motto": "Девиз",
+      "anthem": "Гимн",
+      "leaders": "Руководители"
     }
   },
   "Quiz": {

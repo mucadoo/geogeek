@@ -56,8 +56,8 @@
   },
   "Rankings": {
     "title": "Weltstatistiken", "searchPlaceholder": "Land suchen...",
-    "table": { "rank": "Rang", "country": "Land", "value": "Wert", "population": "Bevölkerung", "area": "Fläche (km²)", "density": "Bevölkerungsdichte (/km²)", "hdi": "HDI-Index", "gdp": "BIP", "na": "N/A" },
-    "categories": { "population": "Weltbevölkerung", "area": "Größte Länder nach Fläche", "density": "Bevölkerungsdichte", "hdi": "Human Development Index (HDI)", "gdp": "BIP" }
+    "table": { "rank": "Rang", "country": "Land", "value": "Wert", "population": "Bevölkerung", "area": "Fläche (km²)", "density": "Bevölkerungsdichte (/km²)", "hdi": "HDI-Index", "gdp": "BIP", "gdpPerCapita": "BIP pro Kopf", "lifeExpectancy": "Lebenserwartung (Jahre)", "internetUsage": "Internetnutzung (%)", "unemployment": "Arbeitslosenquote (%)", "na": "N/A" },
+    "categories": { "population": "Weltbevölkerung", "area": "Größte Länder nach Fläche", "density": "Bevölkerungsdichte", "hdi": "Human Development Index (HDI)", "gdp": "BIP", "gdp-per-capita": "BIP pro Kopf", "life-expectancy": "Lebenserwartung", "internet-usage": "Internetnutzung", "unemployment-rate": "Arbeitslosenquote" }
   },
   "CountryDetails": {
     "summary": "Zusammenfassung",
@@ -83,11 +83,22 @@
       "area": "Fläche",
       "population": "Bevölkerung",
       "gdp": "BIP",
+      "gdpPerCapita": "BIP pro Kopf",
       "hdi": "HDI",
+      "lifeExpectancy": "Lebenserwartung",
+      "internetUsage": "Internetnutzung",
+      "unemploymentRate": "Arbeitslosenquote",
       "currency": "Währung",
       "timeZone": "Zeitzone",
       "callingCode": "Vorwahl",
-      "isoCode": "ISO-Code"
+      "isoCode": "ISO-Code",
+      "continent": "Kontinent",
+      "drivingSide": "Fahrseite",
+      "drivingSideLeft": "Links",
+      "drivingSideRight": "Rechts",
+      "motto": "Motto",
+      "anthem": "Hymne",
+      "leaders": "Staatsoberhäupter"
     }
   },
   "Quiz": {

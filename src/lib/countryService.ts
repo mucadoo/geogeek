@@ -89,6 +89,8 @@ function buildCountry(wiki: any): Country {
   return {
     isoCode: iso2,
     cca3: wiki.isoCode3 || '',
+    continent: wiki.continent || null,
+    isoNumeric: wiki.isoNumeric || null,
     borders: wiki.borders || [],
     name,
     capital,
@@ -97,6 +99,7 @@ function buildCountry(wiki: any): Country {
     flagUrl: wiki.flagUrl || (iso2 ? `https://flagcdn.com/${iso2.toLowerCase()}.svg` : ''),
     areaKm2: area,
     population,
+    populationYear: wiki.populationYear ?? null,
     officialLanguage,
     demonym,
     currency,
@@ -105,12 +108,22 @@ function buildCountry(wiki: any): Country {
     internetTld: wiki.internetTld || [],
     densityKm2: area > 0 ? population / area : 0,
     gdp: wiki.gdp || null,
+    gdpPerCapita: wiki.gdpPerCapita ?? null,
+    gdpPpp: wiki.gdpPpp ?? null,
+    gdpPerCapitaPpp: wiki.gdpPerCapitaPpp ?? null,
+    gdpYear: wiki.gdpYear ?? null,
     hdi: wiki.hdi || null,
+    lifeExpectancy: wiki.lifeExpectancy ?? null,
+    internetUsagePercent: wiki.internetUsagePercent ?? null,
+    unemploymentRate: wiki.unemploymentRate ?? null,
+    drivingSide: wiki.drivingSide || null,
+    motto: wiki.motto || null,
+    anthem: wiki.anthem || null,
     description: wiki.description || { en: 'No description available.' },
     government: wiki.government || [],
+    governmentLeaders: wiki.governmentLeaders || [],
     largestCity: wiki.largestCity || [],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+  };
 }
 
 // First npm version of @mucadoo/wiki-geo-data expected to ship the enriched
@@ -196,8 +209,7 @@ export const countryService = {
     if (!country) return [];
 
     const borderIsoCodes = new Set(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((country as any).borders || []).map((b: { isoCode?: string | null }) => b.isoCode?.toUpperCase()).filter(Boolean)
+      (country.borders || []).map((b) => b.isoCode?.toUpperCase()).filter(Boolean)
     );
     if (borderIsoCodes.size > 0) {
       return countries.filter(c => c.isoCode && borderIsoCodes.has(c.isoCode.toUpperCase()));
@@ -222,8 +234,12 @@ export const countryService = {
       'Population': 'population',
       'Area': 'areaKm2',
       'Density': 'densityKm2',
-      'HDI': 'hdi' as any,
-      'GDP': 'gdp' as any
+      'HDI': 'hdi',
+      'GDP': 'gdp',
+      'GDPPerCapita': 'gdpPerCapita',
+      'LifeExpectancy': 'lifeExpectancy',
+      'InternetUsage': 'internetUsagePercent',
+      'UnemploymentRate': 'unemploymentRate',
     };
 
     const prop = propMap[type] || 'population';

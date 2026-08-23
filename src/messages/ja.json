@@ -56,8 +56,8 @@
   },
   "Rankings": {
     "title": "世界の統計", "searchPlaceholder": "国名で検索...",
-    "table": { "rank": "順位", "country": "国", "value": "数値", "population": "人口", "area": "面積 (km²)", "density": "人口密度 (/km²)", "hdi": "HDIスコア", "gdp": "GDP", "na": "該当なし" },
-    "categories": { "population": "人口順", "area": "面積順", "density": "人口密度順", "hdi": "人間開発指数 (HDI)", "gdp": "GDP" }
+    "table": { "rank": "順位", "country": "国", "value": "数値", "population": "人口", "area": "面積 (km²)", "density": "人口密度 (/km²)", "hdi": "HDIスコア", "gdp": "GDP", "gdpPerCapita": "一人当たりGDP", "lifeExpectancy": "平均寿命（年）", "internetUsage": "インターネット普及率（％）", "unemployment": "失業率（％）", "na": "該当なし" },
+    "categories": { "population": "人口順", "area": "面積順", "density": "人口密度順", "hdi": "人間開発指数 (HDI)", "gdp": "GDP", "gdp-per-capita": "一人当たりGDP", "life-expectancy": "平均寿命", "internet-usage": "インターネット普及率", "unemployment-rate": "失業率" }
   },
   "CountryDetails": {
     "summary": "概要",
@@ -83,11 +83,22 @@
       "area": "面積",
       "population": "人口",
       "gdp": "GDP",
+      "gdpPerCapita": "一人当たりGDP",
       "hdi": "HDI",
+      "lifeExpectancy": "平均寿命",
+      "internetUsage": "インターネット普及率",
+      "unemploymentRate": "失業率",
       "currency": "通貨",
       "timeZone": "タイムゾーン",
       "callingCode": "国番号",
-      "isoCode": "ISOコード"
+      "isoCode": "ISOコード",
+      "continent": "大陸",
+      "drivingSide": "通行区分",
+      "drivingSideLeft": "左側通行",
+      "drivingSideRight": "右側通行",
+      "motto": "国是・標語",
+      "anthem": "国歌",
+      "leaders": "指導者"
     }
   },
   "Quiz": {

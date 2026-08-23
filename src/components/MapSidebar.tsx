@@ -160,16 +160,26 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
                 {[
                   { label: t('labels.capital'), value: getLocalizedValue(data.capital, locale) },
                   { label: t('labels.largestCity'), value: getLocalizedValue(data.largestCity, locale) },
+                  { label: t('labels.continent'), value: data.continent || 'N/A' },
                   { label: t('labels.languages'), value: getLocalizedValue(data.officialLanguage, locale) },
                   { label: t('labels.demonym'), value: getLocalizedValue(data.demonym, locale) },
                   { label: t('labels.government'), value: getLocalizedValue(data.government, locale) },
                   { label: t('labels.area'), value: data.areaKm2 ? data.areaKm2.toLocaleString(locale) + ' km²' : 'N/A' },
                   { label: t('labels.population'), value: data.population ? data.population.toLocaleString(locale) : 'N/A' },
                   { label: t('labels.gdp'), value: data.gdp ? '$' + formatLargeNumber(data.gdp, locale) : 'N/A' },
+                  { label: t('labels.gdpPerCapita'), value: data.gdpPerCapita ? '$' + formatLargeNumber(data.gdpPerCapita, locale) : 'N/A' },
                   { label: t('labels.hdi'), value: data.hdi ? data.hdi.toFixed(3) : 'N/A' },
+                  { label: t('labels.lifeExpectancy'), value: data.lifeExpectancy ? `${data.lifeExpectancy.toFixed(1)}` : 'N/A' },
+                  { label: t('labels.internetUsage'), value: data.internetUsagePercent != null ? `${data.internetUsagePercent.toFixed(1)}%` : 'N/A' },
+                  { label: t('labels.unemploymentRate'), value: data.unemploymentRate != null ? `${data.unemploymentRate.toFixed(1)}%` : 'N/A' },
                   { label: t('labels.currency'), value: getLocalizedValue(data.currency, locale) },
                   { label: t('labels.timeZone'), value: getLocalizedValue(data.timeZone, locale) },
                   { label: t('labels.callingCode'), value: getLocalizedValue(data.callingCode, locale) },
+                  { label: t('labels.drivingSide'), value: data.drivingSide === 'left' ? t('labels.drivingSideLeft') : data.drivingSide === 'right' ? t('labels.drivingSideRight') : 'N/A' },
+                  { label: t('labels.motto'), value: data.motto || 'N/A' },
+                  // `anthem` is omitted here: the scraper currently leaves unstripped
+                  // wikitext artifacts (File: refs, HTML comments, alt=) in ~80% of
+                  // values - not worth surfacing until that's fixed upstream.
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-slate-100 dark:border-slate-800/50 pb-2 last:border-0">
                     <span className="font-bebas text-slate-400 text-xs tracking-wider uppercase">{row.label}</span>
@@ -178,6 +188,21 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
                 ))}
               </div>
             </div>
+
+            {/* GOVERNMENT LEADERS SECTION */}
+            {data.governmentLeaders && data.governmentLeaders.length > 0 && (
+              <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
+                <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80">{t('labels.leaders')}</h3>
+                <div className="space-y-3">
+                  {data.governmentLeaders.map((leader, i) => (
+                    <div key={i} className="flex justify-between border-b border-slate-100 dark:border-slate-800/50 pb-2 last:border-0">
+                      <span className="font-bebas text-slate-400 text-xs tracking-wider uppercase">{leader.title}</span>
+                      <span className="font-mono text-[11px] text-right font-medium">{leader.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* NEIGHBORING COUNTRIES SECTION */}
             <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">

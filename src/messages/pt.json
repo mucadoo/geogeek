@@ -165,13 +165,21 @@
       "density": "Densidade Pop (/km²)",
       "hdi": "IDH",
       "gdp": "PIB",
+      "gdpPerCapita": "PIB per capita",
+      "lifeExpectancy": "Expectativa de vida (anos)",
+      "internetUsage": "Uso de Internet (%)",
+      "unemployment": "Taxa de desemprego (%)",
       "na": "N/D"
     },
     "categories": {
       "population": "População Mundial",
       "area": "Maiores Países por Área",
       "density": "Densidade Populacional",
-      "hdi": "Índice de Desenvolvimento Humano (IDH)", "gdp": "PIB"
+      "hdi": "Índice de Desenvolvimento Humano (IDH)", "gdp": "PIB",
+      "gdp-per-capita": "PIB per capita",
+      "life-expectancy": "Expectativa de vida",
+      "internet-usage": "Uso de Internet",
+      "unemployment-rate": "Taxa de desemprego"
     }
   },
   "CountryDetails": {
@@ -198,11 +206,22 @@
       "area": "Área",
       "population": "População",
       "gdp": "PIB",
+      "gdpPerCapita": "PIB per capita",
       "hdi": "IDH",
+      "lifeExpectancy": "Expectativa de vida",
+      "internetUsage": "Uso de Internet",
+      "unemploymentRate": "Taxa de desemprego",
       "currency": "Moeda",
       "timeZone": "Fuso Horário",
       "callingCode": "Código de discagem",
-      "isoCode": "Código ISO"
+      "isoCode": "Código ISO",
+      "continent": "Continente",
+      "drivingSide": "Lado de direção",
+      "drivingSideLeft": "Esquerda",
+      "drivingSideRight": "Direita",
+      "motto": "Lema",
+      "anthem": "Hino",
+      "leaders": "Líderes"
     }
   },
   "Quiz": {
