@@ -31,6 +31,10 @@ interface BaseGameClientProps {
   projectionConfig: ProjectionConfig;
   showOnlyValid?: boolean;
   gameMode?: 'name' | 'capital' | 'flag' | 'reverse';
+  /** Narrows the configKey's full name list down to a subset (e.g. Daily
+   *  Challenge's deterministic "today's 15 countries" pick). */
+  selectNames?: (names: string[]) => string[];
+  shareResults?: boolean;
 }
 
 export default function BaseGameClient({
@@ -42,6 +46,8 @@ export default function BaseGameClient({
   projectionConfig,
   showOnlyValid,
   gameMode: gameModeProp,
+  selectNames,
+  shareResults,
 }: BaseGameClientProps) {
   const { data: mapData, status: mapStatus } = useMapData();
   const { data: config, status: configStatus } = useGameConfig();
@@ -50,34 +56,36 @@ export default function BaseGameClient({
 
   const projection = useGameProjection(mapData, projectionConfig);
 
-  const localizedValidNames = useMemo(() => {
+  const baseNames: string[] = useMemo(() => {
     if (!config || !config[configKey]) return [];
-    const regionNames = config[configKey];
-    const names = [...regionNames];
-    regionNames.forEach((name: string) => {
+    const regionNames: string[] = config[configKey];
+    return selectNames ? selectNames(regionNames) : regionNames;
+  }, [config, configKey, selectNames]);
+
+  const localizedValidNames = useMemo(() => {
+    const names = [...baseNames];
+    baseNames.forEach((name: string) => {
       if (tRegions.has(name)) {
         const localized = tRegions(name);
         if (localized !== name) names.push(localized);
       }
     });
     return names;
-  }, [tRegions, config, configKey]);
+  }, [tRegions, baseNames]);
 
   // Raw region/country name -> its translation in the current locale.
   // Passed down so answer-checking accepts the localized name too, not
   // just the raw English one baked into the underlying map data.
   const localizedNames = useMemo(() => {
-    if (!config || !config[configKey]) return {};
-    const regionNames: string[] = config[configKey];
     const map: Record<string, string> = {};
-    regionNames.forEach((name: string) => {
+    baseNames.forEach((name: string) => {
       if (tRegions.has(name)) {
         const localized = tRegions(name);
         if (localized !== name) map[name] = localized;
       }
     });
     return map;
-  }, [tRegions, config, configKey]);
+  }, [tRegions, baseNames]);
 
   // Dynamically resolve capitals variables for capital/reverse modes. Each
   // capital-driven gameKey maps to the config key holding its
@@ -111,6 +119,7 @@ export default function BaseGameClient({
       gameMode={gameModeProp}
       capitalMap={capitalMap}
       capitalCoordinates={capitalCoordinates}
+      shareResults={shareResults}
     />
   );
 }

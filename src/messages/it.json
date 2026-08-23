@@ -145,6 +145,10 @@
       "flag-game": {
         "title": "Bandiere del Mondo",
         "description": "Tutte le bandiere del pianeta. La sfida definitiva."
+      },
+      "daily-challenge": {
+        "title": "Sfida Giornaliera",
+        "description": "15 paesi, scelti ogni giorno. La stessa sfida per tutti — torna domani per una nuova."
       }
     }
   },

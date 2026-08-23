@@ -1,4 +1,4 @@
-import { Star, Trophy, Sparkles } from 'lucide-react';
+import { Star, Trophy, Sparkles, Flame } from 'lucide-react';
 import React from 'react';
 import { useGameStore } from '@/store/useGameStore';
 
@@ -9,7 +9,7 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
-  const { masteryPoints, currentMultiplier } = useGameStore();
+  const { masteryPoints, currentMultiplier, streak } = useGameStore();
   
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -27,13 +27,25 @@ export function GameHUD({ score, total, timeLeft }: GameHUDProps) {
           {formatTime(timeLeft)}
         </div>
         
-        {/* Real-time Mastery Points */}
-        <div className="flex items-center gap-2 bg-primary/20 border border-primary px-4 py-1.5 rounded-full -mt-2 animate-in fade-in slide-in-from-top-2">
+        {/* Real-time Mastery Points — key={masteryPoints} retriggers the
+            pop-in animation on every score change, not just on mount. */}
+        <div key={masteryPoints} className="flex items-center gap-2 bg-primary/20 border border-primary px-4 py-1.5 rounded-full -mt-2 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-300">
           <Sparkles size={14} className="text-primary animate-pulse" />
           <span className="font-game-mono text-xs font-bold text-primary tracking-tighter uppercase">
             {masteryPoints.toLocaleString()} PTS ({currentMultiplier}x)
           </span>
         </div>
+
+        {/* Streak / combo indicator — key={streak} remounts the badge on
+            every increment so the pop-in animation retriggers each time. */}
+        {streak >= 3 && (
+          <div key={streak} className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-500 px-3 py-1 rounded-full mt-2 animate-in zoom-in duration-300">
+            <Flame size={12} className="text-amber-500" />
+            <span className="font-game-mono text-[10px] font-bold text-amber-500 tracking-tighter uppercase">
+              {streak} Streak
+            </span>
+          </div>
+        )}
       </div>
       
       {/* Progress Bar */}

@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Sparkles, Settings2, Timer, EyeOff, Hash, Map as MapIcon } from 'lucide-react';
+import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Sparkles, Settings2, Timer, EyeOff, Hash, Map as MapIcon, Copy, Volume2, VolumeX, Flame } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
@@ -18,6 +18,7 @@ import { POINTS_MULTIPLIERS, PRESETS, AdvancedSettings, Difficulty } from '@/con
 import { Link } from '@/i18n/routing';
 import getFeedback from '@/lib/getFeedback';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
+import { playCorrect, playFinish, playStreak, playWrong } from '@/lib/sounds';
 import { useGameStore, StateFeature, GameMode, GameType } from '@/store/useGameStore';
 import { useUserStore } from '@/store/useUserStore';
 import { Country } from '@/types';
@@ -43,23 +44,25 @@ interface QuizLayoutProps {
   /** Raw region/country name -> its translation in the current locale, so
    *  answer-checking accepts the localized name too. */
   localizedNames?: Record<string, string>;
+  /** Daily Challenge etc: adds a "Copy Results" share button to the finish screen. */
+  shareResults?: boolean;
 }
 
 export default function QuizLayout({
   gameKey, title, description, mapData, mapStatus, projection, validNames, gameMode = 'name', capitalMap = {},
-  showOnlyValid = false, capitalCoordinates = {}, localizedNames = {}
+  showOnlyValid = false, capitalCoordinates = {}, localizedNames = {}, shareResults = false
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
   const tRegions = useTranslations('RegionNames');
   const locale = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { 
-    status: gameStatus, startGame, resetGame, currentState, score, 
+  const {
+    status: gameStatus, startGame, resetGame, currentState, score,
     totalToGuess, timeLeft, tick, isNewHighScore,
     userInput, setUserInput, submitGuess, skipState, lastGuessCorrect,
     correctlyGuessedIds, missedStates, options,
-    autoZoom, setAutoZoom,
+    autoZoom, setAutoZoom, soundEnabled, setSoundEnabled, streak,
     pauseGame, resumeGame, quitGame, savedGames, currentGameKey
   } = useGameStore();
   
@@ -80,6 +83,20 @@ export default function QuizLayout({
   const [isScoreRegistered, setIsScoreRegistered] = useState(false);
   const [isSubmittingScore, setIsSubmittingScore] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [resultsCopied, setResultsCopied] = useState(false);
+
+  const handleCopyResults = async () => {
+    const points = useGameStore.getState().masteryPoints;
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const text = `GeoGeek — ${title}\n${score}/${totalToGuess} correct · ${points.toLocaleString()} pts\n${url}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setResultsCopied(true);
+      setTimeout(() => setResultsCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable (e.g. insecure context) — silently no-op */
+    }
+  };
 
   const { currentUser, submitScore } = useUserStore();
 
@@ -201,9 +218,27 @@ export default function QuizLayout({
 
   useEffect(() => {
     if (lastGuessCorrect === false && inputRef.current && !adv.isMultipleChoice) {
-      inputRef.current.select(); 
+      inputRef.current.select();
     }
   }, [lastGuessCorrect, adv.isMultipleChoice]);
+
+  useEffect(() => {
+    if (!soundEnabled) return;
+    if (lastGuessCorrect === true) {
+      if (streak > 0 && streak % 5 === 0) playStreak();
+      else playCorrect();
+    } else if (lastGuessCorrect === false) {
+      playWrong();
+    }
+    // Only the guess result itself should trigger a sound, not every time
+    // streak/soundEnabled happen to change for other reasons.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastGuessCorrect]);
+
+  useEffect(() => {
+    if (soundEnabled && gameStatus === 'finished') playFinish();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStatus]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -289,7 +324,17 @@ export default function QuizLayout({
           <GameHUD score={score} total={totalToGuess} timeLeft={timeLeft} />
 
           <div className="absolute top-6 right-10 z-20 flex gap-2 pointer-events-auto">
-            <button 
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={cn(
+                "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
+                soundEnabled ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
+              )}
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+            </button>
+            <button
               onClick={() => setAutoZoom(!autoZoom)}
               className={cn(
                 "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
@@ -577,6 +622,14 @@ export default function QuizLayout({
                    </div>
 
                    <div className="flex-shrink-0 mt-8">
+                     {shareResults && (
+                       <button
+                         onClick={handleCopyResults}
+                         className="mb-4 w-full flex items-center justify-center gap-2 bg-[var(--input-bg)] border border-[var(--card-border)] py-3 rounded-2xl font-game-heading uppercase tracking-widest text-sm text-[var(--foreground)] hover:border-primary hover:text-primary transition-all"
+                       >
+                         {resultsCopied ? <><CheckCircle2 size={16} /> Copied!</> : <><Copy size={16} /> Copy Results</>}
+                       </button>
+                     )}
                      <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl text-white uppercase tracking-widest font-game-heading text-xl mb-4">{t('playAgain')}</button>
                      <button onClick={resetGame} className="text-slate-500 font-game-heading uppercase tracking-widest">{t('menu')}</button>
                    </div>

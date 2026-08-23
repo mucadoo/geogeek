@@ -145,6 +145,10 @@
       "flag-game": {
         "title": "World Flags",
         "description": "Every flag on the planet. The ultimate flag challenge."
+      },
+      "daily-challenge": {
+        "title": "Daily Challenge",
+        "description": "15 countries, picked fresh every day. Same puzzle for everyone — come back tomorrow for a new one."
       }
     }
   },

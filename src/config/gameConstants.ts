@@ -1,6 +1,10 @@
 export const TIME_PER_STATE_SECONDS = 20;
 
-export type Difficulty = 'very-easy' | 'easy' | 'medium' | 'hard' | 'blazing' | 'custom';
+// Blitz is a fixed-time sprint (see useGameStore's startGame/tick) rather
+// than the per-item budget standard/survival modes use.
+export const BLITZ_DURATION_SECONDS = 60;
+
+export type Difficulty = 'very-easy' | 'easy' | 'medium' | 'hard' | 'blazing' | 'blitz' | 'custom';
 
 export const POINTS_MULTIPLIERS = {
   input: {
@@ -10,6 +14,7 @@ export const POINTS_MULTIPLIERS = {
   mode: {
     standard: 1,
     survival: 1.3,
+    blitz: 1.5,
   },
   settings: {
     strictMatching: 1.2,
@@ -20,7 +25,7 @@ export const POINTS_MULTIPLIERS = {
 
 export interface AdvancedSettings {
   isMultipleChoice: boolean;
-  gameType: 'standard' | 'survival';
+  gameType: 'standard' | 'survival' | 'blitz';
   strictMatching: boolean;
   noMapHints: boolean;
   hideBorders: boolean;
@@ -67,6 +72,14 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: true,
     hideBorders: true,
     timePerGuess: 5,
+  },
+  blitz: {
+    isMultipleChoice: false,
+    gameType: 'blitz',
+    strictMatching: false,
+    noMapHints: false,
+    hideBorders: false,
+    timePerGuess: 10,
   },
 };
 

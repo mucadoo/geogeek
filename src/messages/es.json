@@ -145,6 +145,10 @@
       "flag-game": {
         "title": "Banderas del Mundo",
         "description": "Todas las banderas del planeta. El desafío definitivo."
+      },
+      "daily-challenge": {
+        "title": "Desafío Diario",
+        "description": "15 países, elegidos cada día. El mismo reto para todos — vuelve mañana por uno nuevo."
       }
     }
   },

@@ -145,6 +145,10 @@
       "flag-game": {
         "title": "Drapeaux du Monde",
         "description": "Tous les drapeaux de la planète. Le défi ultime."
+      },
+      "daily-challenge": {
+        "title": "Défi du Jour",
+        "description": "15 pays, choisis chaque jour. Le même défi pour tout le monde — revenez demain pour un nouveau."
       }
     }
   },

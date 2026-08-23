@@ -1,11 +1,12 @@
 'use client';
 
-import { Play, Search, Star, Sparkles, Trophy, RotateCcw } from 'lucide-react';
+import { Play, Search, Star, Sparkles, Trophy, RotateCcw, Calendar, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useState, useMemo } from 'react';
 
 import { games, mechanics, GameListEntry } from '@/config/gamesList';
 import { Link } from '@/i18n/routing';
+import { todayUTC } from '@/lib/dailySeed';
 import { useGameStore } from '@/store/useGameStore';
 
 function GameCard({ game, highScore, t, compact }: {
@@ -94,6 +95,25 @@ export default function GamesClient() {
           {t('description')}
         </p>
       </header>
+
+      <Link
+        href={'/games/daily-challenge' as any}
+        className="group mx-auto mb-14 flex w-full max-w-4xl flex-col items-center gap-4 rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/15 via-[var(--card-bg)] to-accent/10 p-8 text-center shadow-xl transition-all hover:border-primary hover:shadow-2xl sm:flex-row sm:text-left"
+      >
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-white shadow-lg">
+          <Calendar size={28} />
+        </div>
+        <div className="flex-grow">
+          <div className="mb-1 font-game-mono text-[10px] uppercase tracking-widest text-primary font-bold">
+            {new Date(todayUTC()).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+          </div>
+          <h2 className="text-2xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{t('gameData.daily-challenge.title')}</h2>
+          <p className="font-game-mono text-sm text-slate-500">{t('gameData.daily-challenge.description')}</p>
+        </div>
+        <div className="flex flex-shrink-0 items-center gap-2 rounded-xl bg-primary px-6 py-3 font-game-heading uppercase tracking-widest text-sm text-white shadow-lg group-hover:scale-105 transition-all">
+          Play <ArrowRight size={16} />
+        </div>
+      </Link>
 
       <div className="mx-auto mb-14 flex w-full max-w-xl flex-col items-center gap-6">
         <div className="relative w-full">

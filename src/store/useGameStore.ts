@@ -3,12 +3,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { ALIASES } from '@/config/aliases';
-import { POINTS_MULTIPLIERS, AdvancedSettings, Difficulty as ConfigDifficulty } from '@/config/gameConstants';
+import { BLITZ_DURATION_SECONDS, POINTS_MULTIPLIERS, AdvancedSettings, Difficulty as ConfigDifficulty } from '@/config/gameConstants';
 
 export type GameStatus = 'idle' | 'playing' | 'finished';
 export type Difficulty = ConfigDifficulty;
 export type GameMode = 'name' | 'capital' | 'flag' | 'reverse';
-export type GameType = 'standard' | 'survival';
+export type GameType = 'standard' | 'survival' | 'blitz';
 
 export interface StateFeature {
   id: string;
@@ -37,6 +37,7 @@ export interface SavedGame {
   missedStates: LightweightState[];
   correctlyGuessedIds: string[];
   totalToGuess: number;
+  streak: number;
 }
 
 interface GameState {
@@ -64,7 +65,10 @@ interface GameState {
   isNewHighScore: boolean;
   totalToGuess: number;
   autoZoom: boolean;
-  
+  soundEnabled: boolean;
+  /** Consecutive correct answers in the current run; resets on a wrong guess or a skip. */
+  streak: number;
+
   startGame: (
     states: StateFeature[], 
     validNames: string[], 
@@ -83,6 +87,7 @@ interface GameState {
   tick: () => void;
   setUserInput: (input: string) => void;
   setAutoZoom: (enabled: boolean) => void;
+  setSoundEnabled: (enabled: boolean) => void;
   resetGame: () => void;
 }
 
@@ -143,6 +148,7 @@ export const useGameStore = create<GameState>()(
                 missedStates: newState.missedStates,
                 correctlyGuessedIds: newState.correctlyGuessedIds,
                 totalToGuess: newState.totalToGuess,
+                streak: newState.streak,
               }
             };
           }
@@ -189,6 +195,8 @@ export const useGameStore = create<GameState>()(
         isNewHighScore: false,
         totalToGuess: 0,
         autoZoom: true,
+        soundEnabled: true,
+        streak: 0,
 
         startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}, localizedNames = {}) => {
           const filtered = states.filter(s => {
@@ -203,7 +211,7 @@ export const useGameStore = create<GameState>()(
           
           let m = 1.0;
           m *= isMultipleChoice ? POINTS_MULTIPLIERS.input.choice : POINTS_MULTIPLIERS.input.typing;
-          m *= (gameType === 'survival') ? POINTS_MULTIPLIERS.mode.survival : POINTS_MULTIPLIERS.mode.standard;
+          m *= gameType === 'survival' ? POINTS_MULTIPLIERS.mode.survival : gameType === 'blitz' ? POINTS_MULTIPLIERS.mode.blitz : POINTS_MULTIPLIERS.mode.standard;
           if (!isMultipleChoice && strictMatching) m *= POINTS_MULTIPLIERS.settings.strictMatching;
           if (noMapHints) m *= POINTS_MULTIPLIERS.settings.noMapHints;
           if (hideBorders) m *= POINTS_MULTIPLIERS.settings.hideBorders;
@@ -233,7 +241,7 @@ export const useGameStore = create<GameState>()(
             score: 0,
             masteryPoints: 0,
             currentMultiplier: totalMultiplier,
-            timeLeft: gameType === 'survival' ? SURVIVAL_START_TIME : Math.floor(filtered.length * timePerGuess),
+            timeLeft: gameType === 'survival' ? SURVIVAL_START_TIME : gameType === 'blitz' ? BLITZ_DURATION_SECONDS : Math.floor(filtered.length * timePerGuess),
             remainingStates: lightStates.slice(1),
             currentState: firstState,
             missedStates: [],
@@ -243,6 +251,7 @@ export const useGameStore = create<GameState>()(
             lastSkippedState: null,
             isNewHighScore: false,
             totalToGuess: filtered.length,
+            streak: 0,
           });
         },
 
@@ -267,6 +276,7 @@ export const useGameStore = create<GameState>()(
               missedStates: saved.missedStates,
               correctlyGuessedIds: saved.correctlyGuessedIds,
               totalToGuess: saved.totalToGuess,
+              streak: saved.streak || 0,
               userInput: '',
               lastGuessCorrect: null,
               lastSkippedState: null,
@@ -308,10 +318,11 @@ export const useGameStore = create<GameState>()(
         
         setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
         setAutoZoom: (autoZoom) => set({ autoZoom }),
+        setSoundEnabled: (soundEnabled) => set({ soundEnabled }),
 
         submitGuess: (guess) => {
           const state = get();
-          const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, localizedNames, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings } = state;
+          const { currentState, remainingStates, score, correctlyGuessedIds, gameMode, capitalMap, localizedNames, currentGameKey, highScores, timeLeft, currentMultiplier, advancedSettings, streak } = state;
           if (!currentState) return false;
 
           const regionName = currentState.properties.name;
@@ -340,8 +351,9 @@ export const useGameStore = create<GameState>()(
           if (isCorrect) {
             const newCorrectIds = [...correctlyGuessedIds, currentState.id];
             const newScore = score + 1;
-            const newPoints = Math.round(newScore * currentMultiplier * 10); 
-            
+            const newPoints = Math.round(newScore * currentMultiplier * 10);
+            const newStreak = streak + 1;
+
             const isFinished = remainingStates.length === 0;
             const newTime = advancedSettings.gameType === 'survival' ? timeLeft + SURVIVAL_BONUS : timeLeft;
 
@@ -359,7 +371,8 @@ export const useGameStore = create<GameState>()(
                 correctlyGuessedIds: newCorrectIds,
                 highScores: isHighScore ? { ...highScores, [currentGameKey]: newPoints } : highScores,
                 isNewHighScore: isHighScore,
-                timeLeft: newTime
+                timeLeft: newTime,
+                streak: newStreak,
               });
             } else {
               const nextState = remainingStates[0];
@@ -381,12 +394,13 @@ export const useGameStore = create<GameState>()(
                 lastSkippedState: null,
                 correctlyGuessedIds: newCorrectIds,
                 timeLeft: newTime,
-                options: nextOptions
+                options: nextOptions,
+                streak: newStreak,
               });
             }
             return true;
           } else {
-            updateAndSave({ lastGuessCorrect: false, lastSkippedState: null });
+            updateAndSave({ lastGuessCorrect: false, lastSkippedState: null, streak: 0 });
             return false;
           }
         },
@@ -400,7 +414,7 @@ export const useGameStore = create<GameState>()(
           const newTime = advancedSettings.gameType === 'survival' ? Math.max(0, timeLeft - SURVIVAL_PENALTY) : timeLeft;
 
           if (newTime === 0 && advancedSettings.gameType === 'survival') {
-            updateAndSave({ status: 'finished', timeLeft: 0, missedStates: newMissed });
+            updateAndSave({ status: 'finished', timeLeft: 0, missedStates: newMissed, streak: 0 });
             return;
           }
           
@@ -421,7 +435,8 @@ export const useGameStore = create<GameState>()(
             lastSkippedState: currentState,
             missedStates: newMissed,
             timeLeft: newTime,
-            options: nextOptions
+            options: nextOptions,
+            streak: 0,
           });
         },
 
@@ -449,6 +464,7 @@ export const useGameStore = create<GameState>()(
           lastSkippedState: null,
           totalToGuess: 0,
           isNewHighScore: false,
+          streak: 0,
           options: []
         }),
       };
@@ -462,6 +478,7 @@ export const useGameStore = create<GameState>()(
         difficulty: state.difficulty,
         advancedSettings: state.advancedSettings,
         autoZoom: state.autoZoom,
+        soundEnabled: state.soundEnabled,
       }),
     }
   )
