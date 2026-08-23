@@ -18,7 +18,34 @@
   "Games": {
     "title": "地理ハブ", "subtitle": "挑戦を選ぼう", "description": "地理マスターを目指そう。ゲームを選択し、時間制限に挑み、パーフェクトスコアを目指せ！", "searchPlaceholder": "ゲームを検索...",
     "categories": { "all": "すべて", "continents": "大陸", "regions": "地域", "capitals": "首都" },
-    "itemsCount": "{count} 個", "difficulty": "難易度", "startQuiz": "クイズ開始", "noGamesFound": "ゲームが見つかりません", "noGamesDescription": "検索ワードやフィルターを調整してください。", "clearFilters": "フィルターをクリア"
+    "itemsCount": "{count} 個", "difficulty": "難易度", "startQuiz": "クイズ開始", "noGamesFound": "ゲームが見つかりません", "noGamesDescription": "検索ワードやフィルターを調整してください。", "clearFilters": "フィルターをクリア",
+    "gameData": {
+      "us-states": { "title": "アメリカの州", "description": "アメリカ合衆国についてどれくらい知っていますか？" },
+      "us-capitals": { "title": "アメリカの州都", "description": "すべてのアメリカの州都を言えますか？" },
+      "sa-countries": { "title": "南アメリカ", "description": "南アメリカの地理知識を試そう！" },
+      "sa-capitals": { "title": "南米の首都", "description": "南アメリカ諸国の首都を当てよう。" },
+      "brazil-states": { "title": "ブラジルの州", "description": "ブラジルのすべての州を言えますか？" },
+      "italy-regions": { "title": "イタリアの州", "description": "ピエモンテからシチリアまで、イタリアの州を探索しよう。" },
+      "france-regions": { "title": "フランスの地域圏", "description": "ブルターニュからコルシカまで、知識を試そう！" },
+      "canada-provinces": { "title": "カナダの州", "description": "カナダの州と準州をいくつ知っていますか？" },
+      "australia-states": { "title": "オーストラリアの州", "description": "南半球の大地についての知識を試そう！" },
+      "africa-flags": { "title": "アフリカの国旗", "description": "アフリカ諸国の国旗の知識を試そう。" },
+      "asia-flags": { "title": "アジアの国旗", "description": "アジア諸国の国旗の知識を試そう。" },
+      "europe-flags": { "title": "ヨーロッパの国旗", "description": "ヨーロッパ諸国の国旗の知識を試そう。" },
+      "north-america-flags": { "title": "北アメリカの国旗", "description": "北アメリカ諸国の国旗の知識を試そう。" },
+      "oceania-flags": { "title": "オセアニアの国旗", "description": "オセアニア諸国の国旗の知識を試そう。" },
+      "south-america-flags": { "title": "南アメリカの国旗", "description": "南アメリカ諸国の国旗の知識を試そう。" },
+      "world-countries": { "title": "世界の国々", "description": "地球上のすべての国を、一枚の地図で。いくつ見つけられる？" },
+      "europe-capitals": { "title": "ヨーロッパの首都", "description": "ヨーロッパ各国の首都を答えよう。" },
+      "europe-capitals-reverse": { "title": "ヨーロッパの首都（逆）", "description": "首都を表示するので、国を当ててください。" },
+      "africa-capitals": { "title": "アフリカの首都", "description": "アフリカ各国の首都を答えよう。" },
+      "africa-capitals-reverse": { "title": "アフリカの首都（逆）", "description": "首都を表示するので、国を当ててください。" },
+      "asia-capitals": { "title": "アジアの首都", "description": "アジア各国の首都を答えよう。" },
+      "asia-capitals-reverse": { "title": "アジアの首都（逆）", "description": "首都を表示するので、国を当ててください。" },
+      "us-capitals-reverse": { "title": "アメリカの州都（逆）", "description": "州都を表示するので、州を当ててください。" },
+      "flag-game": { "title": "世界の国旗", "description": "地球上のすべての国旗。究極の国旗チャレンジ。" },
+      "daily-challenge": { "title": "デイリーチャレンジ", "description": "毎日更新される15カ国の問題。みんな同じ問題に挑戦 — 明日また新しい問題で会いましょう。" }
+    }
   },
   "Rankings": {
     "title": "世界の統計", "searchPlaceholder": "国名で検索...",
@@ -34,8 +61,27 @@
     "feedback": { "perfect": "完璧！", "amazing": "素晴らしい！", "great": "よくできました！", "good": "頑張りました！", "practice": "練習を続けましょう！" }
   },
   "RegionNames": {
-    "Alabama": "アラバマ州", "Alaska": "アラスカ州", "Arizona": "アリゾナ州", "Arkansas": "アーカンソー州", "California": "カリフォルニア州", "Colorado": "コロラド州", "Connecticut": "コネチカット州", "Delaware": "デラウェア州", "Florida": "フロリダ州", "Georgia": "ジョージア州", "Hawaii": "ハワイ州", "Idaho": "アイダホ州", "Illinois": "イリノイ州", "Indiana": "インディアナ州", "Iowa": "アイオワ州", "Kansas": "カンザス州", "Kentucky": "ケンタッキー州", "Louisiana": "ルイジアナ州", "Maine": "メイン州", "Maryland": "メリーランド州", "Massachusetts": "マサチューセッツ州", "Michigan": "ミシガン州", "Minnesota": "ミネソタ州", "Mississippi": "ミシシッピ州", "Missouri": "ミズーリ州", "Montana": "モンタナ州", "Nebraska": "ネブラスカ州", "Nevada": "ネバダ州", "New Hampshire": "ニューハンプシャー州", "New Jersey": "ニュージャージー州", "New Mexico": "ニューメキシコ州", "New York": "ニューヨーク州", "North Carolina": "ノースカロライナ州", "North Dakota": "ノースダコタ州", "Ohio": "オハイオ州", "Oklahoma": "オクラホマ州", "Oregon": "オレゴン州", "Pennsylvania": "ペンシルベニア州", "Rhode Island": "ロードアイランド州", "South Carolina": "サウスカロライナ州", "South Dakota": "サウスダコタ州", "Tennessee": "テネシー州", "Texas": "テキサス州", "Utah": "ユタ州", "Vermont": "バーモント州", "Virginia": "バージニア州", "Washington": "ワシントン州", "West Virginia": "ウェストバージニア州", "Wisconsin": "ウィスコンシン州", "Wyoming": "ワイオミング州"
+    "Alabama": "アラバマ州", "Alaska": "アラスカ州", "Arizona": "アリゾナ州", "Arkansas": "アーカンソー州", "California": "カリフォルニア州", "Colorado": "コロラド州", "Connecticut": "コネチカット州", "Delaware": "デラウェア州", "Florida": "フロリダ州", "Georgia": "ジョージア州", "Hawaii": "ハワイ州", "Idaho": "アイダホ州", "Illinois": "イリノイ州", "Indiana": "インディアナ州", "Iowa": "アイオワ州", "Kansas": "カンザス州", "Kentucky": "ケンタッキー州", "Louisiana": "ルイジアナ州", "Maine": "メイン州", "Maryland": "メリーランド州", "Massachusetts": "マサチューセッツ州", "Michigan": "ミシガン州", "Minnesota": "ミネソタ州", "Mississippi": "ミシシッピ州", "Missouri": "ミズーリ州", "Montana": "モンタナ州", "Nebraska": "ネブラスカ州", "Nevada": "ネバダ州", "New Hampshire": "ニューハンプシャー州", "New Jersey": "ニュージャージー州", "New Mexico": "ニューメキシコ州", "New York": "ニューヨーク州", "North Carolina": "ノースカロライナ州", "North Dakota": "ノースダコタ州", "Ohio": "オハイオ州", "Oklahoma": "オクラホマ州", "Oregon": "オレゴン州", "Pennsylvania": "ペンシルベニア州", "Rhode Island": "ロードアイランド州", "South Carolina": "サウスカロライナ州", "South Dakota": "サウスダコタ州", "Tennessee": "テネシー州", "Texas": "テキサス州", "Utah": "ユタ州", "Vermont": "バーモント州", "Virginia": "バージニア州", "Washington": "ワシントン州", "West Virginia": "ウェストバージニア州", "Wisconsin": "ウィスコンシン州", "Wyoming": "ワイオミング州",
+    "Acre": "アクレ州", "Alagoas": "アラゴアス州", "Amapá": "アマパ州", "Amazonas": "アマゾナス州", "Bahia": "バイーア州", "Ceará": "セアラ州", "Distrito Federal": "連邦直轄区", "DF": "連邦直轄区", "Espírito Santo": "エスピリトサント州", "Goiás": "ゴイアス州", "Maranhão": "マラニャン州", "Mato Grosso": "マットグロッソ州", "Mato Grosso do Sul": "マットグロッソ・ド・スル州", "Minas Gerais": "ミナスジェライス州", "Pará": "パラ州", "Paraíba": "パライバ州", "Paraná": "パラナ州", "Pernambuco": "ペルナンブコ州", "Piauí": "ピアウイ州", "Rio de Janeiro": "リオデジャネイロ州", "Rio Grande do Norte": "北リオグランデ州", "Rio Grande do Sul": "南リオグランデ州", "Rondônia": "ロンドニア州", "Roraima": "ロライマ州", "Santa Catarina": "サンタカタリーナ州", "São Paulo": "サンパウロ州", "Sergipe": "セルジッペ州", "Tocantins": "トカンティンス州",
+    "Abruzzo": "アブルッツォ州", "Basilicata": "バジリカータ州", "Calabria": "カラブリア州", "Campania": "カンパニア州", "Emilia-Romagna": "エミリア＝ロマーニャ州", "Friuli-Venezia Giulia": "フリウリ＝ヴェネツィア・ジューリア州", "Lazio": "ラツィオ州", "Liguria": "リグーリア州", "Lombardia": "ロンバルディア州", "Marche": "マルケ州", "Molise": "モリーゼ州", "Piemonte": "ピエモンテ州", "Puglia": "プッリャ州", "Sardegna": "サルデーニャ州", "Sicilia": "シチリア州", "Toscana": "トスカーナ州", "Trentino-Alto Adige": "トレンティーノ＝アルト・アディジェ州", "Umbria": "ウンブリア州", "Valle d'Aosta": "ヴァッレ・ダオスタ州", "Veneto": "ヴェネト州",
+    "Auvergne-Rhône-Alpes": "オーヴェルニュ＝ローヌ＝アルプ地域圏", "Bourgogne-Franche-Comté": "ブルゴーニュ＝フランシュ＝コンテ地域圏", "Bretagne": "ブルターニュ地域圏", "Brittany": "ブルターニュ地域圏", "Centre-Val de Loire": "サントル＝ヴァル・ド・ロワール地域圏", "Corse": "コルシカ", "Corsica": "コルシカ", "Grand Est": "グラン・テスト地域圏", "Hauts-de-France": "オー＝ド＝フランス地域圏", "Île-de-France": "イル・ド・フランス地域圏", "Normandie": "ノルマンディー地域圏", "Normandy": "ノルマンディー地域圏", "Nouvelle-Aquitaine": "ヌーヴェル＝アキテーヌ地域圏", "Occitanie": "オクシタニー地域圏", "Pays de la Loire": "ペイ・ド・ラ・ロワール地域圏", "Provence-Alpes-Côte d'Azur": "プロヴァンス＝アルプ＝コート・ダジュール地域圏", "Guadeloupe": "グアドループ", "Guyane": "フランス領ギアナ", "French Guiana": "フランス領ギアナ", "La Réunion": "レユニオン", "Reunion": "レユニオン", "Martinique": "マルティニーク", "Mayotte": "マヨット",
+    "Alberta": "アルバータ州", "British Columbia": "ブリティッシュコロンビア州", "Manitoba": "マニトバ州", "New Brunswick": "ニューブランズウィック州", "Newfoundland and Labrador": "ニューファンドランド・ラブラドール州", "Nova Scotia": "ノバスコシア州", "Ontario": "オンタリオ州", "Prince Edward Island": "プリンスエドワードアイランド州", "Quebec": "ケベック州", "Saskatchewan": "サスカチュワン州", "Northwest Territories": "ノースウエスト準州", "Nunavut": "ヌナブト準州", "Yukon": "ユーコン準州",
+    "New South Wales": "ニューサウスウェールズ州", "Queensland": "クイーンズランド州", "South Australia": "南オーストラリア州", "Tasmania": "タスマニア州", "Victoria": "ビクトリア州", "Western Australia": "西オーストラリア州", "Australian Capital Territory": "オーストラリア首都特別地域", "Northern Territory": "ノーザンテリトリー",
+    "Argentina": "アルゼンチン", "Bolivia": "ボリビア", "Brazil": "ブラジル", "Chile": "チリ", "Colombia": "コロンビア", "Ecuador": "エクアドル", "Guyana": "ガイアナ", "Paraguay": "パラグアイ", "Peru": "ペルー", "Suriname": "スリナム", "Uruguay": "ウルグアイ", "Venezuela": "ベネズエラ"
   },
   "Common": { "unknown": "不明", "loading": "読み込み中...", "back": "戻る", "na": "該当なし" },
-  "Metadata": { "title": "GeoGeek - 地理の冒険へ", "description": "インタラクティブな地理探索とランキング", "mapOf": "{continent}の地図", "worldMapTitle": "世界地図エクスプローラー" }
+  "Metadata": { "title": "GeoGeek - 地理の冒険へ", "description": "インタラクティブな地理探索とランキング", "mapOf": "{continent}の地図", "worldMapTitle": "世界地図エクスプローラー" },
+  "AboutPage": {
+    "title": "GeoGeekについて",
+    "intro": "GeoGeekは単なるウェブサイトではなく、地理への深い愛と、私たちの世界の複雑なディテールへの魅力から生まれた情熱のプロジェクトです。探索、学習、そして世界の地域についての知識に挑戦するための、ダイナミックなプラットフォームとして設計されています。",
+    "passion": "私を突き動かしているのは、好奇心と物事の仕組みを理解したいという欲求です。GeoGeekは、地理データの複雑な美しさを楽しく魅力的なものに変える私なりの方法です。このプロジェクトのあらゆる部分は、正確さと、ほんの少しの知的挑戦を意識して作られています。",
+    "vision": "GeoGeekの目標は、地理愛好家のための素敵な場所を作ることです。世界について学ぶことを楽しく、そして洞察に満ちたものにするツールを提供したいと考えています。政治的な国境を調べたり、統計を掘り下げたり、クイズで遊んだりする中で、GeoGeekがあなたの地理への情熱をかき立てることを願っています。",
+    "invitation": "これはオープンソースのプロジェクトであり、私は物事を共に作り上げることを心から信じています。ぜひコードに飛び込み、アイデアを共有し、GeoGeekの未来を形作る手助けをしてください。世界を発見するための、さらに素晴らしいプラットフォームを一緒に作り上げましょう。一つの地域ずつ。",
+    "creatorName": "Samuel Britto",
+    "websiteProfile": "私のウェブサイト",
+    "projectGithub": "プロジェクトのGitHubリポジトリ",
+    "myPassion": "私の情熱",
+    "myVision": "私のビジョン",
+    "joinJourney": "旅に参加する"
+  }
 }

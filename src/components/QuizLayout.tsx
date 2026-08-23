@@ -232,12 +232,10 @@ export default function QuizLayout({
     }
     // Only the guess result itself should trigger a sound, not every time
     // streak/soundEnabled happen to change for other reasons.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastGuessCorrect]);
 
   useEffect(() => {
     if (soundEnabled && gameStatus === 'finished') playFinish();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStatus]);
 
   useEffect(() => {

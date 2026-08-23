@@ -18,7 +18,34 @@
   "Games": {
     "title": "Географический центр", "subtitle": "Выберите вызов", "description": "Завоюйте звание мастера-географа. Выберите игру, соревнуйтесь со временем и наберите идеальный балл!", "searchPlaceholder": "Поиск игр...",
     "categories": { "all": "Все", "continents": "Континенты", "regions": "Регионы", "capitals": "Столицы" },
-    "itemsCount": "{count} элементов", "difficulty": "Сложность", "startQuiz": "НАЧАТЬ ВИКТОРИНУ", "noGamesFound": "Игры не найдены", "noGamesDescription": "Попробуйте изменить параметры поиска.", "clearFilters": "Очистить фильтры"
+    "itemsCount": "{count} элементов", "difficulty": "Сложность", "startQuiz": "НАЧАТЬ ВИКТОРИНУ", "noGamesFound": "Игры не найдены", "noGamesDescription": "Попробуйте изменить параметры поиска.", "clearFilters": "Очистить фильтры",
+    "gameData": {
+      "us-states": { "title": "Штаты США", "description": "Насколько хорошо вы знаете Соединённые Штаты?" },
+      "us-capitals": { "title": "Столицы штатов США", "description": "Сможете назвать столицу каждого штата США?" },
+      "sa-countries": { "title": "Южная Америка", "description": "Проверьте свои знания территории Южной Америки!" },
+      "sa-capitals": { "title": "Столицы Южной Америки", "description": "Угадайте столицы стран Южной Америки." },
+      "brazil-states": { "title": "Штаты Бразилии", "description": "Сможете назвать все штаты территории Бразилии?" },
+      "italy-regions": { "title": "Регионы Италии", "description": "Исследуйте регионы Италии, от Пьемонта до Сицилии." },
+      "france-regions": { "title": "Регионы Франции", "description": "От Бретани до Корсики — проверьте свои знания!" },
+      "canada-provinces": { "title": "Провинции Канады", "description": "Сколько канадских провинций и территорий вы знаете?" },
+      "australia-states": { "title": "Штаты Австралии", "description": "Проверьте свои знания о земле на другом конце света!" },
+      "africa-flags": { "title": "Флаги Африки", "description": "Проверьте свои знания национальных флагов Африки." },
+      "asia-flags": { "title": "Флаги Азии", "description": "Проверьте свои знания национальных флагов Азии." },
+      "europe-flags": { "title": "Флаги Европы", "description": "Проверьте свои знания национальных флагов Европы." },
+      "north-america-flags": { "title": "Флаги Северной Америки", "description": "Проверьте свои знания национальных флагов Северной Америки." },
+      "oceania-flags": { "title": "Флаги Океании", "description": "Проверьте свои знания национальных флагов Океании." },
+      "south-america-flags": { "title": "Флаги Южной Америки", "description": "Проверьте свои знания национальных флагов Южной Америки." },
+      "world-countries": { "title": "Страны мира", "description": "Каждая страна на Земле, на одной карте. Сколько вы найдёте?" },
+      "europe-capitals": { "title": "Столицы Европы", "description": "Назовите столицу каждой европейской страны." },
+      "europe-capitals-reverse": { "title": "Столицы Европы (наоборот)", "description": "Мы показываем столицу — вы находите страну." },
+      "africa-capitals": { "title": "Столицы Африки", "description": "Назовите столицу каждой африканской страны." },
+      "africa-capitals-reverse": { "title": "Столицы Африки (наоборот)", "description": "Мы показываем столицу — вы находите страну." },
+      "asia-capitals": { "title": "Столицы Азии", "description": "Назовите столицу каждой азиатской страны." },
+      "asia-capitals-reverse": { "title": "Столицы Азии (наоборот)", "description": "Мы показываем столицу — вы находите страну." },
+      "us-capitals-reverse": { "title": "Столицы штатов США (наоборот)", "description": "Мы показываем столицу — вы находите штат." },
+      "flag-game": { "title": "Флаги мира", "description": "Каждый флаг планеты. Главный флаговый вызов." },
+      "daily-challenge": { "title": "Ежедневный вызов", "description": "15 стран, выбираемых каждый день заново. Одна и та же головоломка для всех — возвращайтесь завтра за новой." }
+    }
   },
   "Rankings": {
     "title": "Мировая статистика", "searchPlaceholder": "Поиск страны...",
@@ -34,8 +61,27 @@
     "feedback": { "perfect": "Идеально!", "amazing": "Потрясающе!", "great": "Отличная работа!", "good": "Хорошая попытка!", "practice": "Продолжайте практиковаться!" }
   },
   "RegionNames": {
-    "Alabama": "Алабама", "Alaska": "Аляска", "Arizona": "Аризона", "Arkansas": "Арканзас", "California": "Калифорния", "Colorado": "Колорадо", "Connecticut": "Коннектикут", "Delaware": "Делавэр", "Florida": "Флорида", "Georgia": "Джорджия", "Hawaii": "Гавайи", "Idaho": "Айдахо", "Illinois": "Иллинойс", "Indiana": "Индиана", "Iowa": "Айова", "Kansas": "Канзас", "Kentucky": "Кентукки", "Louisiana": "Луизиана", "Maine": "Мэн", "Maryland": "Мэриленд", "Massachusetts": "Массачусетс", "Michigan": "Мичиган", "Minnesota": "Миннесота", "Mississippi": "Миссисипи", "Missouri": "Миссури", "Montana": "Монтана", "Nebraska": "Небраска", "Nevada": "Невада", "New Hampshire": "Нью-Гэмпшир", "New Jersey": "Нью-Джерси", "New Mexico": "Нью-Мексико", "New York": "Нью-Йорк", "North Carolina": "Северная Каролина", "North Dakota": "Северная Дакота", "Ohio": "Огайо", "Oklahoma": "Оклахома", "Oregon": "Орегон", "Pennsylvania": "Пенсильвания", "Rhode Island": "Род-Айленд", "South Carolina": "Южная Каролина", "South Dakota": "Южная Дакота", "Tennessee": "Теннесси", "Texas": "Техас", "Utah": "Юта", "Vermont": "Вермонт", "Virginia": "Виргиния", "Washington": "Вашингтон", "West Virginia": "Западная Виргиния", "Wisconsin": "Висконсин", "Wyoming": "Вайоминг"
+    "Alabama": "Алабама", "Alaska": "Аляска", "Arizona": "Аризона", "Arkansas": "Арканзас", "California": "Калифорния", "Colorado": "Колорадо", "Connecticut": "Коннектикут", "Delaware": "Делавэр", "Florida": "Флорида", "Georgia": "Джорджия", "Hawaii": "Гавайи", "Idaho": "Айдахо", "Illinois": "Иллинойс", "Indiana": "Индиана", "Iowa": "Айова", "Kansas": "Канзас", "Kentucky": "Кентукки", "Louisiana": "Луизиана", "Maine": "Мэн", "Maryland": "Мэриленд", "Massachusetts": "Массачусетс", "Michigan": "Мичиган", "Minnesota": "Миннесота", "Mississippi": "Миссисипи", "Missouri": "Миссури", "Montana": "Монтана", "Nebraska": "Небраска", "Nevada": "Невада", "New Hampshire": "Нью-Гэмпшир", "New Jersey": "Нью-Джерси", "New Mexico": "Нью-Мексико", "New York": "Нью-Йорк", "North Carolina": "Северная Каролина", "North Dakota": "Северная Дакота", "Ohio": "Огайо", "Oklahoma": "Оклахома", "Oregon": "Орегон", "Pennsylvania": "Пенсильвания", "Rhode Island": "Род-Айленд", "South Carolina": "Южная Каролина", "South Dakota": "Южная Дакота", "Tennessee": "Теннесси", "Texas": "Техас", "Utah": "Юта", "Vermont": "Вермонт", "Virginia": "Виргиния", "Washington": "Вашингтон", "West Virginia": "Западная Виргиния", "Wisconsin": "Висконсин", "Wyoming": "Вайоминг",
+    "Acre": "Акри", "Alagoas": "Алагоас", "Amapá": "Амапа", "Amazonas": "Амазонас", "Bahia": "Баия", "Ceará": "Сеара", "Distrito Federal": "Федеральный округ", "DF": "Федеральный округ", "Espírito Santo": "Эспириту-Санту", "Goiás": "Гояс", "Maranhão": "Мараньян", "Mato Grosso": "Мату-Гросу", "Mato Grosso do Sul": "Мату-Гросу-ду-Сул", "Minas Gerais": "Минас-Жерайс", "Pará": "Пара", "Paraíba": "Параиба", "Paraná": "Парана", "Pernambuco": "Пернамбуку", "Piauí": "Пиауи", "Rio de Janeiro": "Рио-де-Жанейро", "Rio Grande do Norte": "Риу-Гранди-ду-Норти", "Rio Grande do Sul": "Риу-Гранди-ду-Сул", "Rondônia": "Рондония", "Roraima": "Рорайма", "Santa Catarina": "Санта-Катарина", "São Paulo": "Сан-Паулу", "Sergipe": "Сержипи", "Tocantins": "Токантинс",
+    "Abruzzo": "Абруццо", "Basilicata": "Базиликата", "Calabria": "Калабрия", "Campania": "Кампания", "Emilia-Romagna": "Эмилия-Романья", "Friuli-Venezia Giulia": "Фриули-Венеция-Джулия", "Lazio": "Лацио", "Liguria": "Лигурия", "Lombardia": "Ломбардия", "Marche": "Марке", "Molise": "Молизе", "Piemonte": "Пьемонт", "Puglia": "Апулия", "Sardegna": "Сардиния", "Sicilia": "Сицилия", "Toscana": "Тоскана", "Trentino-Alto Adige": "Трентино-Альто-Адидже", "Umbria": "Умбрия", "Valle d'Aosta": "Валле-д'Аоста", "Veneto": "Венето",
+    "Auvergne-Rhône-Alpes": "Овернь-Рона-Альпы", "Bourgogne-Franche-Comté": "Бургундия-Франш-Конте", "Bretagne": "Бретань", "Brittany": "Бретань", "Centre-Val de Loire": "Центр-Валь-де-Луар", "Corse": "Корсика", "Corsica": "Корсика", "Grand Est": "Гранд-Эст", "Hauts-de-France": "О-де-Франс", "Île-de-France": "Иль-де-Франс", "Normandie": "Нормандия", "Normandy": "Нормандия", "Nouvelle-Aquitaine": "Новая Аквитания", "Occitanie": "Окситания", "Pays de la Loire": "Пеи-де-ла-Луар", "Provence-Alpes-Côte d'Azur": "Прованс-Альпы-Лазурный берег", "Guadeloupe": "Гваделупа", "Guyane": "Французская Гвиана", "French Guiana": "Французская Гвиана", "La Réunion": "Реюньон", "Reunion": "Реюньон", "Martinique": "Мартиника", "Mayotte": "Майотта",
+    "Alberta": "Альберта", "British Columbia": "Британская Колумбия", "Manitoba": "Манитоба", "New Brunswick": "Нью-Брансуик", "Newfoundland and Labrador": "Ньюфаундленд и Лабрадор", "Nova Scotia": "Новая Шотландия", "Ontario": "Онтарио", "Prince Edward Island": "Остров Принца Эдуарда", "Quebec": "Квебек", "Saskatchewan": "Саскачеван", "Northwest Territories": "Северо-Западные территории", "Nunavut": "Нунавут", "Yukon": "Юкон",
+    "New South Wales": "Новый Южный Уэльс", "Queensland": "Квинсленд", "South Australia": "Южная Австралия", "Tasmania": "Тасмания", "Victoria": "Виктория", "Western Australia": "Западная Австралия", "Australian Capital Territory": "Австралийская столичная территория", "Northern Territory": "Северная территория",
+    "Argentina": "Аргентина", "Bolivia": "Боливия", "Brazil": "Бразилия", "Chile": "Чили", "Colombia": "Колумбия", "Ecuador": "Эквадор", "Guyana": "Гайана", "Paraguay": "Парагвай", "Peru": "Перу", "Suriname": "Суринам", "Uruguay": "Уругвай", "Venezuela": "Венесуэла"
   },
   "Common": { "unknown": "Неизвестно", "loading": "Загрузка...", "back": "Назад", "na": "Н/Д" },
-  "Metadata": { "title": "GeoGeek - Исследуйте мир", "description": "Интерактивный географический справочник и рейтинг", "mapOf": "Карта {continent}", "worldMapTitle": "Мировой географический атлас" }
+  "Metadata": { "title": "GeoGeek - Исследуйте мир", "description": "Интерактивный географический справочник и рейтинг", "mapOf": "Карта {continent}", "worldMapTitle": "Мировой географический атлас" },
+  "AboutPage": {
+    "title": "О GeoGeek",
+    "intro": "GeoGeek — это больше, чем просто сайт; это проект, рождённый из глубокой любви к географии и увлечения тонкими деталями нашего мира. Он создан как динамичная платформа для исследования, обучения и проверки ваших знаний о территориях мира.",
+    "passion": "Мной движет любопытство и желание понять, как устроены вещи. GeoGeek — это мой способ превратить сложную красоту географических данных во что-то увлекательное и интересное. Каждая часть этого проекта создана с вниманием к точности и лёгким интеллектуальным вызовом.",
+    "vision": "Моя цель для GeoGeek — создать классное место для любителей географии. Я хочу предложить инструменты, которые сделают изучение мира и увлекательным, и познавательным. Изучаете ли вы политические границы, копаетесь в статистике или проходите викторины — я надеюсь, что GeoGeek пробудит в вас интерес к географии.",
+    "invitation": "Это проект с открытым исходным кодом, и я искренне верю в то, что вещи нужно создавать сообща. Не стесняйтесь заглянуть в код, поделиться своими идеями и помочь сформировать будущее GeoGeek. Давайте вместе сделаем эту платформу ещё более потрясающей для открытия мира — территория за территорией.",
+    "creatorName": "Samuel Britto",
+    "websiteProfile": "Мой сайт",
+    "projectGithub": "GitHub-репозиторий проекта",
+    "myPassion": "Моя страсть",
+    "myVision": "Моё видение",
+    "joinJourney": "Присоединяйтесь к путешествию"
+  }
 }

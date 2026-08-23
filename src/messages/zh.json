@@ -18,7 +18,34 @@
   "Games": {
     "title": "地理中心", "subtitle": "选择你的挑战", "description": "赢得地理大师的称号。选择一个游戏，争分夺秒，尝试获得满分！", "searchPlaceholder": "搜索游戏...",
     "categories": { "all": "全部", "continents": "大陆", "regions": "区域", "capitals": "首都" },
-    "itemsCount": "{count} 个项目", "difficulty": "难度", "startQuiz": "开始测验", "noGamesFound": "没有找到游戏", "noGamesDescription": "尝试调整搜索或类别过滤器。", "clearFilters": "清除所有过滤器"
+    "itemsCount": "{count} 个项目", "difficulty": "难度", "startQuiz": "开始测验", "noGamesFound": "没有找到游戏", "noGamesDescription": "尝试调整搜索或类别过滤器。", "clearFilters": "清除所有过滤器",
+    "gameData": {
+      "us-states": { "title": "美国各州", "description": "你对美利坚合众国了解多少？" },
+      "us-capitals": { "title": "美国首府", "description": "你能说出美国每个州的首府吗？" },
+      "sa-countries": { "title": "南美洲", "description": "测试你对南美洲领土的了解！" },
+      "sa-capitals": { "title": "南美首都", "description": "猜猜南美各国的首都。" },
+      "brazil-states": { "title": "巴西各州", "description": "你能说出巴西领土的所有州吗？" },
+      "italy-regions": { "title": "意大利大区", "description": "探索意大利的大区，从皮埃蒙特到西西里。" },
+      "france-regions": { "title": "法国大区", "description": "从布列塔尼到科西嘉，测试你的知识！" },
+      "canada-provinces": { "title": "加拿大省份", "description": "你知道多少个加拿大省份和地区？" },
+      "australia-states": { "title": "澳大利亚各州", "description": "测试你对南半球这片土地的了解！" },
+      "africa-flags": { "title": "非洲国旗", "description": "测试你对非洲国旗的了解。" },
+      "asia-flags": { "title": "亚洲国旗", "description": "测试你对亚洲国旗的了解。" },
+      "europe-flags": { "title": "欧洲国旗", "description": "测试你对欧洲国旗的了解。" },
+      "north-america-flags": { "title": "北美国旗", "description": "测试你对北美国旗的了解。" },
+      "oceania-flags": { "title": "大洋洲国旗", "description": "测试你对大洋洲国旗的了解。" },
+      "south-america-flags": { "title": "南美国旗", "description": "测试你对南美国旗的了解。" },
+      "world-countries": { "title": "世界各国", "description": "地球上的每一个国家，尽在一张地图。你能找到多少个？" },
+      "europe-capitals": { "title": "欧洲首都", "description": "说出每个欧洲国家的首都。" },
+      "europe-capitals-reverse": { "title": "欧洲首都（反向）", "description": "我们显示首都——你来找出国家。" },
+      "africa-capitals": { "title": "非洲首都", "description": "说出每个非洲国家的首都。" },
+      "africa-capitals-reverse": { "title": "非洲首都（反向）", "description": "我们显示首都——你来找出国家。" },
+      "asia-capitals": { "title": "亚洲首都", "description": "说出每个亚洲国家的首都。" },
+      "asia-capitals-reverse": { "title": "亚洲首都（反向）", "description": "我们显示首都——你来找出国家。" },
+      "us-capitals-reverse": { "title": "美国首府（反向）", "description": "我们显示首府——你来找出州。" },
+      "flag-game": { "title": "世界国旗", "description": "地球上的每一面国旗。终极国旗挑战。" },
+      "daily-challenge": { "title": "每日挑战", "description": "每天精选15个国家。每个人面对同一道题——明天再来挑战新的一道。" }
+    }
   },
   "Rankings": {
     "title": "世界统计", "searchPlaceholder": "搜索国家...",
@@ -34,8 +61,27 @@
     "feedback": { "perfect": "完美！", "amazing": "太棒了！", "great": "干得好！", "good": "不错的尝试！", "practice": "继续练习！" }
   },
   "RegionNames": {
-    "Alabama": "阿拉巴马州", "Alaska": "阿拉斯加州", "Arizona": "亚利桑那州", "Arkansas": "阿肯色州", "California": "加利福尼亚州", "Colorado": "科罗拉多州", "Connecticut": "康涅狄格州", "Delaware": "特拉华州", "Florida": "佛罗里达州", "Georgia": "佐治亚州", "Hawaii": "夏威夷州", "Idaho": "爱达荷州", "Illinois": "伊利诺伊州", "Indiana": "印第安纳州", "Iowa": "爱荷华州", "Kansas": "堪萨斯州", "Kentucky": "肯塔基州", "Louisiana": "路易斯安那州", "Maine": "缅因州", "Maryland": "马里兰州", "Massachusetts": "马萨诸塞州", "Michigan": "密歇根州", "Minnesota": "明尼苏达州", "Mississippi": "密西西比州", "Missouri": "密苏里州", "Montana": "蒙大拿州", "Nebraska": "内布拉斯加州", "Nevada": "内华达州", "New Hampshire": "新罕布什尔州", "New Jersey": "新泽西州", "New Mexico": "新墨西哥州", "New York": "纽约州", "North Carolina": "北卡罗来纳州", "North Dakota": "北达科他州", "Ohio": "俄亥俄州", "Oklahoma": "俄克拉荷马州", "Oregon": "俄勒冈州", "Pennsylvania": "宾夕法尼亚州", "Rhode Island": "罗德岛州", "South Carolina": "南卡罗来纳州", "South Dakota": "南达科他州", "Tennessee": "田纳西州", "Texas": "得克萨斯州", "Utah": "犹他州", "Vermont": "佛蒙特州", "Virginia": "弗吉尼亚州", "Washington": "华盛顿州", "West Virginia": "西弗吉尼亚州", "Wisconsin": "威斯康星州", "Wyoming": "怀俄明州"
+    "Alabama": "阿拉巴马州", "Alaska": "阿拉斯加州", "Arizona": "亚利桑那州", "Arkansas": "阿肯色州", "California": "加利福尼亚州", "Colorado": "科罗拉多州", "Connecticut": "康涅狄格州", "Delaware": "特拉华州", "Florida": "佛罗里达州", "Georgia": "佐治亚州", "Hawaii": "夏威夷州", "Idaho": "爱达荷州", "Illinois": "伊利诺伊州", "Indiana": "印第安纳州", "Iowa": "爱荷华州", "Kansas": "堪萨斯州", "Kentucky": "肯塔基州", "Louisiana": "路易斯安那州", "Maine": "缅因州", "Maryland": "马里兰州", "Massachusetts": "马萨诸塞州", "Michigan": "密歇根州", "Minnesota": "明尼苏达州", "Mississippi": "密西西比州", "Missouri": "密苏里州", "Montana": "蒙大拿州", "Nebraska": "内布拉斯加州", "Nevada": "内华达州", "New Hampshire": "新罕布什尔州", "New Jersey": "新泽西州", "New Mexico": "新墨西哥州", "New York": "纽约州", "North Carolina": "北卡罗来纳州", "North Dakota": "北达科他州", "Ohio": "俄亥俄州", "Oklahoma": "俄克拉荷马州", "Oregon": "俄勒冈州", "Pennsylvania": "宾夕法尼亚州", "Rhode Island": "罗德岛州", "South Carolina": "南卡罗来纳州", "South Dakota": "南达科他州", "Tennessee": "田纳西州", "Texas": "得克萨斯州", "Utah": "犹他州", "Vermont": "佛蒙特州", "Virginia": "弗吉尼亚州", "Washington": "华盛顿州", "West Virginia": "西弗吉尼亚州", "Wisconsin": "威斯康星州", "Wyoming": "怀俄明州",
+    "Acre": "阿克里州", "Alagoas": "阿拉戈斯州", "Amapá": "阿马帕州", "Amazonas": "亚马逊州", "Bahia": "巴伊亚州", "Ceará": "塞阿拉州", "Distrito Federal": "联邦区", "DF": "联邦区", "Espírito Santo": "圣埃斯皮里图州", "Goiás": "戈亚斯州", "Maranhão": "马拉尼昂州", "Mato Grosso": "马托格罗索州", "Mato Grosso do Sul": "南马托格罗索州", "Minas Gerais": "米纳斯吉拉斯州", "Pará": "帕拉州", "Paraíba": "帕拉伊巴州", "Paraná": "巴拉那州", "Pernambuco": "伯南布哥州", "Piauí": "皮奥伊州", "Rio de Janeiro": "里约热内卢州", "Rio Grande do Norte": "北里奥格兰德州", "Rio Grande do Sul": "南里奥格兰德州", "Rondônia": "朗多尼亚州", "Roraima": "罗赖马州", "Santa Catarina": "圣卡塔琳娜州", "São Paulo": "圣保罗州", "Sergipe": "塞尔希培州", "Tocantins": "托坎廷斯州",
+    "Abruzzo": "阿布鲁佐大区", "Basilicata": "巴西利卡塔大区", "Calabria": "卡拉布里亚大区", "Campania": "坎帕尼亚大区", "Emilia-Romagna": "艾米利亚-罗马涅大区", "Friuli-Venezia Giulia": "弗留利-威尼斯朱利亚大区", "Lazio": "拉齐奥大区", "Liguria": "利古里亚大区", "Lombardia": "伦巴第大区", "Marche": "马尔凯大区", "Molise": "莫利塞大区", "Piemonte": "皮埃蒙特大区", "Puglia": "普利亚大区", "Sardegna": "撒丁岛大区", "Sicilia": "西西里大区", "Toscana": "托斯卡纳大区", "Trentino-Alto Adige": "特伦蒂诺-上阿迪杰大区", "Umbria": "翁布里亚大区", "Valle d'Aosta": "瓦莱达奥斯塔大区", "Veneto": "威尼托大区",
+    "Auvergne-Rhône-Alpes": "奥弗涅-罗讷-阿尔卑斯大区", "Bourgogne-Franche-Comté": "勃艮第-弗朗什-孔泰大区", "Bretagne": "布列塔尼大区", "Brittany": "布列塔尼大区", "Centre-Val de Loire": "中央-卢瓦尔河谷大区", "Corse": "科西嘉", "Corsica": "科西嘉", "Grand Est": "大东部大区", "Hauts-de-France": "上法兰西大区", "Île-de-France": "法兰西岛大区", "Normandie": "诺曼底大区", "Normandy": "诺曼底大区", "Nouvelle-Aquitaine": "新阿基坦大区", "Occitanie": "奥克西塔尼大区", "Pays de la Loire": "卢瓦尔河地区大区", "Provence-Alpes-Côte d'Azur": "普罗旺斯-阿尔卑斯-蓝色海岸大区", "Guadeloupe": "瓜德罗普", "Guyane": "法属圭亚那", "French Guiana": "法属圭亚那", "La Réunion": "留尼汪", "Reunion": "留尼汪", "Martinique": "马提尼克", "Mayotte": "马约特",
+    "Alberta": "艾伯塔省", "British Columbia": "不列颠哥伦比亚省", "Manitoba": "马尼托巴省", "New Brunswick": "新不伦瑞克省", "Newfoundland and Labrador": "纽芬兰与拉布拉多省", "Nova Scotia": "新斯科舍省", "Ontario": "安大略省", "Prince Edward Island": "爱德华王子岛省", "Quebec": "魁北克省", "Saskatchewan": "萨斯喀彻温省", "Northwest Territories": "西北地区", "Nunavut": "努纳武特地区", "Yukon": "育空地区",
+    "New South Wales": "新南威尔士州", "Queensland": "昆士兰州", "South Australia": "南澳大利亚州", "Tasmania": "塔斯马尼亚州", "Victoria": "维多利亚州", "Western Australia": "西澳大利亚州", "Australian Capital Territory": "澳大利亚首都领地", "Northern Territory": "北领地",
+    "Argentina": "阿根廷", "Bolivia": "玻利维亚", "Brazil": "巴西", "Chile": "智利", "Colombia": "哥伦比亚", "Ecuador": "厄瓜多尔", "Guyana": "圭亚那", "Paraguay": "巴拉圭", "Peru": "秘鲁", "Suriname": "苏里南", "Uruguay": "乌拉圭", "Venezuela": "委内瑞拉"
   },
   "Common": { "unknown": "未知", "loading": "正在加载...", "back": "返回", "na": "N/A" },
-  "Metadata": { "title": "GeoGeek - 探索你内心的地理学家", "description": "交互式地理探索和排名", "mapOf": "{continent} 地图", "worldMapTitle": "世界地图探索者" }
+  "Metadata": { "title": "GeoGeek - 探索你内心的地理学家", "description": "交互式地理探索和排名", "mapOf": "{continent} 地图", "worldMapTitle": "世界地图探索者" },
+  "AboutPage": {
+    "title": "关于 GeoGeek",
+    "intro": "GeoGeek 不仅仅是一个网站，它是一个源于对地理的深厚热爱、以及对我们这个世界错综复杂细节的着迷而诞生的热情项目。它被设计为一个充满活力的平台，用于探索、学习，并挑战你对全球领土的了解。",
+    "passion": "驱使我前进的是好奇心，以及想要理解事物运作方式的渴望。GeoGeek 是我把地理数据的复杂之美转化为有趣且引人入胜的东西的方式。这个项目的每一部分都力求准确，并带着一点智力挑战的用心打造。",
+    "vision": "我为 GeoGeek 设定的目标，是为地理爱好者们打造一个很酷的去处。我想提供一些工具，让了解这个世界的过程既有趣又富有洞察力。无论你是在查看政治边界、深入研究统计数据，还是在玩问答游戏，我都希望 GeoGeek 能激发你对地理的热情。",
+    "invitation": "这是一个开源项目，我真心相信共同创造的力量。欢迎你深入代码、分享你的想法，并帮助塑造 GeoGeek 的未来。让我们一起把它打造成一个更精彩的平台，一片领土接一片领土地探索这个世界。",
+    "creatorName": "Samuel Britto",
+    "websiteProfile": "我的网站",
+    "projectGithub": "项目 GitHub 仓库",
+    "myPassion": "我的热情",
+    "myVision": "我的愿景",
+    "joinJourney": "加入这段旅程"
+  }
 }
