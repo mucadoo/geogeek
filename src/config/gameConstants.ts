@@ -30,6 +30,8 @@ export interface AdvancedSettings {
   noMapHints: boolean;
   hideBorders: boolean;
   timePerGuess: number; // in seconds
+  /** Whether the in-game Hint button (progressive letter clue -> fun fact) is offered at all. */
+  hints: boolean;
 }
 
 export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = {
@@ -40,6 +42,7 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: false,
     hideBorders: false,
     timePerGuess: 60,
+    hints: true,
   },
   easy: {
     isMultipleChoice: true,
@@ -48,6 +51,7 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: false,
     hideBorders: false,
     timePerGuess: 30,
+    hints: true,
   },
   medium: {
     isMultipleChoice: false,
@@ -56,6 +60,7 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: false,
     hideBorders: false,
     timePerGuess: 20,
+    hints: true,
   },
   hard: {
     isMultipleChoice: false,
@@ -64,6 +69,7 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: false,
     hideBorders: false,
     timePerGuess: 15,
+    hints: false,
   },
   blazing: {
     isMultipleChoice: false,
@@ -72,6 +78,7 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: true,
     hideBorders: true,
     timePerGuess: 5,
+    hints: false,
   },
   blitz: {
     isMultipleChoice: false,
@@ -80,6 +87,7 @@ export const PRESETS: Record<Exclude<Difficulty, 'custom'>, AdvancedSettings> = 
     noMapHints: false,
     hideBorders: false,
     timePerGuess: 10,
+    hints: false,
   },
 };
 

@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Copy, Volume2, VolumeX } from 'lucide-react';
+import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Copy, Volume2, VolumeX, Lightbulb } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
@@ -17,6 +17,7 @@ import GameMap from '@/components/GameMap';
 import { PRESETS, AdvancedSettings, Difficulty } from '@/config/gameConstants';
 import { Link } from '@/i18n/routing';
 import getFeedback from '@/lib/getFeedback';
+import { getHintLetterClue, getHintFact } from '@/lib/hints';
 import { getLocalizedCountryName } from '@/lib/i18n-utils';
 import { playCorrect, playFinish, playStreak, playWrong } from '@/lib/sounds';
 import { useGameStore, StateFeature, GameMode } from '@/store/useGameStore';
@@ -70,7 +71,8 @@ export default function QuizLayout({
     userInput, setUserInput, submitGuess, skipState, lastGuessCorrect,
     correctlyGuessedIds, missedStates, options,
     autoZoom, setAutoZoom, soundEnabled, setSoundEnabled, streak,
-    pauseGame, resumeGame, quitGame, savedGames, currentGameKey
+    pauseGame, resumeGame, quitGame, savedGames, currentGameKey,
+    hintLevel, revealHint
   } = useGameStore();
   
   const savedGame = savedGames[gameKey];
@@ -315,6 +317,20 @@ export default function QuizLayout({
     });
   }, [mapData, correctlyGuessedIds]);
 
+  // Hint ladder always describes the state currently being guessed
+  // (currentState.properties.name) - even in 'reverse' mode, where the
+  // capital is what's displayed, the region is still the answer the player
+  // is looking for.
+  const hintInfo = useMemo(() => {
+    if (!currentState) return null;
+    const rawName = currentState.properties.name;
+    const localizedName = getLocalizedName(rawName);
+    return {
+      letterClue: getHintLetterClue(localizedName),
+      fact: getHintFact(rawName, locale, allCountries),
+    };
+  }, [currentState, locale, allCountries]);
+
   if (mapStatus === 'pending') {
     return (
       <main className="fixed inset-0 flex items-center justify-center bg-[var(--background)]">
@@ -436,6 +452,18 @@ export default function QuizLayout({
               </div>
             )}
 
+            {adv.hints && hintInfo && hintLevel > 0 && (
+              <div className="pointer-events-auto flex max-w-md flex-col items-center gap-1.5 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 text-center animate-in fade-in slide-in-from-bottom-2">
+                <span className="flex items-center gap-1.5 font-game-mono text-xs font-bold uppercase tracking-widest text-amber-500">
+                  <Lightbulb size={14} />
+                  {t('hintLetterClue', { letter: hintInfo.letterClue.letter, count: hintInfo.letterClue.count })}
+                </span>
+                {hintLevel > 1 && hintInfo.fact && (
+                  <span className="font-game-mono text-xs text-amber-700 dark:text-amber-300">{hintInfo.fact}</span>
+                )}
+              </div>
+            )}
+
             {options.length > 0 ? (
               <div className="pointer-events-auto grid grid-cols-2 gap-3 w-full max-w-md">
                 {options.map((option, i) => (
@@ -480,6 +508,14 @@ export default function QuizLayout({
             )}
 
             <div className="flex gap-2 pointer-events-auto">
+              {adv.hints && hintInfo && (hintLevel === 0 || (hintLevel === 1 && hintInfo.fact)) && (
+                <button
+                  onClick={revealHint}
+                  className="flex items-center gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-amber-500/20 transition-colors"
+                >
+                  <Lightbulb size={14} /> {t('hint')}
+                </button>
+              )}
               <button
                 onClick={quitGame}
                 className="bg-red-500 text-white px-6 py-2 rounded-xl font-game-heading uppercase text-sm shadow-md hover:bg-red-600 transition-colors"
@@ -558,6 +594,7 @@ export default function QuizLayout({
                             ['strictMatching', t('strictMatching')],
                             ['noMapHints', t('noMapHints')],
                             ['hideBorders', t('hideBorders')],
+                            ['hints', t('hints')],
                           ] as const).map(([key, label]) => (
                             <label
                               key={key}

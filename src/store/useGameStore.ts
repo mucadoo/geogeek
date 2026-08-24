@@ -70,6 +70,8 @@ interface GameState {
   soundEnabled: boolean;
   /** Consecutive correct answers in the current run; resets on a wrong guess or a skip. */
   streak: number;
+  /** Progressive hint ladder for the current target: 0 = none revealed, 1 = letter clue, 2 = fun fact. Resets on every new/skipped state. */
+  hintLevel: number;
 
   startGame: (
     states: StateFeature[],
@@ -91,6 +93,7 @@ interface GameState {
   setUserInput: (input: string) => void;
   setAutoZoom: (enabled: boolean) => void;
   setSoundEnabled: (enabled: boolean) => void;
+  revealHint: () => void;
   resetGame: () => void;
 }
 
@@ -177,6 +180,7 @@ export const useGameStore = create<GameState>()(
           noMapHints: false,
           hideBorders: false,
           timePerGuess: 20,
+          hints: true,
         },
         gameMode: 'name',
         options: [],
@@ -202,6 +206,7 @@ export const useGameStore = create<GameState>()(
         autoZoom: true,
         soundEnabled: true,
         streak: 0,
+        hintLevel: 0,
 
         startGame: (states, validNames, difficulty, advancedSettings, gameKey, gameMode = 'name', capitalMap = {}, localizedNames = {}, capitalLocalizedNames = {}) => {
           const filtered = states.filter(s => {
@@ -258,6 +263,7 @@ export const useGameStore = create<GameState>()(
             isNewHighScore: false,
             totalToGuess: filtered.length,
             streak: 0,
+            hintLevel: 0,
           });
         },
 
@@ -288,6 +294,7 @@ export const useGameStore = create<GameState>()(
               lastGuessCorrect: null,
               lastSkippedState: null,
               isNewHighScore: false,
+              hintLevel: 0,
             });
           }
         },
@@ -326,6 +333,7 @@ export const useGameStore = create<GameState>()(
         setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
         setAutoZoom: (autoZoom) => set({ autoZoom }),
         setSoundEnabled: (soundEnabled) => set({ soundEnabled }),
+        revealHint: () => set((state) => ({ hintLevel: Math.min(state.hintLevel + 1, 2) })),
 
         submitGuess: (guess) => {
           const state = get();
@@ -387,6 +395,7 @@ export const useGameStore = create<GameState>()(
                 isNewHighScore: isHighScore,
                 timeLeft: newTime,
                 streak: newStreak,
+                hintLevel: 0,
               });
             } else {
               const nextState = remainingStates[0];
@@ -410,6 +419,7 @@ export const useGameStore = create<GameState>()(
                 timeLeft: newTime,
                 options: nextOptions,
                 streak: newStreak,
+                hintLevel: 0,
               });
             }
             return true;
@@ -428,7 +438,7 @@ export const useGameStore = create<GameState>()(
           const newTime = advancedSettings.gameType === 'survival' ? Math.max(0, timeLeft - SURVIVAL_PENALTY) : timeLeft;
 
           if (newTime === 0 && advancedSettings.gameType === 'survival') {
-            updateAndSave({ status: 'finished', timeLeft: 0, missedStates: newMissed, streak: 0 });
+            updateAndSave({ status: 'finished', timeLeft: 0, missedStates: newMissed, streak: 0, hintLevel: 0 });
             return;
           }
           
@@ -451,6 +461,7 @@ export const useGameStore = create<GameState>()(
             timeLeft: newTime,
             options: nextOptions,
             streak: 0,
+            hintLevel: 0,
           });
         },
 
@@ -479,7 +490,8 @@ export const useGameStore = create<GameState>()(
           totalToGuess: 0,
           isNewHighScore: false,
           streak: 0,
-          options: []
+          options: [],
+          hintLevel: 0,
         }),
       };
     },
