@@ -5,6 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* GeoGeek controls its own theme; this keeps native UI (scrollbars, form
+     controls) in sync and signals that the page already handles both schemes. */
+  color-scheme: light;
+
   --background: #f0f4f2;
   --foreground: #2c3e50;
   --card: #ffffff;
@@ -45,6 +49,8 @@
 }
 
 .dark {
+  color-scheme: dark;
+
   --background: #0a0a0a;
   --foreground: #f8fafc;
   --card: #121212;

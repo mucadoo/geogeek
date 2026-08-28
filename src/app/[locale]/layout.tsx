@@ -35,8 +35,18 @@ const mono = JetBrains_Mono({
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
   
+  // Tell dark-mode browser extensions to leave the page alone. GeoGeek ships
+  // its own light/dark themes, and letting Dark Reader & co. re-tint the DOM on
+  // top of that breaks the map colours, charts and glassy HUD surfaces.
+  const extensionOptOut = {
+    // Dark Reader: presence of this meta fully disables it for the page.
+    'darkreader-lock': 'true',
+    // Night Eye: explicit per-site disable.
+    nighteye: 'disabled',
+  };
+
   if (!routing.locales.includes(locale as typeof routing.locales[number])) {
-    return {};
+    return { other: extensionOptOut };
   }
 
   const messages = (await import(`../../messages/${locale}.json`)).default as AbstractIntlMessages & { Metadata: { title: string; description: string } };
@@ -62,6 +72,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
       apple: '/apple-icon.png',
     },
     robots: { index: true, follow: true },
+    other: extensionOptOut,
     alternates: {
       canonical: `${baseUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}`,
       languages: alternates,
@@ -86,6 +97,9 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 export function generateViewport() {
   return {
     themeColor: '#00a8b5',
+    // Declares first-class support for both schemes so the browser (and
+    // well-behaved extensions) render native UI without forcing a re-tint.
+    colorScheme: 'light dark',
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
