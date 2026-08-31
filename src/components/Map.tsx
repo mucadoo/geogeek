@@ -10,13 +10,18 @@ import { feature } from 'topojson-client';
 import MapPolygons from './MapPolygons';
 import MapSidebar from './MapSidebar';
 
-import { getCountryByIsoAction } from '@/app/actions';
+import {
+  getCountryByIsoAction,
+  getSubdivisionByCodeAction,
+  listSubdivisionsByCountryAction,
+} from '@/app/actions';
 import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
+import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
-import { Country } from '@/types';
+import { Country, Subdivision } from '@/types';
 
 interface MapProps {
   slug?: string;
@@ -38,46 +43,81 @@ export default function Map({ slug }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [activeCountry, setActiveCountry] = useState<Country | null>(null);
+  // ISO 3166-2 code of the focused subdivision (2nd URL segment), uppercased.
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
+  const [activeSubdivision, setActiveSubdivision] = useState<Subdivision | null>(null);
+  const [subdivisionsForCountry, setSubdivisionsForCountry] = useState<Subdivision[]>([]);
+
+  // Guards against a Rules-of-Hooks violation: this render must call the exact
+  // same hooks on the server, the first client render, and every render after
+  // the persisted map store rehydrates.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const slugParts = Array.isArray(slug) ? slug : (slug ? slug.split('/') : []);
-  
+
   const ALPHA2_TO_NUMERIC = useMemo(() => {
     return Object.fromEntries(
       Object.entries(NUMERIC_TO_ALPHA2).map(([num, alpha]) => [alpha.toUpperCase(), num])
     );
-  },[]);
+  }, []);
 
-  const { 
+  const {
     position, selectedContinent, tooltip, setTooltip,
     exploreMode, setExploreMode, resetMap, handleContinentClick,
     _hasHydrated
   } = useMapStore();
 
   const { data: subMapData } = useCountrySubMap(activeCountry?.isoCode || null);
-  
+
   const isSubMap = !!(activeCountry && subMapData);
   const renderMapData = isSubMap ? subMapData : mapData;
 
-  const activeRegionName = useMemo(() => {
-    if (!activeRegion || !subMapData) return null;
+  // Parsed sub-map region features (once per sub-map load).
+  const subFeatures = useMemo(() => {
+    if (!subMapData) return [] as any[];
     const geoObject = subMapData.objects.regions;
-    if (!geoObject) return null;
+    if (!geoObject) return [] as any[];
     const features = feature(subMapData as any, geoObject as any) as any;
-    const regFeature = features.features.find((f: any) => String(f.id) === String(activeRegion));
-    return regFeature?.properties?.name || null;
-  }, [activeRegion, subMapData]);
-
-  const regionsList = useMemo(() => {
-    if (!subMapData) return [];
-    const geoObject = subMapData.objects.regions;
-    if (!geoObject) return [];
-    const features = feature(subMapData as any, geoObject as any) as any;
-    return features.features.map((f: any) => ({
-      id: String(f.id),
-      name: f.properties.name || "Unknown",
-    })).sort((a: any, b: any) => a.name.localeCompare(b.name));
+    return features.features as any[];
   }, [subMapData]);
+
+  // TopoJSON feature id -> ISO 3166-2 code for the active country's sub-map.
+  const codeByFeatureId = useMemo(() => {
+    if (!activeCountry?.isoCode || subFeatures.length === 0 || subdivisionsForCountry.length === 0) {
+      return {} as Record<string, string>;
+    }
+    return buildCodeByFeatureId(activeCountry.isoCode, subFeatures, subdivisionsForCountry);
+  }, [activeCountry?.isoCode, subFeatures, subdivisionsForCountry]);
+
+  const activeRegionName = useMemo(() => {
+    if (!activeRegion) return null;
+    if (activeSubdivision) return getLocalizedValue(activeSubdivision.name, locale);
+    return activeRegion;
+  }, [activeRegion, activeSubdivision, locale]);
+
+  // Region picker list: prefer the sub-map's own regions (so it lines up with
+  // what's drawn), otherwise fall back to the full subdivision list (data-only
+  // browser for countries without map geometry).
+  const regionsList = useMemo(() => {
+    if (subFeatures.length > 0 && Object.keys(codeByFeatureId).length > 0) {
+      const seen = new Set<string>();
+      const byCode: Record<string, Subdivision> = {};
+      for (const s of subdivisionsForCountry) byCode[s.code] = s;
+      const rows: { code: string; name: string }[] = [];
+      for (const f of subFeatures) {
+        const code = codeByFeatureId[String(f.id)];
+        if (!code || seen.has(code)) continue;
+        seen.add(code);
+        const sub = byCode[code];
+        rows.push({ code, name: sub ? getLocalizedValue(sub.name, locale) : code });
+      }
+      return rows.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return subdivisionsForCountry
+      .map((s) => ({ code: s.code, name: getLocalizedValue(s.name, locale) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [subFeatures, codeByFeatureId, subdivisionsForCountry, locale]);
 
   const handleBackClick = () => {
     if (activeRegion) {
@@ -101,19 +141,9 @@ export default function Map({ slug }: MapProps) {
 
   const projection = useMemo(() => {
     return d3.geoMercator().scale(120).translate([width / 2, height / 2 + 50]);
-  },[]);
+  }, []);
 
   const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
-
-  // Guard render to avoid hydration mismatches
-  if (!_hasHydrated) {
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--background)]">
-        <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-        <p className="font-medium text-slate-500 mt-2">{t('loading')}</p>
-      </div>
-    );
-  }
 
   useEffect(() => {
     async function initView() {
@@ -121,46 +151,55 @@ export default function Map({ slug }: MapProps) {
         resetMap();
         setActiveCountry(null);
         setActiveRegion(null);
+        setActiveSubdivision(null);
+        setSubdivisionsForCountry([]);
         return;
       }
 
       const firstPart = slugParts[0];
       const secondPart = slugParts[1];
+      const regionCode = secondPart ? secondPart.toUpperCase() : null;
 
       // Handle Continent
       const continentName = firstPart.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
       const view = CONTINENT_VIEWS[continentName as keyof typeof CONTINENT_VIEWS];
-      
+
       if (view) {
         handleContinentClick(continentName, view);
         setActiveCountry(null);
         setActiveRegion(null);
+        setActiveSubdivision(null);
+        setSubdivisionsForCountry([]);
         return;
       }
 
-      // Handle Country
+      // Handle Country (+ optional subdivision)
       if (firstPart.length === 2) {
         const iso = firstPart.toUpperCase();
-        // Avoid redundant fetches if we're already on this country
-        if (activeCountry?.isoCode === iso) {
-          setActiveRegion(secondPart || null);
-          return;
+        setActiveRegion(regionCode);
+
+        if (activeCountry?.isoCode !== iso) {
+          const [country, subs] = await Promise.all([
+            getCountryByIsoAction(iso),
+            listSubdivisionsByCountryAction(iso),
+          ]);
+          setActiveCountry(country || null);
+          setSubdivisionsForCountry(country ? subs : []);
+          if (!country) {
+            setActiveRegion(null);
+            setActiveSubdivision(null);
+            return;
+          }
         }
 
-        const country = await getCountryByIsoAction(iso);
-        if (country) {
-          setActiveCountry(country);
-          setActiveRegion(secondPart || null);
-        } else {
-          // If fetch fails, we should still probably clear the previous country
-          setActiveCountry(null);
-          setActiveRegion(null);
-        }
+        setActiveSubdivision(regionCode ? await getSubdivisionByCodeAction(regionCode) : null);
       } else {
         // Fallback for unknown slugs
         resetMap();
         setActiveCountry(null);
         setActiveRegion(null);
+        setActiveSubdivision(null);
+        setSubdivisionsForCountry([]);
       }
     }
     initView();
@@ -192,7 +231,7 @@ export default function Map({ slug }: MapProps) {
 
     if (!isInitialized) {
       const [lng, lat] = position.coordinates;
-      const [x, y] = projection([lng, lat]) ||[width / 2, height / 2];
+      const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
       const initialTransform = d3.zoomIdentity
           .translate(width / 2, height / 2)
           .scale(position.zoom)
@@ -201,30 +240,26 @@ export default function Map({ slug }: MapProps) {
     }
 
     if (activeCountry?.isoCode && activeRegion && subMapData) {
-      const geoObject = subMapData.objects.regions;
-      if (geoObject) {
-        const features = feature(subMapData as any, geoObject as any) as any;
-        const featureData = features.features.find((f: any) => String(f.id) === String(activeRegion));
-        
-        if (featureData) {
-          const path = d3.geoPath().projection(projection);
-          const [[x0, y0], [x1, y1]] = path.bounds(featureData);
-          
-          const dx = x1 - x0;
-          const dy = y1 - y0;
-          const x = (x0 + x1) / 2;
-          const y = (y0 + y1) / 2;
-          
-          const targetWidth = width * 0.6;
-          const scale = Math.min(8, 0.75 / Math.max(dx / targetWidth, dy / height));
-          const translate =[
-            (targetWidth / 2) - scale * x,
-            (height / 2) - scale * y
-          ];
+      const featureData = subFeatures.find((f: any) => codeByFeatureId[String(f.id)] === activeRegion);
 
-          svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
-          return;
-        }
+      if (featureData) {
+        const path = d3.geoPath().projection(projection);
+        const [[x0, y0], [x1, y1]] = path.bounds(featureData);
+
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const x = (x0 + x1) / 2;
+        const y = (y0 + y1) / 2;
+
+        const targetWidth = width * 0.6;
+        const scale = Math.min(8, 0.75 / Math.max(dx / targetWidth, dy / height));
+        const translate = [
+          (targetWidth / 2) - scale * x,
+          (height / 2) - scale * y
+        ];
+
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+        return;
       }
     }
 
@@ -232,19 +267,19 @@ export default function Map({ slug }: MapProps) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
       const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
-      
+
       if (featureData) {
         const path = d3.geoPath().projection(projection);
         const [[x0, y0], [x1, y1]] = path.bounds(featureData);
-        
+
         const dx = x1 - x0;
         const dy = y1 - y0;
         const x = (x0 + x1) / 2;
         const y = (y0 + y1) / 2;
-        
+
         const targetWidth = width * 0.6;
         const scale = Math.min(8, 0.8 / Math.max(dx / targetWidth, dy / height));
-        const translate =[
+        const translate = [
           (targetWidth / 2) - scale * x,
           (height / 2) - scale * y
         ];
@@ -255,9 +290,9 @@ export default function Map({ slug }: MapProps) {
     }
 
     if (isInitialized && !activeCountry) {
-      const[lng, lat] = position.coordinates;
+      const [lng, lat] = position.coordinates;
       const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
-      
+
       svg.transition()
         .duration(750)
         .call(
@@ -269,14 +304,24 @@ export default function Map({ slug }: MapProps) {
         );
     }
 
-  }, [position, projection, activeCountry, activeRegion, mapData, subMapData, ALPHA2_TO_NUMERIC]);
+  }, [position, projection, activeCountry, activeRegion, mapData, subMapData, subFeatures, codeByFeatureId, ALPHA2_TO_NUMERIC]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
   };
 
+  // Guard render to avoid hydration mismatches / hooks-order changes.
+  if (!mounted || !_hasHydrated) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--background)]">
+        <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+        <p className="font-medium text-slate-500 mt-2">{t('loading')}</p>
+      </div>
+    );
+  }
+
   return (
-    <div 
+    <div
       className="absolute inset-0 h-full w-full overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTooltip({ ...tooltip, show: false })}
@@ -290,17 +335,17 @@ export default function Map({ slug }: MapProps) {
 
       {status === 'success' && (
         <React.Fragment>
-          
+
           {/* View Toggles on World Map */}
           {!selectedContinent && !activeCountry && (
             <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 flex gap-2 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1.5 shadow-xl backdrop-blur-md">
-              <button 
+              <button
                 onClick={() => setExploreMode('continent')}
                 className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'continent' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
               >
                 Continents
               </button>
-              <button 
+              <button
                 onClick={() => setExploreMode('country')}
                 className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'country' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
               >
@@ -324,11 +369,13 @@ export default function Map({ slug }: MapProps) {
           >
             <g ref={gRef} className="will-change-transform">
               {renderMapData && (
-                <MapPolygons 
-                  mapData={renderMapData} 
-                  projection={projection} 
-                  activeCountryIso={targetIso} 
-                  isSubMap={isSubMap} 
+                <MapPolygons
+                  mapData={renderMapData}
+                  projection={projection}
+                  activeCountryIso={targetIso}
+                  isSubMap={isSubMap}
+                  subdivisions={subdivisionsForCountry}
+                  activeRegionCode={activeRegion}
                 />
               )}
               {(() => {
@@ -365,24 +412,25 @@ export default function Map({ slug }: MapProps) {
               title={activeCountry ? t('returnToContinent') : t('returnToWorld')}
               className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
             >
-              <Image 
-                src="/media/back_icon.svg" 
-                alt={activeCountry ? t('returnToContinent') : t('returnToWorld')} 
-                width={32} 
-                height={32} 
+              <Image
+                src="/media/back_icon.svg"
+                alt={activeCountry ? t('returnToContinent') : t('returnToWorld')}
+                width={32}
+                height={32}
                 className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
               />
             </button>
           )}
 
           {activeCountry && (
-            <MapSidebar 
-              type={activeRegionName ? 'region' : 'country'} 
-              title={activeRegionName ? activeRegionName : getLocalizedValue(activeCountry.name, locale)} 
-              data={activeCountry} 
-              regionName={activeRegionName}
+            <MapSidebar
+              type={activeSubdivision ? 'region' : 'country'}
+              title={activeSubdivision ? (activeRegionName ?? '') : getLocalizedValue(activeCountry.name, locale)}
+              data={activeCountry}
+              subdivision={activeSubdivision}
+              subdivisions={subdivisionsForCountry}
               regionsList={regionsList}
-              activeRegionId={activeRegion}
+              activeRegionCode={activeRegion}
             />
           )}
         </React.Fragment>

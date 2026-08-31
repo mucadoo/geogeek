@@ -14,7 +14,9 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "data:sync-subdivisions": "cp ../wikigeo-data-scraper/data/subdivisions.min.json public/data/fallback-subdivisions.json",
+    "data:build-subdivision-geometry": "node scripts/build-subdivision-geometry.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",

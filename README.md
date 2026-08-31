@@ -69,6 +69,24 @@
 
 ---
 
+## 🗺️ Map & Subdivision Data
+
+Country facts and subdivisions come from [@mucadoo/wiki-geo-data](https://www.npmjs.com/package/@mucadoo/wiki-geo-data)
+(with `public/data/fallback-*.json` snapshots used until the published SDK carries the
+newest schema).
+
+The Explorer's clickable subdivision shapes live in
+`public/data/subdivisions-geometry.topo.json` — one simplified TopoJSON, keyed by
+ISO 3166-2 code, derived from [Natural Earth](https://www.naturalearthdata.com/)
+`ne_10m_admin_1_states_provinces` (public domain). Regenerate it when Natural Earth or
+the subdivision dataset changes materially:
+
+```bash
+npm run data:build-subdivision-geometry   # downloads Natural Earth, needs npx + network
+```
+
+---
+
 ## 🏗️ Deployment
 
 The project is configured for automated deployment via **GitHub Actions**, pushing production-ready builds to GitHub Pages.

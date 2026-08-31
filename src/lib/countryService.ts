@@ -5,6 +5,7 @@ import path from 'path';
 import { WikiGeoClient } from '@mucadoo/wiki-geo-data';
 import { unstable_cache } from 'next/cache';
 
+import { installedSdkIsAtLeast } from '@/lib/sdkVersion';
 import { Country, RankingType } from '@/types';
 
 const client = new WikiGeoClient({ dataSource: 'remote' });
@@ -91,6 +92,7 @@ function buildCountry(wiki: any): Country {
     continent: wiki.continent || null,
     isoNumeric: wiki.isoNumeric || null,
     borders: wiki.borders || [],
+    subdivisionCodes: wiki.subdivisionCodes || [],
     name,
     capital,
     // GameMap already falls back to the region polygon's centroid when this is null.
@@ -131,26 +133,7 @@ function buildCountry(wiki: any): Country {
 // version containing that schema is actually published.
 const MIN_ENRICHED_SDK_VERSION = [0, 1, 18] as const;
 
-function isVersionAtLeast(version: string, min: readonly number[]): boolean {
-  const parts = version.split('.').map((p) => parseInt(p, 10));
-  for (let i = 0; i < min.length; i++) {
-    const part = parts[i] || 0;
-    if (part !== min[i]) return part > min[i];
-  }
-  return true;
-}
-
-async function installedSdkIsEnriched(): Promise<boolean> {
-  try {
-    const pkgPath = path.join(process.cwd(), 'node_modules/@mucadoo/wiki-geo-data/package.json');
-    const raw = await fs.readFile(pkgPath, 'utf-8');
-    const { version } = JSON.parse(raw) as { version: string };
-    return isVersionAtLeast(version, MIN_ENRICHED_SDK_VERSION);
-  } catch {
-    // Can't verify the installed version - don't trust it.
-    return false;
-  }
-}
+const installedSdkIsEnriched = () => installedSdkIsAtLeast(MIN_ENRICHED_SDK_VERSION);
 
 async function readFallbackCountries(): Promise<Country[]> {
   const fallbackPath = path.join(process.cwd(), 'public/data/fallback-countries.json');

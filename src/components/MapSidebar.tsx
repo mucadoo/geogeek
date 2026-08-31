@@ -7,38 +7,40 @@ import { useLocale, useTranslations } from 'next-intl';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { getNeighborsAction } from '@/app/actions';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
 } from '@/components/ui/dialog';
 import { formatLargeNumber } from '@/lib/formatters';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
-import { Country } from '@/types';
+import { Country, Subdivision } from '@/types';
 
 interface MapSidebarProps {
   type: 'continent' | 'country' | 'region';
   title: string;
   data?: Country;
-  regionName?: string | null;
-  regionsList?: { id: string; name: string }[];
-  activeRegionId?: string | null;
+  subdivision?: Subdivision | null;
+  subdivisions?: Subdivision[];
+  regionsList?: { code: string; name: string }[];
+  activeRegionCode?: string | null;
 }
 
-export default function MapSidebar({ type, title, data, regionName, regionsList, activeRegionId }: MapSidebarProps) {
+export default function MapSidebar({ type, title, data, subdivision, subdivisions = [], regionsList = [], activeRegionCode }: MapSidebarProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('CountryDetails');
-  const tRegions = useTranslations('RegionNames');
   const { masteryMode, setMasteryMode } = useMapStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [neighbors, setNeighbors] = useState<Country[]>([]);
   const [loadingNeighbors, setLoadingNeighbors] = useState(false);
-  
+
   // Swipe-to-dismiss touch states
   const touchStartY = useRef<number>(0);
+
+  const countryPath = data?.isoCode ? `/map/${data.isoCode.toLowerCase()}` : '/map';
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
@@ -50,17 +52,8 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
 
     // If swipe down exceeds 150px, dismiss the drawer
     if (diffY > 150) {
-      if (type === 'region' && data?.isoCode) {
-        router.push(`/map/${data.isoCode.toLowerCase()}`);
-      } else {
-        router.push('/map');
-      }
+      router.push(type === 'region' ? countryPath : '/map');
     }
-  };
-
-  const getLocalizedRegionName = (name: string) => {
-    if (!tRegions.has(name as any)) return name;
-    return tRegions(name as any);
   };
 
   useEffect(() => {
@@ -78,10 +71,36 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
     fetchNeighbors();
   }, [data, type, locale]);
 
-  const displayTitle = type === 'region' && regionName ? getLocalizedRegionName(regionName) : title;
+  const RegionPicker = () => (
+    regionsList.length > 0 ? (
+      <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl">
+        <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
+          {t('exploreRegions')} ({regionsList.length})
+        </h3>
+        <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
+          {regionsList.map((region) => {
+            const isCurrent = region.code === activeRegionCode;
+            return (
+              <button
+                key={region.code}
+                onClick={() => router.push(`${countryPath}/${region.code}`)}
+                className={`px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter ${
+                  isCurrent
+                    ? 'bg-primary border-primary text-white shadow-md scale-105'
+                    : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary'
+                }`}
+              >
+                {region.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    ) : null
+  );
 
   return (
-    <div 
+    <div
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       className="animate-in slide-in-from-right fade-in duration-300 absolute bottom-0 right-0 z-40 flex h-[45vh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-xl lg:bottom-4 lg:top-24 lg:right-4 lg:h-[calc(100vh-8rem)] lg:w-96 lg:rounded-3xl lg:border"
@@ -90,7 +109,7 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
       <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-800 lg:hidden" />
 
       <div className="mb-4 flex items-center justify-between">
-        <button 
+        <button
           onClick={() => setMasteryMode(!masteryMode)}
           className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all font-bebas tracking-widest text-xs ${
             masteryMode ? 'border-primary bg-primary/20 text-primary shadow-[0_0_15px_rgba(0,188,212,0.3)]' : 'border-[var(--card-border)] text-slate-400 grayscale'
@@ -100,13 +119,7 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
           {masteryMode ? 'Mastery: ON' : 'Mastery: OFF'}
         </button>
         <button
-          onClick={() => {
-            if (type === 'region' && data?.isoCode) {
-              router.push(`/map/${data.isoCode.toLowerCase()}`);
-            } else {
-              router.push('/map');
-            }
-          }}
+          onClick={() => router.push(type === 'region' ? countryPath : '/map')}
           className="rounded-full bg-slate-100 dark:bg-slate-800 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500"
         >
           <X size={20} />
@@ -115,7 +128,7 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
 
       <div className="mb-6 flex items-center justify-between border-b border-[var(--card-border)] pb-4">
         <h2 className="font-bebas text-4xl tracking-wider text-primary">
-          {displayTitle}
+          {title}
         </h2>
       </div>
 
@@ -124,9 +137,9 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
           <div className="space-y-6">
             <div className="flex justify-center">
               {data.flagUrl ? (
-                <Image 
-                  src={data.flagUrl} 
-                  alt={`${title} flag`} 
+                <Image
+                  src={data.flagUrl}
+                  alt={`${title} flag`}
                   width={160}
                   height={100}
                   className="h-28 w-auto object-contain shadow-xl rounded-lg border border-[var(--card-border)]"
@@ -138,7 +151,7 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
               )}
             </div>
 
-            <button 
+            <button
               onClick={() => setIsModalOpen(true)}
               className="group relative flex w-full flex-col gap-2 rounded-2xl border border-[var(--card-border)] bg-primary/5 p-4 text-left transition-all hover:bg-primary/10 hover:border-primary"
             >
@@ -150,10 +163,10 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
                 {getLocalizedValue(data.description, locale)}
               </p>
               <div className="mt-1 text-[10px] font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100 uppercase tracking-widest">
-                {t('readMore')} ➔
+                {t('readMore')}
               </div>
             </button>
-            
+
             <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
               <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80">QUICK FACTS</h3>
               <div className="space-y-3">
@@ -177,9 +190,6 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
                   { label: t('labels.callingCode'), value: getLocalizedValue(data.callingCode, locale) },
                   { label: t('labels.drivingSide'), value: data.drivingSide === 'left' ? t('labels.drivingSideLeft') : data.drivingSide === 'right' ? t('labels.drivingSideRight') : 'N/A' },
                   { label: t('labels.motto'), value: data.motto || 'N/A' },
-                  // `anthem` is omitted here: the scraper currently leaves unstripped
-                  // wikitext artifacts (File: refs, HTML comments, alt=) in ~80% of
-                  // values - not worth surfacing until that's fixed upstream.
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-slate-100 dark:border-slate-800/50 pb-2 last:border-0">
                     <span className="font-bebas text-slate-400 text-xs tracking-wider uppercase">{row.label}</span>
@@ -204,6 +214,27 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
               </div>
             )}
 
+            {/* SUBDIVISIONS SECTION (data-only browser for any country) */}
+            {subdivisions.length > 0 && (
+              <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl">
+                <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
+                  {t('subdivisionsTitle')} ({subdivisions.length})
+                </h3>
+                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
+                  {subdivisions.map((sub) => (
+                    <button
+                      key={sub.code}
+                      onClick={() => router.push(`${countryPath}/${sub.code}`)}
+                      title={getLocalizedValue(sub.type, locale)}
+                      className="px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary"
+                    >
+                      {getLocalizedValue(sub.name, locale)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* NEIGHBORING COUNTRIES SECTION */}
             <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
               <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80">NEIGHBORS</h3>
@@ -221,12 +252,12 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
                       title={getLocalizedValue(neighbor.name, locale)}
                     >
                       {neighbor.flagUrl ? (
-                        <Image 
-                          src={neighbor.flagUrl} 
-                          alt="" 
-                          width={48} 
-                          height={32} 
-                          className="h-8 w-12 rounded border border-[var(--card-border)] object-cover shadow-sm transition-shadow group-hover:shadow-md" 
+                        <Image
+                          src={neighbor.flagUrl}
+                          alt=""
+                          width={48}
+                          height={32}
+                          className="h-8 w-12 rounded border border-[var(--card-border)] object-cover shadow-sm transition-shadow group-hover:shadow-md"
                         />
                       ) : (
                         <div className="flex h-8 w-12 items-center justify-center rounded border border-[var(--card-border)] bg-slate-100 dark:bg-slate-800 text-[8px]">
@@ -246,50 +277,65 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
           </div>
         )}
 
-        {type === 'region' && data && (
+        {type === 'region' && data && subdivision && (
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-2">
-              {data.flagUrl ? (
-                <div 
-                  className="relative group cursor-pointer" 
-                  onClick={() => router.push(`/map/${data.isoCode?.toLowerCase()}`)}
-                  title={t('backToCountry')}
-                >
-                  <Image
-                    src={data.flagUrl}
-                    alt={`${getLocalizedValue(data.name, locale)} flag`}
-                    width={160}
-                    height={100}
-                    className="h-24 w-auto object-contain shadow-xl rounded-lg border border-[var(--card-border)] transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity">
-                    <span className="text-[10px] text-white font-bold uppercase tracking-wider">{t('backToCountry')}</span>
-                  </div>
-                </div>
+              {subdivision.flagUrl ? (
+                <Image
+                  src={subdivision.flagUrl}
+                  alt={`${getLocalizedValue(subdivision.name, locale)} flag`}
+                  width={160}
+                  height={100}
+                  className="h-24 w-auto object-contain shadow-xl rounded-lg border border-[var(--card-border)]"
+                />
               ) : (
                 <div className="h-24 w-36 bg-slate-100 dark:bg-slate-900 flex items-center justify-center rounded-lg border border-dashed border-[var(--card-border)] text-slate-400">
                   {t('noFlag')}
                 </div>
               )}
-              <span className="text-[10px] text-slate-400 font-mono uppercase tracking-widest mt-2">
+              <button
+                onClick={() => router.push(countryPath)}
+                className="text-[10px] text-slate-400 hover:text-primary font-mono uppercase tracking-widest mt-2"
+              >
                 {t('regionOf', { name: getLocalizedValue(data.name, locale) })}
-              </span>
+              </button>
             </div>
+
+            {getLocalizedValue(subdivision.description, locale) !== 'N/A' && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="group relative flex w-full flex-col gap-2 rounded-2xl border border-[var(--card-border)] bg-primary/5 p-4 text-left transition-all hover:bg-primary/10 hover:border-primary"
+              >
+                <div className="flex items-center gap-2 text-primary">
+                  <BookOpen size={16} />
+                  <span className="font-bebas text-lg tracking-wider uppercase">{t('descriptionTitle')}</span>
+                </div>
+                <p className="line-clamp-3 text-xs italic text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {getLocalizedValue(subdivision.description, locale)}
+                </p>
+                <div className="mt-1 text-[10px] font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100 uppercase tracking-widest">
+                  {t('readMore')}
+                </div>
+              </button>
+            )}
 
             <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
               <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('quickFacts')}</h3>
               <div className="space-y-3">
                 {[
-                  { label: t('parentCountry'), value: getLocalizedValue(data.name, locale), onClick: () => router.push(`/map/${data.isoCode?.toLowerCase()}`) },
-                  { label: t('regionId'), value: activeRegionId || 'N/A' },
-                  { label: t('countryCapital'), value: getLocalizedValue(data.capital, locale) },
-                  { label: t('officialLanguage'), value: getLocalizedValue(data.officialLanguage, locale) },
-                  { label: t('labels.currency'), value: getLocalizedValue(data.currency, locale) },
+                  { label: t('subdivisionType'), value: getLocalizedValue(subdivision.type, locale) },
+                  { label: t('labels.isoCode'), value: subdivision.code },
+                  { label: t('countryCapital'), value: getLocalizedValue(subdivision.capital, locale) },
+                  { label: t('parentCountry'), value: getLocalizedValue(data.name, locale), onClick: () => router.push(countryPath) },
+                  { label: t('officialLanguage'), value: subdivision.officialLanguage.en },
+                  { label: t('labels.population'), value: subdivision.population ? subdivision.population.toLocaleString(locale) + (subdivision.populationYear ? ` (${subdivision.populationYear})` : '') : 'N/A' },
+                  { label: t('labels.area'), value: subdivision.areaKm2 ? Math.round(subdivision.areaKm2).toLocaleString(locale) + ' km²' : 'N/A' },
+                  { label: t('density'), value: subdivision.densityKm2 ? subdivision.densityKm2.toFixed(1) + ' /km²' : 'N/A' },
                 ].map((row, i) => (
                   <div key={i} className="flex justify-between border-b border-slate-100 dark:border-slate-800/50 pb-2 last:border-0">
                     <span className="font-bebas text-slate-400 text-xs tracking-wider uppercase">{row.label}</span>
                     {row.onClick ? (
-                      <button 
+                      <button
                         onClick={row.onClick}
                         className="font-mono text-[11px] text-right text-primary hover:underline cursor-pointer font-bold"
                       >
@@ -303,38 +349,38 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
               </div>
             </div>
 
-            {regionsList && regionsList.length > 0 && (
-              <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl">
-                <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
-                  Explore Regions ({regionsList.length})
-                </h3>
-                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
-                  {regionsList.map((region) => {
-                    const isCurrent = region.id === activeRegionId;
-                    return (
-                      <button
-                        key={region.id}
-                        onClick={() => router.push(`/map/${data.isoCode?.toLowerCase()}/${region.id}`)}
-                        className={`px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter ${
-                          isCurrent 
-                            ? 'bg-primary border-primary text-white shadow-md scale-105'
-                            : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary'
-                        }`}
-                      >
-                        {getLocalizedRegionName(region.name)}
-                      </button>
-                    );
-                  })}
+            {subdivision.borders.filter((b) => b.code).length > 0 && (
+              <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
+                <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('neighbouringSubdivisions')}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {subdivision.borders.filter((b) => b.code).map((b) => (
+                    <button
+                      key={b.code}
+                      onClick={() => router.push(`/map/${b.code!.slice(0, 2).toLowerCase()}/${b.code}`)}
+                      className="px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary"
+                    >
+                      {getLocalizedValue(b.name, locale)}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
+
+            <RegionPicker />
+          </div>
+        )}
+
+        {type === 'region' && data && !subdivision && (
+          <div className="space-y-6">
+            <p className="text-xs text-slate-400 italic">{t('regionOf', { name: getLocalizedValue(data.name, locale) })}</p>
+            <RegionPicker />
           </div>
         )}
       </div>
 
-      {type === 'country' && data && (
+      {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent 
+          <DialogContent
             className="max-w-2xl bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl shadow-2xl p-0 overflow-hidden flex flex-col backdrop-blur-2xl"
             showCloseButton={true}
           >
@@ -346,23 +392,10 @@ export default function MapSidebar({ type, title, data, regionName, regionsList,
 
             <div className="flex-1 overflow-y-auto p-10 font-mono text-sm leading-relaxed text-[var(--foreground)] scrollbar-thin scrollbar-thumb-slate-800">
               <div className="flex flex-col gap-8">
-                <div className="flex justify-center">
-                  {data.flagUrl ? (
-                    <Image 
-                      src={data.flagUrl} 
-                      alt={`${title} flag`} 
-                      width={200}
-                      height={120}
-                      className="h-32 w-auto object-contain shadow-2xl rounded-xl border border-[var(--card-border)]"
-                    />
-                  ) : (
-                    <div className="h-32 w-48 bg-slate-100 dark:bg-slate-900 flex items-center justify-center rounded-xl border border-dashed border-[var(--card-border)] text-slate-400">
-                      No Flag
-                    </div>
-                  )}
-                </div>
                 <div className="whitespace-pre-wrap first-letter:text-6xl first-letter:font-bebas first-letter:mr-3 first-letter:float-left first-letter:text-primary first-letter:leading-[0.8]">
-                  {getLocalizedValue(data.description, locale)}
+                  {subdivision
+                    ? getLocalizedValue(subdivision.description, locale)
+                    : data && getLocalizedValue(data.description, locale)}
                 </div>
               </div>
             </div>

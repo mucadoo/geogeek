@@ -1,7 +1,8 @@
 'use server';
 
 import { countryService } from '@/lib/countryService';
-import { Country, RankingType } from '@/types';
+import { subdivisionService } from '@/lib/subdivisionService';
+import { Country, RankingType, Subdivision } from '@/types';
 
 export async function getCountryByIsoAction(isoCode: string): Promise<Country | null> {
   try {
@@ -31,6 +32,23 @@ export async function getRankingsAction(type: RankingType, locale: string = 'en'
 export async function getNeighborsAction(countryName: string, locale: string = 'en') {
   try {
     return await countryService.getNeighbors(countryName, locale);
+  } catch {
+    return [];
+  }
+}
+
+export async function getSubdivisionByCodeAction(code: string): Promise<Subdivision | null> {
+  try {
+    const subdivision = await subdivisionService.getSubdivisionByCode(code);
+    return subdivision || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function listSubdivisionsByCountryAction(isoCode: string): Promise<Subdivision[]> {
+  try {
+    return await subdivisionService.listSubdivisionsByCountry(isoCode);
   } catch {
     return [];
   }

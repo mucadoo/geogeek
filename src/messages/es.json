@@ -196,6 +196,11 @@
     "regionOf": "Región de {name}",
     "backToCountry": "Volver al país",
     "noFlag": "Sin bandera",
+    "exploreRegions": "Explorar regiones",
+    "subdivisionsTitle": "Subdivisiones",
+    "subdivisionType": "Tipo",
+    "density": "Densidad",
+    "neighbouringSubdivisions": "Subdivisiones vecinas",
     "labels": {
       "capital": "Capital",
       "largestCity": "Ciudad más grande",

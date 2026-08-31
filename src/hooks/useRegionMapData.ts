@@ -104,24 +104,52 @@ export const useAustraliaMapData = () => {
   });
 };
 
-export const useCountrySubMap = (isoCode: string | null) => {
+// One simplified TopoJSON holding a polygon for (almost) every first-level
+// administrative subdivision worldwide, keyed by ISO 3166-2 code. Built from
+// Natural Earth by scripts/build-subdivision-geometry.mjs. Fetched once and
+// cached for the session; useCountrySubMap slices it per country.
+const useSubdivisionGeometry = () => {
   return useQuery({
-    queryKey: ['sub-map', isoCode],
+    queryKey: ['subdivision-geometry'],
     queryFn: async () => {
-      if (!isoCode) return null;
-      let url = '';
-      switch (isoCode.toLowerCase()) {
-        case 'us': url = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'; break;
-        case 'br': url = 'https://code.highcharts.com/mapdata/countries/br/br-all.topo.json'; break;
-        case 'it': url = 'https://code.highcharts.com/mapdata/countries/it/it-all.topo.json'; break;
-        case 'fr': url = 'https://code.highcharts.com/mapdata/countries/fr/fr-all.topo.json'; break;
-        case 'ca': url = 'https://code.highcharts.com/mapdata/countries/ca/ca-all.topo.json'; break;
-        case 'au': url = 'https://code.highcharts.com/mapdata/countries/au/au-all.topo.json'; break;
-        default: return null;
-      }
-      return await fetchAndNormalizeMapData(url);
+      const response = await fetch('/data/subdivisions-geometry.topo.json');
+      if (!response.ok) throw new Error('Failed to load subdivision geometry');
+      return response.json();
     },
-    enabled: !!isoCode,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+};
+
+/**
+ * Returns a per-country TopoJSON (object key `regions`, one geometry per
+ * ISO 3166-2 subdivision, `id` = the code) sliced out of the global geometry
+ * file, or `null` when that country has no subdivision geometry (the Explorer
+ * then shows the data-only browser).
+ */
+export const useCountrySubMap = (isoCode: string | null) => {
+  const { data: geo } = useSubdivisionGeometry();
+
+  return useQuery({
+    queryKey: ['sub-map', isoCode, !!geo],
+    queryFn: async () => {
+      if (!isoCode || !geo) return null;
+      const prefix = isoCode.toUpperCase() + '-';
+      const objectKey = Object.keys(geo.objects)[0];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const geometries = (geo.objects[objectKey].geometries as any[]).filter(
+        (g) => String(g.id).startsWith(prefix)
+      );
+      if (geometries.length === 0) return null;
+      // Shares the global arc array — topojson-client only reads referenced arcs.
+      return {
+        type: 'Topology',
+        transform: geo.transform,
+        arcs: geo.arcs,
+        objects: { regions: { type: 'GeometryCollection', geometries } },
+      };
+    },
+    enabled: !!isoCode && !!geo,
     staleTime: Infinity,
     gcTime: Infinity,
   });

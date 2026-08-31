@@ -1,6 +1,7 @@
 'use client';
 
 import * as d3 from 'd3';
+import { useLocale } from 'next-intl';
 import NProgress from 'nprogress';
 import React, { useMemo } from 'react';
 import { feature, merge } from 'topojson-client';
@@ -8,8 +9,11 @@ import { Topology } from 'topojson-specification';
 
 import { NUMERIC_TO_CONTINENT, NUMERIC_TO_ALPHA2, CONTINENT_VIEWS } from '@/config/mapConstants';
 import { useRouter } from '@/i18n/routing';
+import { getLocalizedValue } from '@/lib/i18n-utils';
+import { resolveSubdivisionCode } from '@/lib/subdivisionMatch';
 import { useGameStore } from '@/store/useGameStore';
 import { useMapStore } from '@/store/useMapStore';
+import { Subdivision } from '@/types';
 
 interface CountryFeature {
   id: string | number;
@@ -23,10 +27,17 @@ interface MapPolygonsProps {
   projection: d3.GeoProjection;
   activeCountryIso?: string;
   isSubMap?: boolean;
+  subdivisions?: Subdivision[];
+  activeRegionCode?: string | null;
 }
 
-export default function MapPolygons({ mapData, projection, activeCountryIso, isSubMap = false }: MapPolygonsProps) {
+export default function MapPolygons({ mapData, projection, activeCountryIso, isSubMap = false, subdivisions = [], activeRegionCode = null }: MapPolygonsProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const subByCode = useMemo(
+    () => Object.fromEntries(subdivisions.map((s) => [s.code, s])),
+    [subdivisions]
+  );
   const { 
     selectedContinent, hoveredContinent, hoveredCountry, 
     tooltip, setTooltip, exploreMode, masteryMode,
@@ -129,12 +140,21 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
             if (activeCountryIso && alpha2?.toUpperCase() !== activeCountryIso.toUpperCase()) isVisible = false;
           }
 
-          const isHovered = (isContinentMode && !selectedContinent) 
-            ? hoveredContinent === continent 
+          const isHovered = (isContinentMode && !selectedContinent)
+            ? hoveredContinent === continent
             : hoveredCountry === mapId;
 
-          let fillColor = "var(--map-fill)"; 
-          if (isHovered && isClickable) fillColor = "var(--color-map-highlight)";
+          const subCode = isSubMap && activeCountryIso
+            ? resolveSubdivisionCode(activeCountryIso, geo, subdivisions)
+            : null;
+          const isActiveRegion = !!subCode && subCode === activeRegionCode;
+
+          const tooltipLabel = isSubMap
+            ? (subCode && subByCode[subCode] ? getLocalizedValue(subByCode[subCode].name, locale) : subCode || 'Unknown')
+            : countryName;
+
+          let fillColor = "var(--map-fill)";
+          if ((isHovered && isClickable) || isActiveRegion) fillColor = "var(--color-map-highlight)";
           else if (masteryMode && alpha2) fillColor = getMasteryColor(alpha2);
 
           const pathData = pathGenerator(geo);
@@ -152,7 +172,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               onMouseEnter={(e) => {
                 if (!isClickable) return;
                 setHoveredCountry(mapId);
-                setTooltip({ show: true, content: countryName, x: e.clientX, y: e.clientY });
+                setTooltip({ show: true, content: tooltipLabel, x: e.clientX, y: e.clientY });
               }}
               onMouseLeave={() => {
                 setHoveredCountry(null);
@@ -161,7 +181,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               onClick={() => {
                 if (!isClickable) return;
                 if (isSubMap && activeCountryIso) {
-                  router.push(`/map/${activeCountryIso}/${mapId}` as any);
+                  if (subCode) router.push(`/map/${activeCountryIso}/${subCode}` as any);
                 } else if (alpha2) {
                   NProgress.start();
                   router.push(`/map/${alpha2.toLowerCase()}` as any);

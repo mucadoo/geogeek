@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
 
-import { getCountryByIsoAction } from '@/app/actions';
+import { getCountryByIsoAction, getSubdivisionByCodeAction } from '@/app/actions';
 import Map from '@/components/Map';
 import { CONTINENT_VIEWS } from '@/config/mapConstants';
 import { routing } from '@/i18n/routing';
@@ -48,11 +48,21 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   if (slug && slug[0]) {
     const s = slug[0];
-    
+
     // Check if it's a continent
     const continentName = s.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     if (Object.keys(CONTINENT_VIEWS).includes(continentName)) {
       return { title: `${t('mapOf', { continent: continentName })} | GeoGeek` };
+    }
+
+    // Subdivision: /map/<iso2>/<ISO 3166-2 code>
+    if (slug[1] && /^[A-Za-z]{2}-/.test(slug[1])) {
+      const subdivision = await getSubdivisionByCodeAction(slug[1].toUpperCase());
+      const country = await getCountryByIsoAction(s.toUpperCase());
+      if (subdivision) {
+        const countryName = country ? getLocalizedValue(country.name, locale) : s.toUpperCase();
+        return { title: `${getLocalizedValue(subdivision.name, locale)} | ${countryName} | GeoGeek` };
+      }
     }
 
     // Treat as country code

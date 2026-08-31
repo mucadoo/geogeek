@@ -196,6 +196,11 @@
     "regionOf": "Region of {name}",
     "backToCountry": "Back to Country",
     "noFlag": "No Flag",
+    "exploreRegions": "Explore Regions",
+    "subdivisionsTitle": "Subdivisions",
+    "subdivisionType": "Type",
+    "density": "Density",
+    "neighbouringSubdivisions": "Neighbouring Subdivisions",
     "labels": {
       "capital": "Capital",
       "largestCity": "Largest City",

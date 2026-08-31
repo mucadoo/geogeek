@@ -74,6 +74,11 @@
     "regionOf": "{name}の地域",
     "backToCountry": "国のページに戻る",
     "noFlag": "国旗なし",
+    "exploreRegions": "地域を見る",
+    "subdivisionsTitle": "行政区画",
+    "subdivisionType": "種類",
+    "density": "人口密度",
+    "neighbouringSubdivisions": "隣接する行政区画",
     "labels": {
       "capital": "首都",
       "largestCity": "最大都市",

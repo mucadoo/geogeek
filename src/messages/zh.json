@@ -74,6 +74,11 @@
     "regionOf": "{name}的地区",
     "backToCountry": "返回国家页面",
     "noFlag": "无国旗",
+    "exploreRegions": "探索地区",
+    "subdivisionsTitle": "行政区划",
+    "subdivisionType": "类型",
+    "density": "人口密度",
+    "neighbouringSubdivisions": "相邻行政区",
     "labels": {
       "capital": "首都",
       "largestCity": "最大城市",

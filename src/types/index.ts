@@ -50,6 +50,7 @@ export interface Country {
   continent: string | null;
   isoNumeric: string | null;
   borders: LinkedValue[];
+  subdivisionCodes: string[];
   name: LocalizedString;
   capital: LocalizedString;
   capitalCoordinates: { lat: number; lng: number } | null;
@@ -80,6 +81,34 @@ export interface Country {
   government: LinkedValue[];
   governmentLeaders: GovernmentLeader[];
   largestCity: LinkedValue[];
+}
+
+// Flat, locale-keyed shape subdivisionService.buildSubdivision() normalizes
+// every wiki-geo-data subdivision record into. Mirrors how `Country` flattens
+// the SDK's raw type. `code` is the ISO 3166-2 code (e.g. "US-CA").
+export interface SubdivisionBorder {
+  code: string | null;
+  name: LocalizedString;
+}
+
+export interface Subdivision {
+  code: string;
+  wikidataId: string | null;
+  countryIsoCode: string;
+  name: LocalizedString;
+  type: LocalizedString;
+  typeEn: string | null;
+  flagUrl: string | null;
+  description: LocalizedString;
+  capital: LocalizedString;
+  capitalCoordinates: { lat: number; lng: number } | null;
+  coordinates: { lat: number; lng: number } | null;
+  population: number | null;
+  populationYear: number | null;
+  areaKm2: number | null;
+  densityKm2: number | null;
+  officialLanguage: { en: string };
+  borders: SubdivisionBorder[];
 }
 
 export type RankingType =

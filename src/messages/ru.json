@@ -74,6 +74,11 @@
     "regionOf": "Регион страны {name}",
     "backToCountry": "Вернуться к стране",
     "noFlag": "Флаг отсутствует",
+    "exploreRegions": "Регионы",
+    "subdivisionsTitle": "Субъекты",
+    "subdivisionType": "Тип",
+    "density": "Плотность",
+    "neighbouringSubdivisions": "Соседние субъекты",
     "labels": {
       "capital": "Столица",
       "largestCity": "Крупнейший город",

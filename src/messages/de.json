@@ -74,6 +74,11 @@
     "regionOf": "Region von {name}",
     "backToCountry": "Zurück zum Land",
     "noFlag": "Keine Flagge",
+    "exploreRegions": "Regionen erkunden",
+    "subdivisionsTitle": "Verwaltungseinheiten",
+    "subdivisionType": "Typ",
+    "density": "Dichte",
+    "neighbouringSubdivisions": "Benachbarte Einheiten",
     "labels": {
       "capital": "Hauptstadt",
       "largestCity": "Größte Stadt",
