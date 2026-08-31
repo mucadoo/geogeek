@@ -17,7 +17,8 @@
     "db:studio": "drizzle-kit studio",
     "data:sync-subdivisions": "cp ../wikigeo-data-scraper/data/subdivisions.min.json public/data/fallback-subdivisions.json",
     "data:sync-continents": "cp ../wikigeo-data-scraper/data/continents.min.json public/data/fallback-continents.json",
-    "data:build-subdivision-geometry": "node scripts/build-subdivision-geometry.mjs"
+    "data:build-subdivision-geometry": "node scripts/build-subdivision-geometry.mjs",
+    "data:build-continent-geometry": "node scripts/build-continent-geometry.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",
