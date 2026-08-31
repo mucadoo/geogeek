@@ -79,6 +79,8 @@
     "subdivisionType": "種類",
     "density": "人口密度",
     "neighbouringSubdivisions": "隣接する行政区画",
+    "countryCount": "国数",
+    "memberCountries": "構成国",
     "labels": {
       "capital": "首都",
       "largestCity": "最大都市",

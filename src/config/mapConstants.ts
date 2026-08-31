@@ -30,3 +30,14 @@ export const CONTINENT_VIEWS = {
   'South America': { coordinates: [-60, -20] as [number, number], zoom: 2.0 },
   'Oceania': { coordinates: [140, -25] as [number, number], zoom: 2.5 },
 };
+
+// Display name (CONTINENT_VIEWS / NUMERIC_TO_CONTINENT) -> two-letter code used
+// by the wiki-geo-data continents dataset.
+export const CONTINENT_NAME_TO_CODE: Record<string, string> = {
+  'Africa': 'AF',
+  'Asia': 'AS',
+  'Europe': 'EU',
+  'North America': 'NA',
+  'South America': 'SA',
+  'Oceania': 'OC',
+};

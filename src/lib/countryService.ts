@@ -93,6 +93,7 @@ function buildCountry(wiki: any): Country {
     isoNumeric: wiki.isoNumeric || null,
     borders: wiki.borders || [],
     subdivisionCodes: wiki.subdivisionCodes || [],
+    continentCodes: wiki.continentCodes || [],
     name,
     capital,
     // GameMap already falls back to the region polygon's centroid when this is null.

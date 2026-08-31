@@ -11,17 +11,18 @@ import MapPolygons from './MapPolygons';
 import MapSidebar from './MapSidebar';
 
 import {
+  getContinentByCodeAction,
   getCountryByIsoAction,
   getSubdivisionByCodeAction,
   listSubdivisionsByCountryAction,
 } from '@/app/actions';
-import { CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
+import { CONTINENT_NAME_TO_CODE, CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
 import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
-import { Country, Subdivision } from '@/types';
+import { Continent, Country, Subdivision } from '@/types';
 
 interface MapProps {
   slug?: string;
@@ -47,6 +48,7 @@ export default function Map({ slug }: MapProps) {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const [activeSubdivision, setActiveSubdivision] = useState<Subdivision | null>(null);
   const [subdivisionsForCountry, setSubdivisionsForCountry] = useState<Subdivision[]>([]);
+  const [activeContinent, setActiveContinent] = useState<Continent | null>(null);
 
   // Guards against a Rules-of-Hooks violation: this render must call the exact
   // same hooks on the server, the first client render, and every render after
@@ -153,6 +155,7 @@ export default function Map({ slug }: MapProps) {
         setActiveRegion(null);
         setActiveSubdivision(null);
         setSubdivisionsForCountry([]);
+        setActiveContinent(null);
         return;
       }
 
@@ -170,6 +173,8 @@ export default function Map({ slug }: MapProps) {
         setActiveRegion(null);
         setActiveSubdivision(null);
         setSubdivisionsForCountry([]);
+        const continentCode = CONTINENT_NAME_TO_CODE[continentName];
+        setActiveContinent(continentCode ? await getContinentByCodeAction(continentCode) : null);
         return;
       }
 
@@ -177,6 +182,7 @@ export default function Map({ slug }: MapProps) {
       if (firstPart.length === 2) {
         const iso = firstPart.toUpperCase();
         setActiveRegion(regionCode);
+        setActiveContinent(null);
 
         if (activeCountry?.isoCode !== iso) {
           const [country, subs] = await Promise.all([
@@ -200,6 +206,7 @@ export default function Map({ slug }: MapProps) {
         setActiveRegion(null);
         setActiveSubdivision(null);
         setSubdivisionsForCountry([]);
+        setActiveContinent(null);
       }
     }
     initView();
@@ -431,6 +438,14 @@ export default function Map({ slug }: MapProps) {
               subdivisions={subdivisionsForCountry}
               regionsList={regionsList}
               activeRegionCode={activeRegion}
+            />
+          )}
+
+          {!activeCountry && activeContinent && (
+            <MapSidebar
+              type="continent"
+              title={getLocalizedValue(activeContinent.name, locale)}
+              continent={activeContinent}
             />
           )}
         </React.Fragment>

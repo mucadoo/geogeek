@@ -14,9 +14,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { formatLargeNumber } from '@/lib/formatters';
-import { getLocalizedValue } from '@/lib/i18n-utils';
+import { getLocalizedCountryName, getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
-import { Country, Subdivision } from '@/types';
+import { Continent, Country, Subdivision } from '@/types';
 
 interface MapSidebarProps {
   type: 'continent' | 'country' | 'region';
@@ -24,11 +24,12 @@ interface MapSidebarProps {
   data?: Country;
   subdivision?: Subdivision | null;
   subdivisions?: Subdivision[];
+  continent?: Continent | null;
   regionsList?: { code: string; name: string }[];
   activeRegionCode?: string | null;
 }
 
-export default function MapSidebar({ type, title, data, subdivision, subdivisions = [], regionsList = [], activeRegionCode }: MapSidebarProps) {
+export default function MapSidebar({ type, title, data, subdivision, subdivisions = [], continent, regionsList = [], activeRegionCode }: MapSidebarProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('CountryDetails');
@@ -376,6 +377,69 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
             <RegionPicker />
           </div>
         )}
+
+        {type === 'continent' && continent && (
+          <div className="space-y-6">
+            {getLocalizedValue(continent.description, locale) !== 'N/A' && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="group relative flex w-full flex-col gap-2 rounded-2xl border border-[var(--card-border)] bg-primary/5 p-4 text-left transition-all hover:bg-primary/10 hover:border-primary"
+              >
+                <div className="flex items-center gap-2 text-primary">
+                  <BookOpen size={16} />
+                  <span className="font-bebas text-lg tracking-wider uppercase">{t('descriptionTitle')}</span>
+                </div>
+                <p className="line-clamp-3 text-xs italic text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {getLocalizedValue(continent.description, locale)}
+                </p>
+                <div className="mt-1 text-[10px] font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100 uppercase tracking-widest">
+                  {t('readMore')}
+                </div>
+              </button>
+            )}
+
+            <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
+              <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('quickFacts')}</h3>
+              <div className="space-y-3">
+                {[
+                  { label: t('labels.population'), value: continent.population ? continent.population.toLocaleString(locale) + (continent.populationYear ? ` (${continent.populationYear})` : '') : 'N/A' },
+                  { label: t('labels.area'), value: continent.areaKm2 ? Math.round(continent.areaKm2).toLocaleString(locale) + ' km²' : 'N/A' },
+                  { label: t('density'), value: continent.densityKm2 ? continent.densityKm2.toFixed(1) + ' /km²' : 'N/A' },
+                  { label: t('countryCount'), value: String(continent.countryCount) },
+                ].map((row, i) => (
+                  <div key={i} className="flex justify-between border-b border-slate-100 dark:border-slate-800/50 pb-2 last:border-0">
+                    <span className="font-bebas text-slate-400 text-xs tracking-wider uppercase">{row.label}</span>
+                    <span className="font-mono text-[11px] text-right font-medium">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {continent.countryIsoCodes.length > 0 && (
+              <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
+                <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('memberCountries')}</h3>
+                <div className="flex flex-wrap gap-3">
+                  {continent.countryIsoCodes.map((iso) => (
+                    <button
+                      key={iso}
+                      onClick={() => router.push(`/map/${iso.toLowerCase()}`)}
+                      className="group relative transition-transform hover:scale-110 active:scale-95"
+                      title={getLocalizedCountryName(iso, locale)}
+                    >
+                      <Image
+                        src={`https://flagcdn.com/${iso.toLowerCase()}.svg`}
+                        alt=""
+                        width={40}
+                        height={27}
+                        className="h-6 w-10 rounded border border-[var(--card-border)] object-cover shadow-sm transition-shadow group-hover:shadow-md"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {isModalOpen && (
@@ -395,7 +459,9 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                 <div className="whitespace-pre-wrap first-letter:text-6xl first-letter:font-bebas first-letter:mr-3 first-letter:float-left first-letter:text-primary first-letter:leading-[0.8]">
                   {subdivision
                     ? getLocalizedValue(subdivision.description, locale)
-                    : data && getLocalizedValue(data.description, locale)}
+                    : continent
+                      ? getLocalizedValue(continent.description, locale)
+                      : data && getLocalizedValue(data.description, locale)}
                 </div>
               </div>
             </div>

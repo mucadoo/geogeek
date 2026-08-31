@@ -79,6 +79,8 @@
     "subdivisionType": "Тип",
     "density": "Плотность",
     "neighbouringSubdivisions": "Соседние субъекты",
+    "countryCount": "Страны",
+    "memberCountries": "Страны",
     "labels": {
       "capital": "Столица",
       "largestCity": "Крупнейший город",

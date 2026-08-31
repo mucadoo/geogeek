@@ -202,6 +202,8 @@
     "subdivisionType": "Tipo",
     "density": "Densidade",
     "neighbouringSubdivisions": "Subdivisões Vizinhas",
+    "countryCount": "Países",
+    "memberCountries": "Países",
     "labels": {
       "capital": "Capital",
       "largestCity": "Maior Cidade",

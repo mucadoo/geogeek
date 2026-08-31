@@ -71,9 +71,10 @@
 
 ## 🗺️ Map & Subdivision Data
 
-Country facts and subdivisions come from [@mucadoo/wiki-geo-data](https://www.npmjs.com/package/@mucadoo/wiki-geo-data)
+Country, subdivision and continent facts come from
+[@mucadoo/wiki-geo-data](https://www.npmjs.com/package/@mucadoo/wiki-geo-data)
 (with `public/data/fallback-*.json` snapshots used until the published SDK carries the
-newest schema).
+newest schema — resync with `npm run data:sync-subdivisions` / `data:sync-continents`).
 
 The Explorer's clickable subdivision shapes live in
 `public/data/subdivisions-geometry.topo.json` — one simplified TopoJSON, keyed by

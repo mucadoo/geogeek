@@ -79,6 +79,8 @@
     "subdivisionType": "Typ",
     "density": "Dichte",
     "neighbouringSubdivisions": "Benachbarte Einheiten",
+    "countryCount": "Länder",
+    "memberCountries": "Länder",
     "labels": {
       "capital": "Hauptstadt",
       "largestCity": "Größte Stadt",

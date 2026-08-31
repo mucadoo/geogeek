@@ -51,6 +51,7 @@ export interface Country {
   isoNumeric: string | null;
   borders: LinkedValue[];
   subdivisionCodes: string[];
+  continentCodes: string[];
   name: LocalizedString;
   capital: LocalizedString;
   capitalCoordinates: { lat: number; lng: number } | null;
@@ -109,6 +110,23 @@ export interface Subdivision {
   densityKm2: number | null;
   officialLanguage: { en: string };
   borders: SubdivisionBorder[];
+}
+
+// Flat, locale-keyed shape continentService.buildContinent() normalizes every
+// wiki-geo-data continent record into. `code` is the two-letter continent code
+// (AF, AS, EU, NA, SA, OC).
+export interface Continent {
+  code: string;
+  wikidataId: string | null;
+  name: LocalizedString;
+  description: LocalizedString;
+  coordinates: { lat: number; lng: number } | null;
+  population: number | null;
+  populationYear: number | null;
+  areaKm2: number | null;
+  densityKm2: number | null;
+  countryCount: number;
+  countryIsoCodes: string[];
 }
 
 export type RankingType =
