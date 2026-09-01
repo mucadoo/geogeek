@@ -78,6 +78,30 @@ export function orientationFor(point: [number, number]): [number, number] {
   return [-point[0], -point[1]];
 }
 
+/**
+ * Globe framing for a feature: centre on `centrePoint` — pass the capital when
+ * known so the populated heart of a country faces the viewer instead of an
+ * area-weighted centroid skewed toward empty Arctic / ocean / desert (clicking
+ * Canada should look at southern Canada, not Ellesmere Island) — with an
+ * orthographic scale derived from the feature's spherical area so large countries
+ * pull back to fit and small ones zoom in.
+ */
+export function fitFeatureGlobe(
+  feature: d3.GeoPermissibleObjects,
+  centrePoint: [number, number],
+  height: number,
+  defaultScale: number,
+): { point: [number, number]; scale: number } {
+  // Angular radius of a spherical cap with the same area as the feature.
+  const capRadius = Math.acos(Math.max(-1, 1 - d3.geoArea(feature) / (2 * Math.PI)));
+  const eff = Math.min(capRadius * 2.1, (78 * Math.PI) / 180);
+  // Orthographic: a point `α` from the projection centre lands `scale·sin(α)` px
+  // out, so solve for the scale that puts the padded cap edge at ~0.4·height.
+  const raw = (0.4 * height) / Math.sin(Math.max(eff, 0.05));
+  const scale = Math.max(defaultScale * 1.6, Math.min(defaultScale * 3.6, raw));
+  return { point: centrePoint, scale };
+}
+
 /** True when `[lng, lat]` sits on the visible near hemisphere of the globe. */
 export function isFrontFacing(
   point: [number, number],

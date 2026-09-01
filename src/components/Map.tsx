@@ -30,7 +30,7 @@ import {
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
-import { fitFeatureFlat, isFrontFacing, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
+import { fitFeatureFlat, fitFeatureGlobe, isFrontFacing, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
 import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
 import { Continent, Country, Subdivision } from '@/types';
@@ -262,21 +262,27 @@ export default function Map({ slug }: MapProps) {
     if (activeCountry?.isoCode && activeRegion && subMapData) {
       const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
       if (f) {
+        const cap = activeSubdivision?.capitalCoordinates;
+        const centre: [number, number] = cap ? [cap.lng, cap.lat] : (d3.geoCentroid(f) as [number, number]);
         return {
           key: `region:${activeCountry.isoCode}:${activeRegion}`,
-          point: d3.geoCentroid(f) as [number, number],
-          scale: GLOBE_SCALE_DEFAULT * 4,
+          ...fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT),
         };
       }
     }
     if (activeCountry?.isoCode) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === numericId);
-      if (f) {
+      const cap = activeCountry.capitalCoordinates;
+      if (cap || f) {
+        const centre: [number, number] = cap
+          ? [cap.lng, cap.lat]
+          : (d3.geoCentroid(f) as [number, number]);
         return {
           key: `country:${activeCountry.isoCode}`,
-          point: d3.geoCentroid(f) as [number, number],
-          scale: GLOBE_SCALE_DEFAULT * 2.4,
+          ...(f
+            ? fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT)
+            : { point: centre, scale: GLOBE_SCALE_DEFAULT * 2.4 }),
         };
       }
     }
@@ -287,7 +293,7 @@ export default function Map({ slug }: MapProps) {
       }
     }
     return { key: 'world', point: [10, 25], scale: GLOBE_SCALE_DEFAULT };
-  }, [activeCountry, activeRegion, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent]);
+  }, [activeCountry, activeRegion, activeSubdivision, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent]);
 
   useEffect(() => {
     async function initView() {

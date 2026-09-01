@@ -159,7 +159,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               stroke="var(--map-stroke)"
               strokeWidth={0.5}
               vectorEffect="non-scaling-stroke"
-              className="transition-all duration-700 outline-none cursor-pointer"
+              className="transition-[fill,stroke-width,opacity] duration-700 outline-none cursor-pointer"
               role="button"
               tabIndex={0}
               aria-label={continent}
@@ -206,7 +206,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               stroke="var(--map-stroke)"
               strokeWidth={inContinent ? 0.5 : 0}
               vectorEffect="non-scaling-stroke"
-              className={`transition-all duration-700 outline-none ${inContinent ? 'cursor-pointer opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`transition-[fill,stroke-width,opacity] duration-700 outline-none ${inContinent ? 'cursor-pointer opacity-100' : 'opacity-0 pointer-events-none'}`}
               onMouseEnter={(e) => {
                 if (!inContinent) return;
                 setHoveredCountry(alpha2);
@@ -273,7 +273,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
             stroke="var(--map-stroke)"
             strokeWidth={isVisible ? 0.5 : 0}
             vectorEffect="non-scaling-stroke"
-            className={`transition-all duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            className={`transition-[fill,stroke-width,opacity] duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             onMouseEnter={(e) => {
               if (!isClickable) return;
               setHoveredCountry(mapId);
