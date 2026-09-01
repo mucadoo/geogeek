@@ -19,8 +19,8 @@ export const NUMERIC_TO_CONTINENT: Record<string, string> = {
   '032': 'South America', '068': 'South America', '076': 'South America', '152': 'South America', '170': 'South America', '218': 'South America', '238': 'South America', '328': 'South America', '600': 'South America', '604': 'South America', '740': 'South America', '858': 'South America', '862': 'South America',
   // Oceania
   '016': 'Oceania', '036': 'Oceania', '090': 'Oceania', '184': 'Oceania', '242': 'Oceania', '258': 'Oceania', '296': 'Oceania', '316': 'Oceania', '520': 'Oceania', '540': 'Oceania', '548': 'Oceania', '554': 'Oceania', '570': 'Oceania', '574': 'Oceania', '580': 'Oceania', '583': 'Oceania', '584': 'Oceania', '585': 'Oceania', '598': 'Oceania', '612': 'Oceania', '776': 'Oceania', '798': 'Oceania', '876': 'Oceania', '882': 'Oceania',
-  // Antarctica — no wiki-geo-data continent record, but drawn in the Explorer so
-  // the continent view isn't missing a landmass.
+  // Antarctica (no member states, so it isn't in the prebuilt continent geometry;
+  // its shape comes straight from the world-atlas polygon).
   '010': 'Antarctica',
 };
 
@@ -60,5 +60,5 @@ export const CONTINENT_NAME_TO_CODE: Record<string, string> = {
   'North America': 'NA',
   'South America': 'SA',
   'Oceania': 'OC',
-  'Antarctica': 'AQ',
+  'Antarctica': 'AN',
 };

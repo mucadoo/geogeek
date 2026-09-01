@@ -180,8 +180,8 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   const continentTopoKey = continentsTopo ? Object.keys(continentsTopo.objects)[0] : null;
 
   const continentGeographies = useMemo(() => {
-    // Antarctica has no wiki-geo-data continent record and isn't in the prebuilt
-    // continent geometry, so its shape always comes from the world-atlas polygon.
+    // Antarctica isn't in the prebuilt continent geometry (no member states), so
+    // its shape always comes from the world-atlas polygon.
     const antarcticaFeature = () => {
       if (!mapData?.objects?.countries) return null;
       const geoms = (mapData.objects.countries as any).geometries.filter(
@@ -384,7 +384,7 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
                 NProgress.start();
                 router.push(`/map/${alpha2.toLowerCase()}` as any);
               } else if (continent === 'Antarctica') {
-                // Not a country in wiki-geo-data — route to the continent view.
+                // Not a country — route to the continent view.
                 NProgress.start();
                 router.push('/map/antarctica' as any);
               }
