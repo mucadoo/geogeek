@@ -1,6 +1,7 @@
 'use client';
 
 import * as d3 from 'd3';
+import { Globe2, Map as MapIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -16,10 +17,20 @@ import {
   getSubdivisionByCodeAction,
   listSubdivisionsByCountryAction,
 } from '@/app/actions';
-import { CONTINENT_NAME_TO_CODE, CONTINENT_VIEWS, NUMERIC_TO_ALPHA2, NUMERIC_TO_CONTINENT } from '@/config/mapConstants';
+import {
+  CONTINENT_NAME_TO_CODE,
+  CONTINENT_VIEWS,
+  GLOBE_SCALE_DEFAULT,
+  GLOBE_SCALE_RANGE,
+  MERCATOR_SCALE,
+  NUMERIC_TO_ALPHA2,
+  NUMERIC_TO_CONTINENT,
+  WORLD_WIDTH,
+} from '@/config/mapConstants';
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
+import { fitFeatureFlat, isFrontFacing, orientationFor, wrapTranslateX } from '@/lib/mapProjection';
 import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
 import { Continent, Country, Subdivision } from '@/types';
@@ -50,6 +61,16 @@ export default function Map({ slug }: MapProps) {
   const [subdivisionsForCountry, setSubdivisionsForCountry] = useState<Subdivision[]>([]);
   const [activeContinent, setActiveContinent] = useState<Continent | null>(null);
 
+  // Globe (orthographic) view state. Refs mirror the state so the drag / wheel
+  // handlers registered once per view can read the live values without being
+  // re-bound every frame. `rotation` = orthographic `.rotate([λ, φ])`.
+  const [rotation, setRotation] = useState<[number, number]>(() => orientationFor([10, 25]));
+  const [globeScale, setGlobeScale] = useState<number>(GLOBE_SCALE_DEFAULT);
+  const rotationRef = useRef<[number, number]>(rotation);
+  const globeScaleRef = useRef<number>(globeScale);
+  rotationRef.current = rotation;
+  globeScaleRef.current = globeScale;
+
   // Guards against a Rules-of-Hooks violation: this render must call the exact
   // same hooks on the server, the first client render, and every render after
   // the persisted map store rehydrates.
@@ -67,8 +88,10 @@ export default function Map({ slug }: MapProps) {
   const {
     position, selectedContinent, tooltip, setTooltip,
     exploreMode, setExploreMode, resetMap, handleContinentClick,
+    viewMode, setViewMode,
     _hasHydrated
   } = useMapStore();
+  const isGlobe = viewMode === 'globe';
 
   const { data: subMapData } = useCountrySubMap(activeCountry?.isoCode || null);
 
@@ -141,9 +164,28 @@ export default function Map({ slug }: MapProps) {
   const width = 800;
   const height = 450;
 
-  const projection = useMemo(() => {
-    return d3.geoMercator().scale(120).translate([width / 2, height / 2 + 50]);
+  const flatProjection = useMemo(() => {
+    return d3.geoMercator().scale(MERCATOR_SCALE).translate([width / 2, height / 2 + 50]);
   }, []);
+
+  const globeProjection = useMemo(() => {
+    return d3.geoOrthographic()
+      .scale(globeScale)
+      .translate([width / 2, height / 2])
+      .rotate([rotation[0], rotation[1]])
+      .clipAngle(90);
+  }, [globeScale, rotation]);
+
+  const projection = isGlobe ? globeProjection : flatProjection;
+
+  const globeOverlay = useMemo(() => {
+    if (!isGlobe) return null;
+    const p = d3.geoPath(globeProjection);
+    return {
+      sphere: p({ type: 'Sphere' } as d3.GeoPermissibleObjects) ?? undefined,
+      graticule: p(d3.geoGraticule10() as d3.GeoPermissibleObjects) ?? undefined,
+    };
+  }, [isGlobe, globeProjection]);
 
   const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
 
@@ -212,12 +254,29 @@ export default function Map({ slug }: MapProps) {
     initView();
   }, [slug, handleContinentClick, resetMap, activeCountry?.isoCode]);
 
+  // --- FLAT MAP: pan / zoom (d3-zoom transform on <g>), with horizontal wrap ---
   useEffect(() => {
-    if (!svgRef.current || !gRef.current) return;
+    if (isGlobe || !svgRef.current || !gRef.current) return;
 
     const svg = d3.select(svgRef.current);
     const g = d3.select(gRef.current);
+    const node = svgRef.current;
     const isInitialized = !!svg.property('__zoom');
+
+    // Fold the pan offset back onto the centre world copy after a user gesture,
+    // so the 3 rendered copies always cover the viewport. Skipped for
+    // programmatic moves (their targets are already wrapped) to avoid a mid-flight
+    // jump when the flight path crosses a copy boundary.
+    const wrapTransform = (t: d3.ZoomTransform, userDriven: boolean) => {
+      if (isSubMap || !userDriven) return t;
+      const nx = wrapTranslateX(t.x, t.k, WORLD_WIDTH);
+      if (nx === t.x) return t;
+      const wrapped = d3.zoomIdentity.translate(nx, t.y).scale(t.k);
+      // Keep d3-zoom's stored transform in sync so the next gesture continues
+      // smoothly — the world copies are identical, so the shift is invisible.
+      (node as unknown as { __zoom: d3.ZoomTransform }).__zoom = wrapped;
+      return wrapped;
+    };
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
@@ -227,7 +286,7 @@ export default function Map({ slug }: MapProps) {
         svg.attr('shape-rendering', 'optimizeSpeed');
       })
       .on('zoom', (event) => {
-        g.attr('transform', event.transform);
+        g.attr('transform', wrapTransform(event.transform, !!event.sourceEvent).toString());
       })
       .on('end', () => {
         svg.attr('shape-rendering', 'geometricPrecision');
@@ -236,36 +295,23 @@ export default function Map({ slug }: MapProps) {
     svg.call(zoom);
     svg.on('dblclick.zoom', null);
 
+    const flyTo = (t: d3.ZoomTransform) => {
+      svg.transition().duration(750).call(zoom.transform, t);
+    };
+
     if (!isInitialized) {
       const [lng, lat] = position.coordinates;
-      const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
-      const initialTransform = d3.zoomIdentity
-          .translate(width / 2, height / 2)
-          .scale(position.zoom)
-          .translate(-x, -y);
-      svg.call(zoom.transform, initialTransform);
+      const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
+      const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(position.zoom).translate(-x, -y);
+      svg.call(zoom.transform, d3.zoomIdentity.translate(wrapTranslateX(base.x, base.k, WORLD_WIDTH), base.y).scale(base.k));
     }
+
+    const targetWidth = width * 0.6;
 
     if (activeCountry?.isoCode && activeRegion && subMapData) {
       const featureData = subFeatures.find((f: any) => codeByFeatureId[String(f.id)] === activeRegion);
-
       if (featureData) {
-        const path = d3.geoPath().projection(projection);
-        const [[x0, y0], [x1, y1]] = path.bounds(featureData);
-
-        const dx = x1 - x0;
-        const dy = y1 - y0;
-        const x = (x0 + x1) / 2;
-        const y = (y0 + y1) / 2;
-
-        const targetWidth = width * 0.6;
-        const scale = Math.min(8, 0.75 / Math.max(dx / targetWidth, dy / height));
-        const translate = [
-          (targetWidth / 2) - scale * x,
-          (height / 2) - scale * y
-        ];
-
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+        flyTo(fitFeatureFlat(featureData, flatProjection, WORLD_WIDTH, targetWidth, height));
         return;
       }
     }
@@ -274,44 +320,114 @@ export default function Map({ slug }: MapProps) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const world = feature(mapData as any, mapData.objects.countries as any) as any;
       const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
-
       if (featureData) {
-        const path = d3.geoPath().projection(projection);
-        const [[x0, y0], [x1, y1]] = path.bounds(featureData);
-
-        const dx = x1 - x0;
-        const dy = y1 - y0;
-        const x = (x0 + x1) / 2;
-        const y = (y0 + y1) / 2;
-
-        const targetWidth = width * 0.6;
-        const scale = Math.min(8, 0.8 / Math.max(dx / targetWidth, dy / height));
-        const translate = [
-          (targetWidth / 2) - scale * x,
-          (height / 2) - scale * y
-        ];
-
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+        flyTo(fitFeatureFlat(featureData, flatProjection, WORLD_WIDTH, targetWidth, height));
         return;
       }
     }
 
     if (isInitialized && !activeCountry) {
       const [lng, lat] = position.coordinates;
-      const [x, y] = projection([lng, lat]) || [width / 2, height / 2];
-
-      svg.transition()
-        .duration(750)
-        .call(
-          zoom.transform,
-          d3.zoomIdentity
-            .translate(width / 2, height / 2)
-            .scale(position.zoom)
-            .translate(-x, -y)
-        );
+      const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
+      const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(position.zoom).translate(-x, -y);
+      flyTo(d3.zoomIdentity.translate(wrapTranslateX(base.x, base.k, WORLD_WIDTH), base.y).scale(base.k));
     }
+  }, [isGlobe, position, flatProjection, activeCountry, activeRegion, isSubMap, mapData, subMapData, subFeatures, codeByFeatureId, ALPHA2_TO_NUMERIC]);
 
-  }, [position, projection, activeCountry, activeRegion, mapData, subMapData, subFeatures, codeByFeatureId, ALPHA2_TO_NUMERIC]);
+  // --- GLOBE: drag to rotate, wheel to zoom (registered once per view) ---
+  useEffect(() => {
+    if (!isGlobe || !svgRef.current || !gRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    const g = d3.select(gRef.current);
+    const node = svgRef.current;
+
+    svg.on('.zoom', null);
+    g.attr('transform', null);
+
+    let raf: number | null = null;
+    const flush = () => {
+      raf = null;
+      setRotation([rotationRef.current[0], rotationRef.current[1]]);
+    };
+    const schedule = () => { if (raf == null) raf = requestAnimationFrame(flush); };
+
+    const drag = d3.drag<SVGSVGElement, unknown>()
+      .clickDistance(4)
+      .on('start', () => svg.attr('shape-rendering', 'optimizeSpeed'))
+      .on('drag', (event) => {
+        const sens = 0.22 * (GLOBE_SCALE_DEFAULT / globeScaleRef.current);
+        const [l, p] = rotationRef.current;
+        rotationRef.current = [l + event.dx * sens, Math.max(-90, Math.min(90, p - event.dy * sens))];
+        schedule();
+      })
+      .on('end', () => svg.attr('shape-rendering', 'geometricPrecision'));
+
+    svg.call(drag);
+
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const next = globeScaleRef.current * Math.pow(1.0016, -event.deltaY);
+      const clamped = Math.max(GLOBE_SCALE_RANGE[0], Math.min(GLOBE_SCALE_RANGE[1], next));
+      globeScaleRef.current = clamped;
+      setGlobeScale(clamped);
+    };
+    node.addEventListener('wheel', onWheel, { passive: false });
+
+    return () => {
+      svg.on('.drag', null);
+      node.removeEventListener('wheel', onWheel);
+      if (raf != null) cancelAnimationFrame(raf);
+    };
+  }, [isGlobe]);
+
+  // --- GLOBE: rotate / zoom toward the focused continent, country or region ---
+  useEffect(() => {
+    if (!isGlobe) return;
+
+    let point: [number, number] | null = null;
+    let targetScale = globeScaleRef.current;
+
+    if (activeCountry?.isoCode && activeRegion && subMapData) {
+      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
+      if (f) { point = d3.geoCentroid(f); targetScale = GLOBE_SCALE_DEFAULT * 4; }
+    }
+    if (!point && activeCountry?.isoCode && mapData) {
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
+      const world = feature(mapData as any, mapData.objects.countries as any) as any;
+      const f = world.features.find((x: any) => String(x.id).padStart(3, '0') === numericId);
+      if (f) { point = d3.geoCentroid(f); targetScale = GLOBE_SCALE_DEFAULT * 2.4; }
+    }
+    if (!point && selectedContinent) {
+      const view = CONTINENT_VIEWS[selectedContinent as keyof typeof CONTINENT_VIEWS];
+      if (view) { point = view.coordinates; targetScale = GLOBE_SCALE_DEFAULT * 1.5; }
+    }
+    if (!point && !activeCountry && !selectedContinent) {
+      point = [10, 25];
+      targetScale = GLOBE_SCALE_DEFAULT;
+    }
+    if (!point) return;
+
+    const [sl, sp] = rotationRef.current;
+    const [tl, tp] = orientationFor(point);
+    const dl = ((tl - sl) % 360 + 540) % 360 - 180;
+    const dp = tp - sp;
+    const sScale = globeScaleRef.current;
+    const dScale = targetScale - sScale;
+    if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5 && Math.abs(dScale) < 1) return;
+
+    const start = performance.now();
+    let raf = requestAnimationFrame(function step(now) {
+      const u = Math.min(1, (now - start) / 750);
+      const e = d3.easeCubicInOut(u);
+      rotationRef.current = [sl + dl * e, sp + dp * e];
+      globeScaleRef.current = sScale + dScale * e;
+      setRotation([rotationRef.current[0], rotationRef.current[1]]);
+      setGlobeScale(globeScaleRef.current);
+      if (u < 1) raf = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isGlobe, activeCountry, activeRegion, selectedContinent, mapData, subMapData, subFeatures, codeByFeatureId, ALPHA2_TO_NUMERIC]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
@@ -342,6 +458,46 @@ export default function Map({ slug }: MapProps) {
 
       {status === 'success' && (
         <React.Fragment>
+
+          {/* Flat map / globe switch + back button (stacked, top-left) */}
+          <div className="absolute top-24 left-6 z-30 flex flex-col gap-2 md:left-10">
+            <div className="flex gap-1 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1 shadow-xl backdrop-blur-md">
+              <button
+                onClick={() => setViewMode('flat')}
+                title={t('flatView')}
+                aria-label={t('flatView')}
+                aria-pressed={!isGlobe}
+                className={`rounded-full p-2 transition-all ${!isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+              >
+                <MapIcon size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode('globe')}
+                title={t('globeView')}
+                aria-label={t('globeView')}
+                aria-pressed={isGlobe}
+                className={`rounded-full p-2 transition-all ${isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+              >
+                <Globe2 size={18} />
+              </button>
+            </div>
+
+            {(selectedContinent || activeCountry) && (
+              <button
+                onClick={handleBackClick}
+                title={activeCountry ? t('returnToContinent') : t('returnToWorld')}
+                className="animate-in fade-in slide-in-from-left-4 group cursor-pointer self-start rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto"
+              >
+                <Image
+                  src="/media/back_icon.svg"
+                  alt={activeCountry ? t('returnToContinent') : t('returnToWorld')}
+                  width={32}
+                  height={32}
+                  className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
+                />
+              </button>
+            )}
+          </div>
 
           {/* View Toggles on World Map */}
           {!selectedContinent && !activeCountry && (
@@ -375,6 +531,26 @@ export default function Map({ slug }: MapProps) {
             className="h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none"
           >
             <g ref={gRef} className="will-change-transform">
+              {isGlobe && globeOverlay && (
+                <g className="pointer-events-none">
+                  <path
+                    d={globeOverlay.sphere}
+                    fill="var(--map-fill)"
+                    fillOpacity={0.35}
+                    stroke="var(--map-stroke)"
+                    strokeWidth={0.75}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <path
+                    d={globeOverlay.graticule}
+                    fill="none"
+                    stroke="var(--map-stroke)"
+                    strokeOpacity={0.35}
+                    strokeWidth={0.4}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </g>
+              )}
               {renderMapData && (
                 <MapPolygons
                   mapData={renderMapData}
@@ -383,6 +559,8 @@ export default function Map({ slug }: MapProps) {
                   isSubMap={isSubMap}
                   subdivisions={subdivisionsForCountry}
                   activeRegionCode={activeRegion}
+                  repeat={!isGlobe && !isSubMap}
+                  worldWidth={WORLD_WIDTH}
                 />
               )}
               {(() => {
@@ -391,6 +569,7 @@ export default function Map({ slug }: MapProps) {
                 const source = activeSubdivision ?? activeCountry;
                 const coords = source?.capitalCoordinates;
                 if (!coords) return null;
+                if (isGlobe && !isFrontFacing([coords.lng, coords.lat], rotation)) return null;
                 const projected = projection([coords.lng, coords.lat]);
                 if (!projected) return null;
                 return (
@@ -415,22 +594,6 @@ export default function Map({ slug }: MapProps) {
               })()}
             </g>
           </svg>
-
-          {(selectedContinent || activeCountry) && (
-            <button
-              onClick={handleBackClick}
-              title={activeCountry ? t('returnToContinent') : t('returnToWorld')}
-              className="animate-in fade-in slide-in-from-left-4 group absolute top-24 left-6 z-20 cursor-pointer rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto md:left-10"
-            >
-              <Image
-                src="/media/back_icon.svg"
-                alt={activeCountry ? t('returnToContinent') : t('returnToWorld')}
-                width={32}
-                height={32}
-                className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
-              />
-            </button>
-          )}
 
           {activeCountry && (
             <MapSidebar

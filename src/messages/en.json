@@ -31,7 +31,9 @@
   "Map": {
     "loading": "Loading Explorer...",
     "returnToContinent": "Return to Continent",
-    "returnToWorld": "Return to World"
+    "returnToWorld": "Return to World",
+    "flatView": "Flat map",
+    "globeView": "Globe"
   },
   "Games": {
     "title": "Geography Hub",

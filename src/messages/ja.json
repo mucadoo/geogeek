@@ -20,7 +20,7 @@
     "toggleTheme": "テーマを切り替え"
   },
   "Map": {
-    "loading": "探索中...", "returnToContinent": "大陸選択に戻る", "returnToWorld": "世界地図に戻る"
+    "loading": "探索中...", "returnToContinent": "大陸選択に戻る", "returnToWorld": "世界地図に戻る", "flatView": "平面地図", "globeView": "地球儀"
   },
   "Games": {
     "title": "地理ハブ", "subtitle": "挑戦を選ぼう", "description": "地理マスターを目指そう。ゲームを選択し、時間制限に挑み、パーフェクトスコアを目指せ！", "searchPlaceholder": "ゲームを検索...",

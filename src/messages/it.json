@@ -31,7 +31,9 @@
   "Map": {
     "loading": "Caricamento Esploratore...",
     "returnToContinent": "Torna al continente",
-    "returnToWorld": "Torna al mondo"
+    "returnToWorld": "Torna al mondo",
+    "flatView": "Mappa piatta",
+    "globeView": "Globo"
   },
   "Games": {
     "title": "Hub Geografico",

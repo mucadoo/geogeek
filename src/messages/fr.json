@@ -31,7 +31,9 @@
   "Map": {
     "loading": "Chargement...",
     "returnToContinent": "Retour au continent",
-    "returnToWorld": "Retour au monde"
+    "returnToWorld": "Retour au monde",
+    "flatView": "Carte plate",
+    "globeView": "Globe"
   },
   "Games": {
     "title": "Centro Geográfico",

@@ -20,7 +20,7 @@
     "toggleTheme": "Design umschalten"
   },
   "Map": {
-    "loading": "Lade Entdecker...", "returnToContinent": "Zurück zum Kontinent", "returnToWorld": "Zurück zur Welt"
+    "loading": "Lade Entdecker...", "returnToContinent": "Zurück zum Kontinent", "returnToWorld": "Zurück zur Welt", "flatView": "Flache Karte", "globeView": "Globus"
   },
   "Games": {
     "title": "Geografie-Hub", "subtitle": "Wähle deine Herausforderung", "description": "Erwirb dir deinen Platz als Meister-Geograf. Wähle ein Spiel, kämpfe gegen die Zeit und versuche eine perfekte Punktzahl zu erreichen!", "searchPlaceholder": "Spiele suchen...",

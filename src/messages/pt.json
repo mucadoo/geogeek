@@ -31,7 +31,9 @@
   "Map": {
     "loading": "Carregando Explorador...",
     "returnToContinent": "Voltar ao Continente",
-    "returnToWorld": "Voltar ao Mundo"
+    "returnToWorld": "Voltar ao Mundo",
+    "flatView": "Mapa plano",
+    "globeView": "Globo"
   },
   "Games": {
     "title": "Centro Geográfico",

@@ -20,7 +20,7 @@
     "toggleTheme": "切换主题"
   },
   "Map": {
-    "loading": "正在加载探索者...", "returnToContinent": "返回大陆", "returnToWorld": "返回世界"
+    "loading": "正在加载探索者...", "returnToContinent": "返回大陆", "returnToWorld": "返回世界", "flatView": "平面地图", "globeView": "地球仪"
   },
   "Games": {
     "title": "地理中心", "subtitle": "选择你的挑战", "description": "赢得地理大师的称号。选择一个游戏，争分夺秒，尝试获得满分！", "searchPlaceholder": "搜索游戏...",

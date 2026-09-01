@@ -30,9 +30,12 @@ interface MapPolygonsProps {
   isSubMap?: boolean;
   subdivisions?: Subdivision[];
   activeRegionCode?: string | null;
+  /** Flat-map only: draw the geography layer three times so it wraps east–west. */
+  repeat?: boolean;
+  worldWidth?: number;
 }
 
-export default function MapPolygons({ mapData, projection, activeCountryIso, isSubMap = false, subdivisions = [], activeRegionCode = null }: MapPolygonsProps) {
+export default function MapPolygons({ mapData, projection, activeCountryIso, isSubMap = false, subdivisions = [], activeRegionCode = null, repeat = false, worldWidth = 0 }: MapPolygonsProps) {
   const router = useRouter();
   const locale = useLocale();
   const subByCode = useMemo(
@@ -58,6 +61,22 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   };
 
   const pathGenerator = d3.geoPath().projection(projection);
+
+  // On the flat map the geography layer is drawn three times (−1, 0, +1 world
+  // widths) so it repeats horizontally; countries that straddle the antimeridian
+  // (USA, Russia, Fiji…) then read as continuous and panning wraps. The globe and
+  // sub-maps draw a single copy.
+  const wrapLayer = (paths: React.ReactNode) => (
+    <g className="map-geographies">
+      {repeat && worldWidth > 0
+        ? [-1, 0, 1].map((i) => (
+            <g key={i} transform={`translate(${i * worldWidth},0)`}>
+              {paths}
+            </g>
+          ))
+        : paths}
+    </g>
+  );
 
   const geographies = useMemo(() => {
     if (!mapData) return[];
@@ -122,8 +141,8 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
     continentDrillFeatures.length > 0;
 
   if (isContinentMode && !selectedContinent && !isSubMap) {
-    return (
-      <g className="map-geographies">
+    return wrapLayer(
+      <>
         {continentGeographies.map((continentData) => {
           const continent = continentData.continent;
           const isHovered = hoveredContinent === continent;
@@ -159,13 +178,13 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
             />
           );
         })}
-      </g>
+      </>
     );
   }
 
   if (useContinentDrill) {
-    return (
-      <g className="map-geographies">
+    return wrapLayer(
+      <>
         {continentDrillFeatures.map((geo, index) => {
           const alpha2 = String(geo.id || '').toUpperCase();
           const inContinent = geo.properties?.continent === selectedContinent;
@@ -205,12 +224,12 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
             />
           );
         })}
-      </g>
+      </>
     );
   }
 
-  return (
-    <g className="map-geographies">
+  return wrapLayer(
+    <>
       {(geographies as unknown as CountryFeature[]).map((geo, index) => {
         const rawId = geo.id ? String(geo.id) : `geo-${index}`;
 
@@ -276,6 +295,6 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
           />
         );
       })}
-    </g>
+    </>
   );
 }

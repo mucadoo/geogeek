@@ -20,6 +20,7 @@ interface MapState {
   hoveredCountry: string | null;
   tooltip: Tooltip;
   exploreMode: 'continent' | 'country';
+  viewMode: 'flat' | 'globe';
   masteryMode: boolean;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
@@ -29,6 +30,7 @@ interface MapState {
   setHoveredCountry: (country: string | null) => void;
   setTooltip: (tooltip: Tooltip) => void;
   setExploreMode: (mode: 'continent' | 'country') => void;
+  setViewMode: (mode: 'flat' | 'globe') => void;
   setMasteryMode: (enabled: boolean) => void;
   handleContinentClick: (name: string, view: MapPosition) => void;
   clearActiveCountry: () => void;
@@ -43,6 +45,7 @@ export const useMapStore = create<MapState>()(
       hoveredCountry: null,
       tooltip: { show: false, content: '', x: 0, y: 0 },
       exploreMode: 'continent',
+      viewMode: 'flat',
       masteryMode: false,
       _hasHydrated: false,
       setHasHydrated: (state) => set({ _hasHydrated: state }),
@@ -52,6 +55,7 @@ export const useMapStore = create<MapState>()(
       setHoveredCountry: (hoveredCountry) => set({ hoveredCountry }),
       setTooltip: (tooltip) => set({ tooltip }),
       setExploreMode: (mode) => set({ exploreMode: mode }),
+      setViewMode: (mode) => set({ viewMode: mode }),
       setMasteryMode: (masteryMode) => set({ masteryMode }),
 
       handleContinentClick: (name, view) =>
@@ -88,6 +92,7 @@ export const useMapStore = create<MapState>()(
         position: state.position,
         selectedContinent: state.selectedContinent,
         exploreMode: state.exploreMode,
+        viewMode: state.viewMode,
       }),
     }
   )
