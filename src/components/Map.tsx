@@ -30,7 +30,7 @@ import {
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
-import { fitFeatureFlat, fitFeatureGlobe, isFrontFacing, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
+import { fitAreaGlobe, fitFeatureFlat, fitFeatureGlobe, isFrontFacing, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
 import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
 import { Continent, Country, Subdivision } from '@/types';
@@ -286,15 +286,22 @@ export default function Map({ slug }: MapProps) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === numericId);
       const cap = activeCountry.capitalCoordinates;
+      const centre: [number, number] = cap
+        ? [cap.lng, cap.lat]
+        : f
+          ? (d3.geoCentroid(f) as [number, number])
+          : [0, 0];
       if (cap || f) {
-        const centre: [number, number] = cap
-          ? [cap.lng, cap.lat]
-          : (d3.geoCentroid(f) as [number, number]);
+        // Scale from the country record's own areaKm2 (stable once the record
+        // loads) rather than the world-atlas feature — so the fly-to target
+        // doesn't churn / snap when that feature settles a beat later.
         return {
           key: `country:${activeCountry.isoCode}`,
-          ...(f
-            ? fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT)
-            : { point: centre, scale: GLOBE_SCALE_DEFAULT * 2.4 }),
+          ...(activeCountry.areaKm2
+            ? fitAreaGlobe(activeCountry.areaKm2, centre, height, GLOBE_SCALE_DEFAULT, 'km2')
+            : f
+              ? fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT)
+              : { point: centre, scale: GLOBE_SCALE_DEFAULT * 2.4 }),
         };
       }
     }
@@ -519,24 +526,28 @@ export default function Map({ slug }: MapProps) {
   }, [isGlobe, mounted, _hasHydrated, status]);
 
   // --- GLOBE: rotate / zoom toward the current target, once per destination ---
-  // Depend on the primitive target values, not the `globeViewTarget` object:
-  // it's rebuilt (same values, new identity) whenever an unrelated dep like the
-  // world-atlas features settle, and re-running here would cancel an in-flight
-  // fly-to and then early-return on the matching key — leaving the globe stuck
-  // mid-animation (e.g. a hard reload onto /map/<continent> never centring).
-  const { key: globeTargetKey, scale: globeTargetScale } = globeViewTarget;
-  const [globeTargetLng, globeTargetLat] = globeViewTarget.point;
+  // Keyed ONLY on `globeViewTarget.key`. The point/scale are read from a ref, so
+  // they can settle (a country's fitFeatureGlobe scale refines once the
+  // world-atlas feature is found; a `globeViewTarget` object is rebuilt on any
+  // unrelated re-render) without re-running this effect — a re-run would cancel
+  // the in-flight fly-to and then early-return on the matching key, leaving the
+  // globe snapped instead of gliding (continents were fine because their target
+  // scale is a constant; countries were not).
+  const globeTargetKey = globeViewTarget.key;
+  const globeTargetRef = useRef(globeViewTarget);
+  globeTargetRef.current = globeViewTarget;
   useEffect(() => {
     if (!isGlobe) return;
     if (globeTargetKey === lastGlobeKeyRef.current) return;
     lastGlobeKeyRef.current = globeTargetKey;
 
+    const { point, scale: targetScale } = globeTargetRef.current;
     const [sl, sp] = rotationRef.current;
-    const [tl, tp] = orientationFor([globeTargetLng, globeTargetLat]);
+    const [tl, tp] = orientationFor(point);
     const dl = ((tl - sl) % 360 + 540) % 360 - 180;
     const dp = tp - sp;
     const sScale = globeScaleRef.current;
-    const dScale = globeTargetScale - sScale;
+    const dScale = targetScale - sScale;
     if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5 && Math.abs(dScale) < 1) return;
 
     const start = performance.now();
@@ -550,7 +561,7 @@ export default function Map({ slug }: MapProps) {
       if (u < 1) raf = requestAnimationFrame(step);
     });
     return () => cancelAnimationFrame(raf);
-  }, [isGlobe, globeTargetKey, globeTargetLng, globeTargetLat, globeTargetScale]);
+  }, [isGlobe, globeTargetKey]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });

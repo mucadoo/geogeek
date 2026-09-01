@@ -92,8 +92,28 @@ export function fitFeatureGlobe(
   height: number,
   defaultScale: number,
 ): { point: [number, number]; scale: number } {
+  return fitAreaGlobe(d3.geoArea(feature), centrePoint, height, defaultScale);
+}
+
+/** Mean Earth surface area, km² — for converting `areaKm2` to steradians. */
+const EARTH_SURFACE_KM2 = 510_072_000;
+
+/**
+ * Same framing as `fitFeatureGlobe` but from a raw area. Prefer this when the
+ * area is known independently of the drawn geometry (`Country.areaKm2`), so the
+ * globe fly-to target is stable the moment the country record loads instead of
+ * waiting on / churning with the world-atlas feature.
+ */
+export function fitAreaGlobe(
+  area: number,
+  centrePoint: [number, number],
+  height: number,
+  defaultScale: number,
+  areaUnit: 'steradians' | 'km2' = 'steradians',
+): { point: [number, number]; scale: number } {
+  const steradians = areaUnit === 'km2' ? (area / EARTH_SURFACE_KM2) * 4 * Math.PI : area;
   // Angular radius of a spherical cap with the same area as the feature.
-  const capRadius = Math.acos(Math.max(-1, 1 - d3.geoArea(feature) / (2 * Math.PI)));
+  const capRadius = Math.acos(Math.max(-1, 1 - steradians / (2 * Math.PI)));
   const eff = Math.min(capRadius * 2.1, (78 * Math.PI) / 180);
   // Orthographic: a point `α` from the projection centre lands `scale·sin(α)` px
   // out, so solve for the scale that puts the padded cap edge at ~0.4·height.
