@@ -520,17 +520,24 @@ export default function Map({ slug }: MapProps) {
   }, [isGlobe, mounted, _hasHydrated, status]);
 
   // --- GLOBE: rotate / zoom toward the current target, once per destination ---
+  // Depend on the primitive target values, not the `globeViewTarget` object:
+  // it's rebuilt (same values, new identity) whenever an unrelated dep like the
+  // world-atlas features settle, and re-running here would cancel an in-flight
+  // fly-to and then early-return on the matching key — leaving the globe stuck
+  // mid-animation (e.g. a hard reload onto /map/<continent> never centring).
+  const { key: globeTargetKey, scale: globeTargetScale } = globeViewTarget;
+  const [globeTargetLng, globeTargetLat] = globeViewTarget.point;
   useEffect(() => {
     if (!isGlobe) return;
-    if (globeViewTarget.key === lastGlobeKeyRef.current) return;
-    lastGlobeKeyRef.current = globeViewTarget.key;
+    if (globeTargetKey === lastGlobeKeyRef.current) return;
+    lastGlobeKeyRef.current = globeTargetKey;
 
     const [sl, sp] = rotationRef.current;
-    const [tl, tp] = orientationFor(globeViewTarget.point);
+    const [tl, tp] = orientationFor([globeTargetLng, globeTargetLat]);
     const dl = ((tl - sl) % 360 + 540) % 360 - 180;
     const dp = tp - sp;
     const sScale = globeScaleRef.current;
-    const dScale = globeViewTarget.scale - sScale;
+    const dScale = globeTargetScale - sScale;
     if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5 && Math.abs(dScale) < 1) return;
 
     const start = performance.now();
@@ -544,7 +551,7 @@ export default function Map({ slug }: MapProps) {
       if (u < 1) raf = requestAnimationFrame(step);
     });
     return () => cancelAnimationFrame(raf);
-  }, [isGlobe, globeViewTarget]);
+  }, [isGlobe, globeTargetKey, globeTargetLng, globeTargetLat, globeTargetScale]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
