@@ -6,13 +6,14 @@ import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useState, useEffect, useRef } from 'react';
 
-import { getNeighborsAction } from '@/app/actions';
+import { getNeighborsAction, getSubdivisionFlagsAction } from '@/app/actions';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { SimpleTooltip } from '@/components/ui/tooltip';
 import { formatLargeNumber } from '@/lib/formatters';
 import { getLocalizedCountryName, getLocalizedValue } from '@/lib/i18n-utils';
 import { useMapStore } from '@/store/useMapStore';
@@ -25,8 +26,54 @@ interface MapSidebarProps {
   subdivision?: Subdivision | null;
   subdivisions?: Subdivision[];
   continent?: Continent | null;
-  regionsList?: { code: string; name: string }[];
+  regionsList?: { code: string; name: string; flagUrl?: string | null }[];
   activeRegionCode?: string | null;
+}
+
+/**
+ * A pill that shows a subdivision / country flag when one is available and falls
+ * back to its name otherwise. The name is always reachable on hover (covers both
+ * "which one is this flag?" and a clipped fallback label).
+ */
+function FlagPill({
+  name,
+  flagUrl,
+  onClick,
+  isCurrent = false,
+}: {
+  name: string;
+  flagUrl?: string | null;
+  onClick: () => void;
+  isCurrent?: boolean;
+}) {
+  return (
+    <SimpleTooltip label={name}>
+      <button
+        onClick={onClick}
+        aria-label={name}
+        aria-current={isCurrent || undefined}
+        className={`flex items-center justify-center border transition-all font-bold uppercase tracking-tighter ${
+          flagUrl ? 'overflow-hidden rounded-md p-0' : 'rounded-full px-3 py-1.5 text-[10px]'
+        } ${
+          isCurrent
+            ? 'border-primary ring-2 ring-primary bg-primary text-white shadow-md scale-105'
+            : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary hover:scale-105 active:scale-95'
+        }`}
+      >
+        {flagUrl ? (
+          <Image
+            src={flagUrl}
+            alt=""
+            width={48}
+            height={32}
+            className="h-7 w-11 object-cover"
+          />
+        ) : (
+          <span className="max-w-[10rem] truncate">{name}</span>
+        )}
+      </button>
+    </SimpleTooltip>
+  );
 }
 
 export default function MapSidebar({ type, title, data, subdivision, subdivisions = [], continent, regionsList = [], activeRegionCode }: MapSidebarProps) {
@@ -37,6 +84,9 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [neighbors, setNeighbors] = useState<Country[]>([]);
   const [loadingNeighbors, setLoadingNeighbors] = useState(false);
+  // ISO 3166-2 code -> flag URL for the focused region's neighbouring
+  // subdivisions (the border list only carries code + name).
+  const [borderFlags, setBorderFlags] = useState<Record<string, string | null>>({});
 
   // Swipe-to-dismiss touch states
   const touchStartY = useRef<number>(0);
@@ -72,29 +122,37 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
     fetchNeighbors();
   }, [data, type, locale]);
 
+  useEffect(() => {
+    const codes = subdivision?.borders.map((b) => b.code).filter((c): c is string => !!c) ?? [];
+    if (codes.length === 0) {
+      setBorderFlags({});
+      return;
+    }
+    let cancelled = false;
+    getSubdivisionFlagsAction(codes).then((flags) => {
+      if (!cancelled) setBorderFlags(flags);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [subdivision?.code]);
+
   const RegionPicker = () => (
     regionsList.length > 0 ? (
       <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl">
         <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
           {t('exploreRegions')} ({regionsList.length})
         </h3>
-        <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
-          {regionsList.map((region) => {
-            const isCurrent = region.code === activeRegionCode;
-            return (
-              <button
-                key={region.code}
-                onClick={() => router.push(`${countryPath}/${region.code}`)}
-                className={`px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter ${
-                  isCurrent
-                    ? 'bg-primary border-primary text-white shadow-md scale-105'
-                    : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary'
-                }`}
-              >
-                {region.name}
-              </button>
-            );
-          })}
+        <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
+          {regionsList.map((region) => (
+            <FlagPill
+              key={region.code}
+              name={region.name}
+              flagUrl={region.flagUrl}
+              isCurrent={region.code === activeRegionCode}
+              onClick={() => router.push(`${countryPath}/${region.code}`)}
+            />
+          ))}
         </div>
       </div>
     ) : null
@@ -221,16 +279,14 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                 <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
                   {t('subdivisionsTitle')} ({subdivisions.length})
                 </h3>
-                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
+                <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
                   {subdivisions.map((sub) => (
-                    <button
+                    <FlagPill
                       key={sub.code}
+                      name={getLocalizedValue(sub.name, locale)}
+                      flagUrl={sub.flagUrl}
                       onClick={() => router.push(`${countryPath}/${sub.code}`)}
-                      title={getLocalizedValue(sub.type, locale)}
-                      className="px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary"
-                    >
-                      {getLocalizedValue(sub.name, locale)}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -246,11 +302,11 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
               ) : neighbors.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
                   {neighbors.map((neighbor) => (
+                    <SimpleTooltip key={neighbor.isoCode} label={getLocalizedValue(neighbor.name, locale)}>
                     <button
-                      key={neighbor.isoCode}
                       onClick={() => router.push(`/map/${neighbor.isoCode?.toLowerCase()}`)}
+                      aria-label={getLocalizedValue(neighbor.name, locale)}
                       className="group relative transition-transform hover:scale-110 active:scale-95"
-                      title={getLocalizedValue(neighbor.name, locale)}
                     >
                       {neighbor.flagUrl ? (
                         <Image
@@ -269,6 +325,7 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                         ➔
                       </div>
                     </button>
+                    </SimpleTooltip>
                   ))}
                 </div>
               ) : (
@@ -353,15 +410,14 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
             {subdivision.borders.filter((b) => b.code).length > 0 && (
               <div className="bg-slate-50/50 dark:bg-slate-900/30 border border-[var(--card-border)] p-5 rounded-2xl">
                 <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('neighbouringSubdivisions')}</h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {subdivision.borders.filter((b) => b.code).map((b) => (
-                    <button
+                    <FlagPill
                       key={b.code}
+                      name={getLocalizedValue(b.name, locale)}
+                      flagUrl={borderFlags[b.code!]}
                       onClick={() => router.push(`/map/${b.code!.slice(0, 2).toLowerCase()}/${b.code}`)}
-                      className="px-3 py-1.5 rounded-full text-[10px] transition-all border font-bold uppercase tracking-tighter bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-[var(--card-border)] hover:border-primary hover:text-primary"
-                    >
-                      {getLocalizedValue(b.name, locale)}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -420,11 +476,11 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                 <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary opacity-80 uppercase">{t('memberCountries')}</h3>
                 <div className="flex flex-wrap gap-3">
                   {continent.countryIsoCodes.map((iso) => (
+                    <SimpleTooltip key={iso} label={getLocalizedCountryName(iso, locale)}>
                     <button
-                      key={iso}
                       onClick={() => router.push(`/map/${iso.toLowerCase()}`)}
+                      aria-label={getLocalizedCountryName(iso, locale)}
                       className="group relative transition-transform hover:scale-110 active:scale-95"
-                      title={getLocalizedCountryName(iso, locale)}
                     >
                       <Image
                         src={`https://flagcdn.com/${iso.toLowerCase()}.svg`}
@@ -434,6 +490,7 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                         className="h-6 w-10 rounded border border-[var(--card-border)] object-cover shadow-sm transition-shadow group-hover:shadow-md"
                       />
                     </button>
+                    </SimpleTooltip>
                   ))}
                 </div>
               </div>

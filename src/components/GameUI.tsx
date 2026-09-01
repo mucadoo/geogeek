@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import React, { useRef, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+import { SimpleTooltip } from '@/components/ui/tooltip';
 import { useGameStore } from '@/store/useGameStore';
 
 function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
@@ -63,21 +64,25 @@ export default function GameUI() {
           )}
         </div>
 
-        <button 
-          onClick={skipState}
-          className="group flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 text-gray-400 shadow-xl backdrop-blur-md transition-all hover:bg-white hover:text-primary"
-          title={t('skip')}
-        >
-          <SkipForward size={28} />
-        </button>
+        <SimpleTooltip label={t('skip')}>
+          <button
+            onClick={skipState}
+            aria-label={t('skip')}
+            className="group flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 text-gray-400 shadow-xl backdrop-blur-md transition-all hover:bg-white hover:text-primary"
+          >
+            <SkipForward size={28} />
+          </button>
+        </SimpleTooltip>
 
-        <button 
-          onClick={resetGame}
-          className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 text-gray-400 shadow-xl backdrop-blur-md transition-all hover:bg-red-50 hover:text-red-500"
-          title={t('quit')}
-        >
-          <XCircle size={28} />
-        </button>
+        <SimpleTooltip label={t('quit')}>
+          <button
+            onClick={resetGame}
+            aria-label={t('quit')}
+            className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 text-gray-400 shadow-xl backdrop-blur-md transition-all hover:bg-red-50 hover:text-red-500"
+          >
+            <XCircle size={28} />
+          </button>
+        </SimpleTooltip>
       </div>
 
       <style jsx>{`

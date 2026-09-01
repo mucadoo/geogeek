@@ -10,6 +10,7 @@ import { feature } from 'topojson-client';
 
 import MapPolygons from './MapPolygons';
 import MapSidebar from './MapSidebar';
+import { SimpleTooltip } from './ui/tooltip';
 
 import {
   getContinentByCodeAction,
@@ -142,18 +143,22 @@ export default function Map({ slug }: MapProps) {
       const seen = new Set<string>();
       const byCode: Record<string, Subdivision> = {};
       for (const s of subdivisionsForCountry) byCode[s.code] = s;
-      const rows: { code: string; name: string }[] = [];
+      const rows: { code: string; name: string; flagUrl: string | null }[] = [];
       for (const f of subFeatures) {
         const code = codeByFeatureId[String(f.id)];
         if (!code || seen.has(code)) continue;
         seen.add(code);
         const sub = byCode[code];
-        rows.push({ code, name: sub ? getLocalizedValue(sub.name, locale) : code });
+        rows.push({
+          code,
+          name: sub ? getLocalizedValue(sub.name, locale) : code,
+          flagUrl: sub?.flagUrl ?? null,
+        });
       }
       return rows.sort((a, b) => a.name.localeCompare(b.name));
     }
     return subdivisionsForCountry
-      .map((s) => ({ code: s.code, name: getLocalizedValue(s.name, locale) }))
+      .map((s) => ({ code: s.code, name: getLocalizedValue(s.name, locale), flagUrl: s.flagUrl }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [subFeatures, codeByFeatureId, subdivisionsForCountry, locale]);
 
@@ -560,30 +565,33 @@ export default function Map({ slug }: MapProps) {
           {/* Flat map / globe switch + back button (stacked, top-left) */}
           <div className="absolute top-24 left-6 z-30 flex flex-col gap-2 md:left-10">
             <div className="flex gap-1 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1 shadow-xl backdrop-blur-md">
-              <button
-                onClick={() => setViewMode('flat')}
-                title={t('flatView')}
-                aria-label={t('flatView')}
-                aria-pressed={!isGlobe}
-                className={`rounded-full p-2 transition-all ${!isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
-              >
-                <MapIcon size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode('globe')}
-                title={t('globeView')}
-                aria-label={t('globeView')}
-                aria-pressed={isGlobe}
-                className={`rounded-full p-2 transition-all ${isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
-              >
-                <Globe2 size={18} />
-              </button>
+              <SimpleTooltip label={t('flatView')} side="right">
+                <button
+                  onClick={() => setViewMode('flat')}
+                  aria-label={t('flatView')}
+                  aria-pressed={!isGlobe}
+                  className={`rounded-full p-2 transition-all ${!isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+                >
+                  <MapIcon size={18} />
+                </button>
+              </SimpleTooltip>
+              <SimpleTooltip label={t('globeView')} side="right">
+                <button
+                  onClick={() => setViewMode('globe')}
+                  aria-label={t('globeView')}
+                  aria-pressed={isGlobe}
+                  className={`rounded-full p-2 transition-all ${isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+                >
+                  <Globe2 size={18} />
+                </button>
+              </SimpleTooltip>
             </div>
 
             {(selectedContinent || activeCountry) && (
+              <SimpleTooltip label={activeCountry ? t('returnToContinent') : t('returnToWorld')} side="right">
               <button
                 onClick={handleBackClick}
-                title={activeCountry ? t('returnToContinent') : t('returnToWorld')}
+                aria-label={activeCountry ? t('returnToContinent') : t('returnToWorld')}
                 className="animate-in fade-in slide-in-from-left-4 group cursor-pointer self-start rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto"
               >
                 <Image
@@ -594,6 +602,7 @@ export default function Map({ slug }: MapProps) {
                   className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
                 />
               </button>
+              </SimpleTooltip>
             )}
           </div>
 

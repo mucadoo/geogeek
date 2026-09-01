@@ -14,6 +14,7 @@ import { getAllCountriesAction } from '@/app/actions';
 import DifficultyTicket from '@/components/DifficultyTicket';
 import { GameHUD } from '@/components/GameHUD';
 import GameMap from '@/components/GameMap';
+import { SimpleTooltip } from '@/components/ui/tooltip';
 import { PRESETS, AdvancedSettings, Difficulty } from '@/config/gameConstants';
 import { Link } from '@/i18n/routing';
 import getFeedback from '@/lib/getFeedback';
@@ -367,26 +368,30 @@ export default function QuizLayout({
           <GameHUD score={score} total={totalToGuess} timeLeft={timeLeft} />
 
           <div className="absolute top-6 right-10 z-20 flex gap-2 pointer-events-auto">
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className={cn(
-                "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
-                soundEnabled ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
-              )}
-              title={soundEnabled ? t('muteSound') : t('unmuteSound')}
-            >
-              {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
-            </button>
-            <button
-              onClick={() => setAutoZoom(!autoZoom)}
-              className={cn(
-                "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
-                autoZoom ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
-              )}
-              title={autoZoom ? t('disableAutoZoom') : t('enableAutoZoom')}
-            >
-              {autoZoom ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
-            </button>
+            <SimpleTooltip label={soundEnabled ? t('muteSound') : t('unmuteSound')}>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                aria-label={soundEnabled ? t('muteSound') : t('unmuteSound')}
+                className={cn(
+                  "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
+                  soundEnabled ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
+                )}
+              >
+                {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+              </button>
+            </SimpleTooltip>
+            <SimpleTooltip label={autoZoom ? t('disableAutoZoom') : t('enableAutoZoom')}>
+              <button
+                onClick={() => setAutoZoom(!autoZoom)}
+                aria-label={autoZoom ? t('disableAutoZoom') : t('enableAutoZoom')}
+                className={cn(
+                  "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
+                  autoZoom ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
+                )}
+              >
+                {autoZoom ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+              </button>
+            </SimpleTooltip>
           </div>
 
           <div className="absolute top-24 left-10 hidden xl:flex flex-col gap-4 w-60 bg-[var(--card-bg)]/85 backdrop-blur-md p-5 rounded-2xl border border-[var(--card-border)] shadow-lg animate-in fade-in slide-in-from-left-4 duration-500">

@@ -170,6 +170,13 @@ export const subdivisionService = {
     return all.find((s) => s.code === target);
   },
 
+  getSubdivisionsByCodes: async (codes: string[]): Promise<Subdivision[]> => {
+    const wanted = new Set(codes.map((c) => c.toUpperCase()));
+    if (wanted.size === 0) return [];
+    const all = await getSubdivisionsData();
+    return all.filter((s) => wanted.has(s.code));
+  },
+
   listSubdivisionsByCountry: async (isoCode: string): Promise<Subdivision[]> => {
     const target = isoCode.toUpperCase();
     const all = await getSubdivisionsData();

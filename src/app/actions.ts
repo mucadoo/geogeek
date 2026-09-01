@@ -47,6 +47,17 @@ export async function getSubdivisionByCodeAction(code: string): Promise<Subdivis
   }
 }
 
+export async function getSubdivisionFlagsAction(
+  codes: string[]
+): Promise<Record<string, string | null>> {
+  try {
+    const subs = await subdivisionService.getSubdivisionsByCodes(codes);
+    return Object.fromEntries(subs.map((s) => [s.code, s.flagUrl]));
+  } catch {
+    return {};
+  }
+}
+
 export async function listSubdivisionsByCountryAction(isoCode: string): Promise<Subdivision[]> {
   try {
     return await subdivisionService.listSubdivisionsByCountry(isoCode);
