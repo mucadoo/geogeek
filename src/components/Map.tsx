@@ -386,7 +386,10 @@ export default function Map({ slug }: MapProps) {
                 />
               )}
               {(() => {
-                const coords = (activeCountry as any)?.capitalCoordinates as { lat: number; lng: number } | null | undefined;
+                // When a subdivision is focused, mark its capital / administrative
+                // seat; otherwise mark the country's capital.
+                const source = activeSubdivision ?? activeCountry;
+                const coords = source?.capitalCoordinates;
                 if (!coords) return null;
                 const projected = projection([coords.lng, coords.lat]);
                 if (!projected) return null;
@@ -405,7 +408,7 @@ export default function Map({ slug }: MapProps) {
                       y={projected[1] + 4}
                       className="font-game-mono text-xs fill-[var(--foreground)]"
                     >
-                      {getLocalizedValue((activeCountry as any).capital, locale)}
+                      {getLocalizedValue(source.capital, locale)}
                     </text>
                   </g>
                 );
