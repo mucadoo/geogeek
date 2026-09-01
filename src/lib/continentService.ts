@@ -93,7 +93,9 @@ const getContinentsData = unstable_cache(
       return readFallbackContinents();
     }
   },
-  ['continents-data'],
+  // v2: Antarctica added to the dataset (2026-09) — bump so a warm Data Cache
+  // doesn't keep serving the 6-continent snapshot.
+  ['continents-data-v2'],
   { revalidate: 3600 }
 );
 

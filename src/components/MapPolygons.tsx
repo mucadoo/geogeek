@@ -127,18 +127,30 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   // (USA, Russia, Fiji…) then read as continuous and panning wraps. The globe and
   // sub-maps draw a single copy.
   const isRepeating = repeat && worldWidth > 0;
-  // Projected x of the two antimeridian meridians, used to clip the seam
-  // artifact out of every copy's stroke layer (see GeoShape above).
-  const seamL = isRepeating ? projection([-180, 0])?.[0] ?? null : null;
-  const seamR = isRepeating ? projection([180, 0])?.[0] ?? null : null;
-  const hasSeamClip = seamL != null && seamR != null && seamR > seamL;
+  // Projected bounds of the whole sphere. d3 closes any polygon it has to clip
+  // at an edge of the projection (antimeridian: Russia/Fiji; Mercator's ±85°
+  // pole cutoff: Antarctica) with a synthetic edge along that edge; drawn 3x for
+  // the repeat those become a vertical scar near the Bering Strait and a
+  // horizontal one under Antarctica. Clip every copy's stroke layer to just
+  // inside the sphere so those synthetic edges aren't drawn — it's open
+  // ocean/ice-shelf right at the edges, so nothing real is lost.
+  const sphereBounds = isRepeating
+    ? d3.geoPath().projection(projection).bounds({ type: 'Sphere' } as d3.GeoPermissibleObjects)
+    : null;
+  const hasSeamClip =
+    !!sphereBounds && sphereBounds[1][0] > sphereBounds[0][0] && sphereBounds[1][1] > sphereBounds[0][1];
 
   const wrapLayer = (paths: React.ReactNode) => (
     <g className="map-geographies">
       {hasSeamClip && (
         <defs>
           <clipPath id={SEAM_CLIP_ID} clipPathUnits="userSpaceOnUse">
-            <rect x={seamL! + 1.5} y={-100000} width={seamR! - seamL! - 3} height={200000} />
+            <rect
+              x={sphereBounds![0][0] + 1.5}
+              y={sphereBounds![0][1] + 1.5}
+              width={sphereBounds![1][0] - sphereBounds![0][0] - 3}
+              height={sphereBounds![1][1] - sphereBounds![0][1] - 3}
+            />
           </clipPath>
         </defs>
       )}
