@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+import { GLOBE_SCALE_DEFAULT } from '@/config/mapConstants';
+
 interface Tooltip {
   show: boolean;
   content: string;
@@ -22,6 +24,11 @@ interface MapState {
   exploreMode: 'continent' | 'country';
   viewMode: 'flat' | 'globe';
   masteryMode: boolean;
+  // Live orthographic globe pose. Kept in the store (not component state)
+  // because the Explorer's <Map> remounts on every /map ↔ /map/<x> navigation,
+  // which would otherwise snap the globe back to its default orientation.
+  globeRotation: [number, number];
+  globeScale: number;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setPosition: (position: MapPosition) => void;
@@ -32,6 +39,8 @@ interface MapState {
   setExploreMode: (mode: 'continent' | 'country') => void;
   setViewMode: (mode: 'flat' | 'globe') => void;
   setMasteryMode: (enabled: boolean) => void;
+  setGlobeRotation: (rotation: [number, number]) => void;
+  setGlobeScale: (scale: number) => void;
   handleContinentClick: (name: string, view: MapPosition) => void;
   clearActiveCountry: () => void;
   resetMap: () => void;
@@ -47,6 +56,9 @@ export const useMapStore = create<MapState>()(
       exploreMode: 'continent',
       viewMode: 'flat',
       masteryMode: false,
+      // orientationFor([10, 25]) — the default "world" globe orientation.
+      globeRotation: [-10, -25],
+      globeScale: GLOBE_SCALE_DEFAULT,
       _hasHydrated: false,
       setHasHydrated: (state) => set({ _hasHydrated: state }),
       setPosition: (position) => set({ position }),
@@ -57,6 +69,8 @@ export const useMapStore = create<MapState>()(
       setExploreMode: (mode) => set({ exploreMode: mode }),
       setViewMode: (mode) => set({ viewMode: mode }),
       setMasteryMode: (masteryMode) => set({ masteryMode }),
+      setGlobeRotation: (globeRotation) => set({ globeRotation }),
+      setGlobeScale: (globeScale) => set({ globeScale }),
 
       handleContinentClick: (name, view) =>
         set({

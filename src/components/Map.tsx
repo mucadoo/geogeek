@@ -62,14 +62,13 @@ export default function Map({ slug }: MapProps) {
   const [activeContinent, setActiveContinent] = useState<Continent | null>(null);
 
   // Globe (orthographic) view state. `rotation` = orthographic `.rotate([λ, φ])`.
-  // The refs are the source of truth for the live globe pose — the drag/wheel
-  // handlers and the fly-to animation write them synchronously and mirror into
-  // state for rendering. Do NOT re-sync state -> ref on every render: a drag
-  // writes the ref ahead of the (rAF-batched) state, and a re-render in that
-  // gap (e.g. the route change from clicking a continent) would clobber the
-  // ref back to the stale rotation, making the next fly-to jump from there.
-  const [rotation, setRotation] = useState<[number, number]>(() => orientationFor([10, 25]));
-  const [globeScale, setGlobeScale] = useState<number>(GLOBE_SCALE_DEFAULT);
+  // Lives in the store (see useMapStore) so it survives the <Map> remount on
+  // every /map ↔ /map/<x> navigation. The refs are the live source of truth —
+  // the drag/wheel handlers and the fly-to animation write them synchronously
+  // and mirror into the store for rendering. Do NOT re-sync store -> ref on
+  // every render: a drag writes the ref ahead of the (rAF-batched) store, and a
+  // re-render in that gap would clobber the ref back to the stale rotation.
+  const { globeRotation: rotation, setGlobeRotation: setRotation, globeScale, setGlobeScale } = useMapStore();
   const rotationRef = useRef<[number, number]>(rotation);
   const globeScaleRef = useRef<number>(globeScale);
 
