@@ -417,7 +417,10 @@ export default function Map({ slug }: MapProps) {
       const [lng, lat] = positionRef.current.coordinates;
       const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
       const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(positionRef.current.zoom).translate(-x, -y);
-      const seedX = rebaseTranslateX(base.x, width / 2, base.k, WORLD_WIDTH);
+      // Fold onto the centre world copy so the −1/+1 copies backfill both edges;
+      // rebasing toward screen-centre here could shift past the last copy and
+      // leave a gap at the viewport edge before the first pan.
+      const seedX = wrapTranslateX(base.x, base.k, WORLD_WIDTH);
       svg.call(zoom.transform, d3.zoomIdentity.translate(seedX, base.y).scale(base.k));
     } else {
       // Returning from the globe: the globe effect cleared the <g> transform —
