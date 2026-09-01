@@ -186,6 +186,13 @@ export default function Map({ slug }: MapProps) {
     return d3.geoMercator().scale(MERCATOR_SCALE).translate([width / 2, height / 2 + 50]);
   }, []);
 
+  // Vertical pan clamp for the flat map: the projected top/bottom of the sphere
+  // (Mercator's ±85° limit). Horizontal panning stays free — it wraps.
+  const flatYExtent = useMemo(() => {
+    const [[, y0], [, y1]] = d3.geoPath(flatProjection).bounds({ type: 'Sphere' } as d3.GeoPermissibleObjects);
+    return [y0, y1] as [number, number];
+  }, [flatProjection]);
+
   const globeProjection = useMemo(() => {
     return d3.geoOrthographic()
       .scale(globeScale)
@@ -397,6 +404,7 @@ export default function Map({ slug }: MapProps) {
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
+      .translateExtent([[-Infinity, flatYExtent[0]], [Infinity, flatYExtent[1]]])
       .touchable(true)
       .interpolate(linearZoomInterpolator)
       .on('start', () => {
@@ -434,7 +442,7 @@ export default function Map({ slug }: MapProps) {
     };
     // `status` matters: on a cold load the <svg> isn't mounted until the
     // world-atlas fetch resolves, so this must re-run once it does.
-  }, [isGlobe, flatProjection, mounted, _hasHydrated, status]);
+  }, [isGlobe, flatProjection, flatYExtent, mounted, _hasHydrated, status]);
 
   // --- FLAT MAP: fly to the current target, at most once per destination ---
   useEffect(() => {

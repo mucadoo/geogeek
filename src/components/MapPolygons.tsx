@@ -180,25 +180,42 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   const continentTopoKey = continentsTopo ? Object.keys(continentsTopo.objects)[0] : null;
 
   const continentGeographies = useMemo(() => {
+    // Antarctica has no wiki-geo-data continent record and isn't in the prebuilt
+    // continent geometry, so its shape always comes from the world-atlas polygon.
+    const antarcticaFeature = () => {
+      if (!mapData?.objects?.countries) return null;
+      const geoms = (mapData.objects.countries as any).geometries.filter(
+        (g: any) => String(g.id).padStart(3, '0') === '010'
+      );
+      return geoms.length ? merge(mapData, geoms) : null;
+    };
+
     if (continentsTopo && continentTopoKey) {
       const geometries = (continentsTopo.objects[continentTopoKey] as any).geometries as any[];
-      return Object.keys(CONTINENT_VIEWS).map((continentName) => ({
-        continent: continentName,
-        feature: merge(
-          continentsTopo,
-          geometries.filter((g) => g.properties?.continent === continentName)
-        ),
-      }));
+      return Object.keys(CONTINENT_VIEWS)
+        .map((continentName) => ({
+          continent: continentName,
+          feature:
+            continentName === 'Antarctica'
+              ? antarcticaFeature()
+              : merge(
+                  continentsTopo,
+                  geometries.filter((g) => g.properties?.continent === continentName)
+                ),
+        }))
+        .filter((c) => c.feature);
     }
 
     if (!mapData || !mapData.objects.countries) return [];
-    return Object.keys(CONTINENT_VIEWS).map((continentName) => {
-      const geometries = (mapData.objects.countries as any).geometries.filter((geo: any) => {
-        const id = String(geo.id).padStart(3, '0');
-        return NUMERIC_TO_CONTINENT[id] === continentName;
-      });
-      return { continent: continentName, feature: merge(mapData, geometries) };
-    });
+    return Object.keys(CONTINENT_VIEWS)
+      .map((continentName) => {
+        const geometries = (mapData.objects.countries as any).geometries.filter((geo: any) => {
+          const id = String(geo.id).padStart(3, '0');
+          return NUMERIC_TO_CONTINENT[id] === continentName;
+        });
+        return { continent: continentName, feature: geometries.length ? merge(mapData, geometries) : null };
+      })
+      .filter((c) => c.feature);
   }, [continentsTopo, continentTopoKey, mapData]);
 
   // Per-country pieces for the continent drill-down (/map/<continent>), keyed so
@@ -210,9 +227,14 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   }, [continentsTopo, continentTopoKey]);
 
   const isContinentMode = exploreMode === 'continent';
+  // Antarctica has no per-country drill geometry — fall through to the main
+  // branch (which filters the world polygons by NUMERIC_TO_CONTINENT) so
+  // /map/antarctica still shows the continent instead of a blank map.
+  const hasDrillFeatures =
+    !!selectedContinent &&
+    continentDrillFeatures.some((g) => g.properties?.continent === selectedContinent);
   const useContinentDrill =
-    isContinentMode && !!selectedContinent && !isSubMap && !activeCountryIso &&
-    continentDrillFeatures.length > 0;
+    isContinentMode && !!selectedContinent && !isSubMap && !activeCountryIso && hasDrillFeatures;
 
   if (isContinentMode && !selectedContinent && !isSubMap) {
     return wrapLayer(
