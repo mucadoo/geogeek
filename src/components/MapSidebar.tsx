@@ -191,7 +191,7 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
         </h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto font-mono text-sm text-[var(--foreground)] pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+      <div className="flex-1 min-h-0 overflow-y-auto -mr-3 pr-3 font-mono text-sm text-[var(--foreground)] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
         {type === 'country' && data && (
           <div className="space-y-6">
             <div className="flex justify-center">
@@ -502,16 +502,16 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent
-            className="max-w-2xl bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl shadow-2xl p-0 overflow-hidden flex flex-col backdrop-blur-2xl"
+            className="w-[calc(100%-2rem)] max-w-2xl sm:max-w-3xl lg:max-w-4xl max-h-[88vh] gap-0 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl shadow-2xl p-0 overflow-hidden flex flex-col backdrop-blur-2xl"
             showCloseButton={true}
           >
-            <DialogHeader className="flex items-center justify-between border-b border-[var(--card-border)] p-8 space-y-0">
-              <DialogTitle className="font-bebas text-4xl tracking-widest text-primary">
+            <DialogHeader className="flex items-center justify-between border-b border-[var(--card-border)] p-6 sm:p-8 space-y-0 shrink-0">
+              <DialogTitle className="font-bebas text-3xl sm:text-4xl tracking-widest text-primary">
                 {title}
               </DialogTitle>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto p-10 font-mono text-sm leading-relaxed text-[var(--foreground)] scrollbar-thin scrollbar-thumb-slate-800">
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-10 font-mono text-sm leading-relaxed text-[var(--foreground)] scrollbar-thin scrollbar-thumb-slate-800">
               <div className="flex flex-col gap-8">
                 <div className="whitespace-pre-wrap first-letter:text-6xl first-letter:font-bebas first-letter:mr-3 first-letter:float-left first-letter:text-primary first-letter:leading-[0.8]">
                   {subdivision
@@ -523,7 +523,7 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
               </div>
             </div>
 
-            <div className="h-2 bg-primary/20" />
+            <div className="h-2 bg-primary/20 shrink-0" />
           </DialogContent>
         </Dialog>
       )}

@@ -1,8 +1,7 @@
 'use client';
 
 import * as d3 from 'd3';
-import { Globe2, Map as MapIcon } from 'lucide-react';
-import Image from 'next/image';
+import { ArrowLeft, Globe2, Map as MapIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useRef, useEffect, useMemo, useState } from 'react';
@@ -575,8 +574,8 @@ export default function Map({ slug }: MapProps) {
       {status === 'success' && (
         <React.Fragment>
 
-          {/* Flat map / globe switch + back button (stacked, top-left) */}
-          <div className="absolute top-24 left-6 z-30 flex flex-col gap-2 md:left-10">
+          {/* Flat/globe switch, continent/country toggle + back button (stacked, top-left) */}
+          <div className="absolute top-24 left-6 z-30 flex flex-col items-start gap-2 md:left-10">
             <div className="flex gap-1 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1 shadow-xl backdrop-blur-md">
               <SimpleTooltip label={t('flatView')} side="right">
                 <button
@@ -600,42 +599,38 @@ export default function Map({ slug }: MapProps) {
               </SimpleTooltip>
             </div>
 
+            {/* Continents / Countries toggle (world view only) */}
+            {!selectedContinent && !activeCountry && (
+              <div className="flex gap-1 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1 shadow-xl backdrop-blur-md">
+                <button
+                  onClick={() => setExploreMode('continent')}
+                  aria-pressed={exploreMode === 'continent'}
+                  className={`rounded-full px-4 py-1.5 text-[11px] font-bold tracking-widest uppercase transition-all ${exploreMode === 'continent' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+                >
+                  Continents
+                </button>
+                <button
+                  onClick={() => setExploreMode('country')}
+                  aria-pressed={exploreMode === 'country'}
+                  className={`rounded-full px-4 py-1.5 text-[11px] font-bold tracking-widest uppercase transition-all ${exploreMode === 'country' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
+                >
+                  Countries
+                </button>
+              </div>
+            )}
+
             {(selectedContinent || activeCountry) && (
               <SimpleTooltip label={activeCountry ? t('returnToContinent') : t('returnToWorld')} side="right">
-              <button
-                onClick={handleBackClick}
-                aria-label={activeCountry ? t('returnToContinent') : t('returnToWorld')}
-                className="animate-in fade-in slide-in-from-left-4 group cursor-pointer self-start rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] p-3 shadow-xl transition-all duration-500 hover:scale-105 pointer-events-auto"
-              >
-                <Image
-                  src="/media/back_icon.svg"
-                  alt={activeCountry ? t('returnToContinent') : t('returnToWorld')}
-                  width={32}
-                  height={32}
-                  className="hue-rotate-[180deg] saturate-[3] sepia-[1] transition-all group-hover:invert-[0.3]"
-                />
-              </button>
+                <button
+                  onClick={handleBackClick}
+                  aria-label={activeCountry ? t('returnToContinent') : t('returnToWorld')}
+                  className="animate-in fade-in slide-in-from-left-4 self-start rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-2.5 text-slate-500 shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:text-primary"
+                >
+                  <ArrowLeft size={18} />
+                </button>
               </SimpleTooltip>
             )}
           </div>
-
-          {/* View Toggles on World Map */}
-          {!selectedContinent && !activeCountry && (
-            <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 flex gap-2 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1.5 shadow-xl backdrop-blur-md">
-              <button
-                onClick={() => setExploreMode('continent')}
-                className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'continent' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
-              >
-                Continents
-              </button>
-              <button
-                onClick={() => setExploreMode('country')}
-                className={`rounded-full px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all ${exploreMode === 'country' ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
-              >
-                Countries
-              </button>
-            </div>
-          )}
 
           <div
             className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] transform rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/95 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-[var(--foreground)] shadow-xl backdrop-blur transition-opacity duration-150"
