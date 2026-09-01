@@ -383,6 +383,10 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
               } else if (alpha2) {
                 NProgress.start();
                 router.push(`/map/${alpha2.toLowerCase()}` as any);
+              } else if (continent === 'Antarctica') {
+                // Not a country in wiki-geo-data — route to the continent view.
+                NProgress.start();
+                router.push('/map/antarctica' as any);
               }
             }}
           />
