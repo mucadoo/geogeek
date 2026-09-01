@@ -30,7 +30,7 @@ import {
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
-import { fitFeatureFlat, isFrontFacing, orientationFor, wrapTranslateX } from '@/lib/mapProjection';
+import { fitFeatureFlat, isFrontFacing, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
 import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
 import { Continent, Country, Subdivision } from '@/types';
@@ -71,6 +71,15 @@ export default function Map({ slug }: MapProps) {
   rotationRef.current = rotation;
   globeScaleRef.current = globeScale;
 
+  // Flat-map zoom behavior + "where are we flying to" bookkeeping. The zoom is
+  // built once per view (see the setup effect); the fly-to effect issues at most
+  // one transition per distinct target so async data settling never restarts an
+  // in-flight flight.
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  const lastFlatKeyRef = useRef<string | null>(null);
+  const lastGlobeKeyRef = useRef<string | null>(null);
+  const isSubMapRef = useRef(false);
+
   // Guards against a Rules-of-Hooks violation: this render must call the exact
   // same hooks on the server, the first client render, and every render after
   // the persisted map store rehydrates.
@@ -93,9 +102,13 @@ export default function Map({ slug }: MapProps) {
   } = useMapStore();
   const isGlobe = viewMode === 'globe';
 
+  const positionRef = useRef(position);
+  positionRef.current = position;
+
   const { data: subMapData } = useCountrySubMap(activeCountry?.isoCode || null);
 
   const isSubMap = !!(activeCountry && subMapData);
+  isSubMapRef.current = isSubMap;
   const renderMapData = isSubMap ? subMapData : mapData;
 
   // Parsed sub-map region features (once per sub-map load).
@@ -189,6 +202,93 @@ export default function Map({ slug }: MapProps) {
 
   const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
 
+  // World-atlas country features, parsed once per map load. Shared by the flat
+  // and globe fly-to targets.
+  const worldCountryFeatures = useMemo(() => {
+    if (!mapData) return [] as any[];
+    return (feature(mapData as any, mapData.objects.countries as any) as any).features as any[];
+  }, [mapData]);
+
+  // The single place that answers "where should the flat map be framed right
+  // now?". `key` identifies the destination; the fly-to effect animates only
+  // when it changes, so data loading in stages never restarts a flight.
+  const flatViewTarget = useMemo<{ key: string; transform: d3.ZoomTransform } | null>(() => {
+    const targetWidth = width * 0.6;
+
+    const positionTransform = () => {
+      const [lng, lat] = position.coordinates;
+      const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
+      const base = d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(position.zoom)
+        .translate(-x, -y);
+      return d3.zoomIdentity
+        .translate(wrapTranslateX(base.x, base.k, WORLD_WIDTH), base.y)
+        .scale(base.k);
+    };
+
+    if (activeCountry?.isoCode && activeRegion && subMapData) {
+      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
+      if (f) {
+        return {
+          key: `region:${activeCountry.isoCode}:${activeRegion}`,
+          transform: fitFeatureFlat(f, flatProjection, WORLD_WIDTH, targetWidth, height),
+        };
+      }
+    }
+
+    // Also the fallback while a focused region's geometry is still loading.
+    if (activeCountry?.isoCode) {
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
+      const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === numericId);
+      if (f) {
+        return {
+          key: `country:${activeCountry.isoCode}`,
+          transform: fitFeatureFlat(f, flatProjection, WORLD_WIDTH, targetWidth, height),
+        };
+      }
+    }
+
+    if (selectedContinent) {
+      return { key: `continent:${selectedContinent}`, transform: positionTransform() };
+    }
+
+    return { key: 'world', transform: positionTransform() };
+  }, [activeCountry, activeRegion, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position]);
+
+  // Same idea for the globe: a target point + zoom scale, keyed so the rotation
+  // animation runs once per destination.
+  const globeViewTarget = useMemo<{ key: string; point: [number, number]; scale: number }>(() => {
+    if (activeCountry?.isoCode && activeRegion && subMapData) {
+      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
+      if (f) {
+        return {
+          key: `region:${activeCountry.isoCode}:${activeRegion}`,
+          point: d3.geoCentroid(f) as [number, number],
+          scale: GLOBE_SCALE_DEFAULT * 4,
+        };
+      }
+    }
+    if (activeCountry?.isoCode) {
+      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
+      const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === numericId);
+      if (f) {
+        return {
+          key: `country:${activeCountry.isoCode}`,
+          point: d3.geoCentroid(f) as [number, number],
+          scale: GLOBE_SCALE_DEFAULT * 2.4,
+        };
+      }
+    }
+    if (selectedContinent) {
+      const view = CONTINENT_VIEWS[selectedContinent as keyof typeof CONTINENT_VIEWS];
+      if (view) {
+        return { key: `continent:${selectedContinent}`, point: view.coordinates, scale: GLOBE_SCALE_DEFAULT * 1.5 };
+      }
+    }
+    return { key: 'world', point: [10, 25], scale: GLOBE_SCALE_DEFAULT };
+  }, [activeCountry, activeRegion, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent]);
+
   useEffect(() => {
     async function initView() {
       if (slugParts.length === 0) {
@@ -254,7 +354,14 @@ export default function Map({ slug }: MapProps) {
     initView();
   }, [slug, handleContinentClick, resetMap, activeCountry?.isoCode]);
 
-  // --- FLAT MAP: pan / zoom (d3-zoom transform on <g>), with horizontal wrap ---
+  // Switching projection resets the fly-to bookkeeping so the newly shown view
+  // re-frames itself (the hidden view can't animate anyway).
+  useEffect(() => {
+    lastFlatKeyRef.current = null;
+    lastGlobeKeyRef.current = null;
+  }, [isGlobe]);
+
+  // --- FLAT MAP: install the d3-zoom behavior once per view ---
   useEffect(() => {
     if (isGlobe || !svgRef.current || !gRef.current) return;
 
@@ -265,10 +372,9 @@ export default function Map({ slug }: MapProps) {
 
     // Fold the pan offset back onto the centre world copy after a user gesture,
     // so the 3 rendered copies always cover the viewport. Skipped for
-    // programmatic moves (their targets are already wrapped) to avoid a mid-flight
-    // jump when the flight path crosses a copy boundary.
+    // programmatic moves (the fly-to effect already picks the nearest copy).
     const wrapTransform = (t: d3.ZoomTransform, userDriven: boolean) => {
-      if (isSubMap || !userDriven) return t;
+      if (isSubMapRef.current || !userDriven) return t;
       const nx = wrapTranslateX(t.x, t.k, WORLD_WIDTH);
       if (nx === t.x) return t;
       const wrapped = d3.zoomIdentity.translate(nx, t.y).scale(t.k);
@@ -292,47 +398,54 @@ export default function Map({ slug }: MapProps) {
         svg.attr('shape-rendering', 'geometricPrecision');
       });
 
+    zoomRef.current = zoom;
     svg.call(zoom);
     svg.on('dblclick.zoom', null);
 
-    const flyTo = (t: d3.ZoomTransform) => {
-      svg.transition().duration(750).call(zoom.transform, t);
-    };
-
     if (!isInitialized) {
-      const [lng, lat] = position.coordinates;
+      const [lng, lat] = positionRef.current.coordinates;
       const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
-      const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(position.zoom).translate(-x, -y);
-      svg.call(zoom.transform, d3.zoomIdentity.translate(wrapTranslateX(base.x, base.k, WORLD_WIDTH), base.y).scale(base.k));
+      const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(positionRef.current.zoom).translate(-x, -y);
+      const seedX = rebaseTranslateX(base.x, width / 2, base.k, WORLD_WIDTH);
+      svg.call(zoom.transform, d3.zoomIdentity.translate(seedX, base.y).scale(base.k));
+    } else {
+      // Returning from the globe: the globe effect cleared the <g> transform —
+      // restore it from d3-zoom's stored value so the map doesn't flash unzoomed.
+      g.attr('transform', (svg.property('__zoom') as d3.ZoomTransform).toString());
     }
 
-    const targetWidth = width * 0.6;
+    return () => {
+      svg.on('.zoom', null);
+      zoomRef.current = null;
+    };
+  }, [isGlobe, flatProjection, mounted, _hasHydrated]);
 
-    if (activeCountry?.isoCode && activeRegion && subMapData) {
-      const featureData = subFeatures.find((f: any) => codeByFeatureId[String(f.id)] === activeRegion);
-      if (featureData) {
-        flyTo(fitFeatureFlat(featureData, flatProjection, WORLD_WIDTH, targetWidth, height));
-        return;
-      }
-    }
+  // --- FLAT MAP: fly to the current target, at most once per destination ---
+  useEffect(() => {
+    if (isGlobe || !svgRef.current || !flatViewTarget) return;
+    const zoom = zoomRef.current;
+    if (!zoom) return;
 
-    if (activeCountry?.isoCode && mapData) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
-      const world = feature(mapData as any, mapData.objects.countries as any) as any;
-      const featureData = world.features.find((f: any) => String(f.id).padStart(3, '0') === numericId);
-      if (featureData) {
-        flyTo(fitFeatureFlat(featureData, flatProjection, WORLD_WIDTH, targetWidth, height));
-        return;
-      }
-    }
+    if (flatViewTarget.key === lastFlatKeyRef.current) return;
+    const isFirst = lastFlatKeyRef.current === null;
+    lastFlatKeyRef.current = flatViewTarget.key;
 
-    if (isInitialized && !activeCountry) {
-      const [lng, lat] = position.coordinates;
-      const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
-      const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(position.zoom).translate(-x, -y);
-      flyTo(d3.zoomIdentity.translate(wrapTranslateX(base.x, base.k, WORLD_WIDTH), base.y).scale(base.k));
+    const svg = d3.select(svgRef.current);
+    const node = svgRef.current as unknown as { __zoom?: d3.ZoomTransform };
+    const t = flatViewTarget.transform;
+    // Take the shortest horizontal path: aim for the world copy nearest the
+    // current pan position rather than the centre one.
+    const refX = node.__zoom ? node.__zoom.x : width / 2;
+    const target = d3.zoomIdentity
+      .translate(rebaseTranslateX(t.x, refX, t.k, WORLD_WIDTH), t.y)
+      .scale(t.k);
+
+    if (isFirst) {
+      svg.call(zoom.transform, target);
+    } else {
+      svg.transition().duration(750).ease(d3.easeCubicInOut).call(zoom.transform, target);
     }
-  }, [isGlobe, position, flatProjection, activeCountry, activeRegion, isSubMap, mapData, subMapData, subFeatures, codeByFeatureId, ALPHA2_TO_NUMERIC]);
+  }, [isGlobe, flatViewTarget, mounted, _hasHydrated]);
 
   // --- GLOBE: drag to rotate, wheel to zoom (registered once per view) ---
   useEffect(() => {
@@ -379,41 +492,20 @@ export default function Map({ slug }: MapProps) {
       node.removeEventListener('wheel', onWheel);
       if (raf != null) cancelAnimationFrame(raf);
     };
-  }, [isGlobe]);
+  }, [isGlobe, mounted, _hasHydrated]);
 
-  // --- GLOBE: rotate / zoom toward the focused continent, country or region ---
+  // --- GLOBE: rotate / zoom toward the current target, once per destination ---
   useEffect(() => {
     if (!isGlobe) return;
-
-    let point: [number, number] | null = null;
-    let targetScale = globeScaleRef.current;
-
-    if (activeCountry?.isoCode && activeRegion && subMapData) {
-      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
-      if (f) { point = d3.geoCentroid(f); targetScale = GLOBE_SCALE_DEFAULT * 4; }
-    }
-    if (!point && activeCountry?.isoCode && mapData) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
-      const world = feature(mapData as any, mapData.objects.countries as any) as any;
-      const f = world.features.find((x: any) => String(x.id).padStart(3, '0') === numericId);
-      if (f) { point = d3.geoCentroid(f); targetScale = GLOBE_SCALE_DEFAULT * 2.4; }
-    }
-    if (!point && selectedContinent) {
-      const view = CONTINENT_VIEWS[selectedContinent as keyof typeof CONTINENT_VIEWS];
-      if (view) { point = view.coordinates; targetScale = GLOBE_SCALE_DEFAULT * 1.5; }
-    }
-    if (!point && !activeCountry && !selectedContinent) {
-      point = [10, 25];
-      targetScale = GLOBE_SCALE_DEFAULT;
-    }
-    if (!point) return;
+    if (globeViewTarget.key === lastGlobeKeyRef.current) return;
+    lastGlobeKeyRef.current = globeViewTarget.key;
 
     const [sl, sp] = rotationRef.current;
-    const [tl, tp] = orientationFor(point);
+    const [tl, tp] = orientationFor(globeViewTarget.point);
     const dl = ((tl - sl) % 360 + 540) % 360 - 180;
     const dp = tp - sp;
     const sScale = globeScaleRef.current;
-    const dScale = targetScale - sScale;
+    const dScale = globeViewTarget.scale - sScale;
     if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5 && Math.abs(dScale) < 1) return;
 
     const start = performance.now();
@@ -427,7 +519,7 @@ export default function Map({ slug }: MapProps) {
       if (u < 1) raf = requestAnimationFrame(step);
     });
     return () => cancelAnimationFrame(raf);
-  }, [isGlobe, activeCountry, activeRegion, selectedContinent, mapData, subMapData, subFeatures, codeByFeatureId, ALPHA2_TO_NUMERIC]);
+  }, [isGlobe, globeViewTarget]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });

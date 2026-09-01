@@ -17,6 +17,23 @@ export function wrapTranslateX(x: number, k: number, worldWidth: number): number
 }
 
 /**
+ * Shift `targetX` by a whole number of scaled world widths so it lands on the
+ * world copy nearest `referenceX` (the current pan position). Keeps a
+ * programmatic fly-to on the repeating flat map to the shortest horizontal path
+ * instead of sliding across the whole world to reach the centre copy.
+ */
+export function rebaseTranslateX(
+  targetX: number,
+  referenceX: number,
+  k: number,
+  worldWidth: number,
+): number {
+  const span = worldWidth * k;
+  if (span <= 0) return targetX;
+  return targetX + Math.round((referenceX - targetX) / span) * span;
+}
+
+/**
  * Zoom transform that frames `feature` on the repeating flat map. Uses
  * `d3.geoBounds` / `d3.geoCentroid` (not projected path bounds) so features that
  * straddle the antimeridian — USA/Aleutians, Russia, Fiji, Kiribati, NZ, where
