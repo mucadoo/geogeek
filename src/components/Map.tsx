@@ -429,7 +429,9 @@ export default function Map({ slug }: MapProps) {
       svg.on('.zoom', null);
       zoomRef.current = null;
     };
-  }, [isGlobe, flatProjection, mounted, _hasHydrated]);
+    // `status` matters: on a cold load the <svg> isn't mounted until the
+    // world-atlas fetch resolves, so this must re-run once it does.
+  }, [isGlobe, flatProjection, mounted, _hasHydrated, status]);
 
   // --- FLAT MAP: fly to the current target, at most once per destination ---
   useEffect(() => {
@@ -456,7 +458,7 @@ export default function Map({ slug }: MapProps) {
     } else {
       svg.transition().duration(750).ease(d3.easeCubicInOut).call(zoom.transform, target);
     }
-  }, [isGlobe, flatViewTarget, mounted, _hasHydrated]);
+  }, [isGlobe, flatViewTarget, mounted, _hasHydrated, status]);
 
   // --- GLOBE: drag to rotate, wheel to zoom (registered once per view) ---
   useEffect(() => {
@@ -503,7 +505,7 @@ export default function Map({ slug }: MapProps) {
       node.removeEventListener('wheel', onWheel);
       if (raf != null) cancelAnimationFrame(raf);
     };
-  }, [isGlobe, mounted, _hasHydrated]);
+  }, [isGlobe, mounted, _hasHydrated, status]);
 
   // --- GLOBE: rotate / zoom toward the current target, once per destination ---
   useEffect(() => {

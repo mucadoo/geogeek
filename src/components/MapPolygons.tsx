@@ -23,6 +23,66 @@ interface CountryFeature {
   geometry: d3.GeoGeometryObjects;
 }
 
+const SEAM_CLIP_ID = 'map-antimeridian-clip';
+
+// A shape's fill + border. On the repeating flat map (`split`) the fill and
+// stroke are two separate <path>s sharing the same `d`: d3 closes any polygon
+// that crosses the antimeridian (Russia's Chukotka, Fiji…) with a synthetic
+// edge running down the ±180° meridian, and with the geography drawn 3x that
+// edge lands mid-view as a vertical scar. The fill (needed whole, so the
+// repeated copies still meet with no gap) keeps it; the stroke is clipped to
+// skip a hairline band at each projected antimeridian, which is open ocean
+// everywhere except those few seams.
+function GeoShape({
+  pathData, fill, strokeWidth, split, className, strokeClassName, role, tabIndex,
+  ariaLabel, onMouseEnter, onMouseLeave, onClick,
+}: {
+  pathData: string;
+  fill: string;
+  strokeWidth: number;
+  split: boolean;
+  className: string;
+  strokeClassName?: string;
+  role?: string;
+  tabIndex?: number;
+  ariaLabel?: string;
+  onMouseEnter?: (e: React.MouseEvent) => void;
+  onMouseLeave?: () => void;
+  onClick?: () => void;
+}) {
+  const fillPath = (
+    <path
+      d={pathData}
+      fill={fill}
+      stroke={split ? 'none' : 'var(--map-stroke)'}
+      strokeWidth={split ? undefined : strokeWidth}
+      vectorEffect="non-scaling-stroke"
+      className={className}
+      role={role}
+      tabIndex={tabIndex}
+      aria-label={ariaLabel}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+    />
+  );
+  if (!split) return fillPath;
+  return (
+    <>
+      {fillPath}
+      <path
+        d={pathData}
+        fill="none"
+        stroke="var(--map-stroke)"
+        strokeWidth={strokeWidth}
+        vectorEffect="non-scaling-stroke"
+        clipPath={`url(#${SEAM_CLIP_ID})`}
+        className={`pointer-events-none ${strokeClassName ?? 'transition-[stroke-width] duration-700'}`}
+      />
+    </>
+  );
+}
+
 interface MapPolygonsProps {
   mapData: Topology;
   projection: d3.GeoProjection;
@@ -66,9 +126,23 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
   // widths) so it repeats horizontally; countries that straddle the antimeridian
   // (USA, Russia, Fiji…) then read as continuous and panning wraps. The globe and
   // sub-maps draw a single copy.
+  const isRepeating = repeat && worldWidth > 0;
+  // Projected x of the two antimeridian meridians, used to clip the seam
+  // artifact out of every copy's stroke layer (see GeoShape above).
+  const seamL = isRepeating ? projection([-180, 0])?.[0] ?? null : null;
+  const seamR = isRepeating ? projection([180, 0])?.[0] ?? null : null;
+  const hasSeamClip = seamL != null && seamR != null && seamR > seamL;
+
   const wrapLayer = (paths: React.ReactNode) => (
     <g className="map-geographies">
-      {repeat && worldWidth > 0
+      {hasSeamClip && (
+        <defs>
+          <clipPath id={SEAM_CLIP_ID} clipPathUnits="userSpaceOnUse">
+            <rect x={seamL! + 1.5} y={-100000} width={seamR! - seamL! - 3} height={200000} />
+          </clipPath>
+        </defs>
+      )}
+      {isRepeating
         ? [-1, 0, 1].map((i) => (
             <g key={i} transform={`translate(${i * worldWidth},0)`}>
               {paths}
@@ -152,17 +226,16 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
           if (!pathData) return null;
 
           return (
-            <path
+            <GeoShape
               key={continent}
-              d={pathData}
+              pathData={pathData}
               fill={fillColor}
-              stroke="var(--map-stroke)"
               strokeWidth={0.5}
-              vectorEffect="non-scaling-stroke"
+              split={hasSeamClip}
               className="transition-[fill,stroke-width,opacity] duration-700 outline-none cursor-pointer"
               role="button"
               tabIndex={0}
-              aria-label={continent}
+              ariaLabel={continent}
               onMouseEnter={(e) => {
                 setHoveredContinent(continent);
                 setTooltip({ show: true, content: continent, x: e.clientX, y: e.clientY });
@@ -199,13 +272,12 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
           if (!pathData) return null;
 
           return (
-            <path
+            <GeoShape
               key={`${alpha2}-${geo.properties?.continent || index}`}
-              d={pathData}
+              pathData={pathData}
               fill={fillColor}
-              stroke="var(--map-stroke)"
               strokeWidth={inContinent ? 0.5 : 0}
-              vectorEffect="non-scaling-stroke"
+              split={hasSeamClip}
               className={`transition-[fill,stroke-width,opacity] duration-700 outline-none ${inContinent ? 'cursor-pointer opacity-100' : 'opacity-0 pointer-events-none'}`}
               onMouseEnter={(e) => {
                 if (!inContinent) return;
@@ -266,13 +338,12 @@ export default function MapPolygons({ mapData, projection, activeCountryIso, isS
         if (!pathData) return null;
 
         return (
-          <path
+          <GeoShape
             key={mapId}
-            d={pathData}
+            pathData={pathData}
             fill={fillColor}
-            stroke="var(--map-stroke)"
             strokeWidth={isVisible ? 0.5 : 0}
-            vectorEffect="non-scaling-stroke"
+            split={hasSeamClip}
             className={`transition-[fill,stroke-width,opacity] duration-700 outline-none ${isClickable ? 'cursor-pointer' : 'cursor-default'} ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             onMouseEnter={(e) => {
               if (!isClickable) return;
