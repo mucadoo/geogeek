@@ -78,7 +78,7 @@ export default function Map({ slug }: MapProps) {
   // in-flight flight.
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const lastFlatKeyRef = useRef<string | null>(null);
-  const lastGlobeKeyRef = useRef<string | null>(null);
+  const lastGlobeTargetRef = useRef<{ key: string; lng: number; lat: number; scale: number } | null>(null);
   const isSubMapRef = useRef(false);
 
   // Guards against a Rules-of-Hooks violation: this render must call the exact
@@ -198,7 +198,11 @@ export default function Map({ slug }: MapProps) {
       .scale(globeScale)
       .translate([width / 2, height / 2])
       .rotate([rotation[0], rotation[1]])
-      .clipAngle(90);
+      .clipAngle(90)
+      // Coarser adaptive resampling — the globe re-projects every path on every
+      // drag / fly-to frame, and at a country's zoom the default ~0.5px
+      // threshold explodes the point count of every border and graticule line.
+      .precision(1.2);
   }, [globeScale, rotation]);
 
   const projection = isGlobe ? globeProjection : flatProjection;
@@ -282,23 +286,26 @@ export default function Map({ slug }: MapProps) {
         };
       }
     }
-    if (activeCountry?.isoCode) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
-      const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === numericId);
-      const cap = activeCountry.capitalCoordinates;
-      const centre: [number, number] = cap
+    // Key off the URL-derived iso (`targetIso`), not the loaded record, so the
+    // globe heads for the country from the first render instead of drifting to
+    // `world` while the record + world-atlas feature load. Centre on the capital
+    // once known (populated heart faces the viewer), else the feature centroid;
+    // zoom from the record's areaKm2 once known, else the feature's area.
+    if (targetIso) {
+      const iso = targetIso.toUpperCase();
+      const loaded = activeCountry?.isoCode?.toUpperCase() === iso ? activeCountry : null;
+      const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === ALPHA2_TO_NUMERIC[iso]);
+      const cap = loaded?.capitalCoordinates;
+      const centre: [number, number] | null = cap
         ? [cap.lng, cap.lat]
         : f
           ? (d3.geoCentroid(f) as [number, number])
-          : [0, 0];
-      if (cap || f) {
-        // Scale from the country record's own areaKm2 (stable once the record
-        // loads) rather than the world-atlas feature — so the fly-to target
-        // doesn't churn / snap when that feature settles a beat later.
+          : null;
+      if (centre) {
         return {
-          key: `country:${activeCountry.isoCode}`,
-          ...(activeCountry.areaKm2
-            ? fitAreaGlobe(activeCountry.areaKm2, centre, height, GLOBE_SCALE_DEFAULT, 'km2')
+          key: `country:${iso}`,
+          ...(loaded?.areaKm2
+            ? fitAreaGlobe(loaded.areaKm2, centre, height, GLOBE_SCALE_DEFAULT, 'km2')
             : f
               ? fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT)
               : { point: centre, scale: GLOBE_SCALE_DEFAULT * 2.4 }),
@@ -312,7 +319,7 @@ export default function Map({ slug }: MapProps) {
       }
     }
     return { key: 'world', point: [10, 25], scale: GLOBE_SCALE_DEFAULT };
-  }, [activeCountry, activeRegion, activeSubdivision, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent]);
+  }, [activeCountry, activeRegion, activeSubdivision, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent, targetIso]);
 
   useEffect(() => {
     async function initView() {
@@ -383,7 +390,7 @@ export default function Map({ slug }: MapProps) {
   // re-frames itself (the hidden view can't animate anyway).
   useEffect(() => {
     lastFlatKeyRef.current = null;
-    lastGlobeKeyRef.current = null;
+    lastGlobeTargetRef.current = null;
   }, [isGlobe]);
 
   // --- FLAT MAP: install the d3-zoom behavior once per view ---
@@ -509,8 +516,12 @@ export default function Map({ slug }: MapProps) {
 
     svg.call(drag);
 
+    let wheelIdle: ReturnType<typeof setTimeout> | null = null;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+      svg.attr('shape-rendering', 'optimizeSpeed');
+      if (wheelIdle) clearTimeout(wheelIdle);
+      wheelIdle = setTimeout(() => svg.attr('shape-rendering', 'geometricPrecision'), 200);
       const next = globeScaleRef.current * Math.pow(1.0016, -event.deltaY);
       const clamped = Math.max(GLOBE_SCALE_RANGE[0], Math.min(GLOBE_SCALE_RANGE[1], next));
       globeScaleRef.current = clamped;
@@ -521,35 +532,41 @@ export default function Map({ slug }: MapProps) {
     return () => {
       svg.on('.drag', null);
       node.removeEventListener('wheel', onWheel);
+      if (wheelIdle) clearTimeout(wheelIdle);
       if (raf != null) cancelAnimationFrame(raf);
     };
   }, [isGlobe, mounted, _hasHydrated, status]);
 
-  // --- GLOBE: rotate / zoom toward the current target, once per destination ---
-  // Keyed ONLY on `globeViewTarget.key`. The point/scale are read from a ref, so
-  // they can settle (a country's fitFeatureGlobe scale refines once the
-  // world-atlas feature is found; a `globeViewTarget` object is rebuilt on any
-  // unrelated re-render) without re-running this effect — a re-run would cancel
-  // the in-flight fly-to and then early-return on the matching key, leaving the
-  // globe snapped instead of gliding (continents were fine because their target
-  // scale is a constant; countries were not).
+  // --- GLOBE: rotate / zoom toward the current target ---
+  // Re-run only when the destination *meaningfully* moves: a new key, or the
+  // same key drifting past a threshold (a country's centre/zoom refines from
+  // feature-centroid + feature-area to capital + record areaKm2 once the record
+  // loads — a small, wanted adjustment). Sub-threshold churn from `globeViewTarget`
+  // being rebuilt on unrelated re-renders is ignored, so an in-flight fly-to
+  // isn't cancelled and left snapped.
   const globeTargetKey = globeViewTarget.key;
-  const globeTargetRef = useRef(globeViewTarget);
-  globeTargetRef.current = globeViewTarget;
+  const [globeTargetLng, globeTargetLat] = globeViewTarget.point;
+  const globeTargetScale = globeViewTarget.scale;
   useEffect(() => {
     if (!isGlobe) return;
-    if (globeTargetKey === lastGlobeKeyRef.current) return;
-    lastGlobeKeyRef.current = globeTargetKey;
+    const prev = lastGlobeTargetRef.current;
+    if (
+      prev && prev.key === globeTargetKey &&
+      Math.abs(prev.lng - globeTargetLng) < 1 &&
+      Math.abs(prev.lat - globeTargetLat) < 1 &&
+      Math.abs(prev.scale - globeTargetScale) < 5
+    ) return;
+    lastGlobeTargetRef.current = { key: globeTargetKey, lng: globeTargetLng, lat: globeTargetLat, scale: globeTargetScale };
 
-    const { point, scale: targetScale } = globeTargetRef.current;
     const [sl, sp] = rotationRef.current;
-    const [tl, tp] = orientationFor(point);
+    const [tl, tp] = orientationFor([globeTargetLng, globeTargetLat]);
     const dl = ((tl - sl) % 360 + 540) % 360 - 180;
     const dp = tp - sp;
     const sScale = globeScaleRef.current;
-    const dScale = targetScale - sScale;
+    const dScale = globeTargetScale - sScale;
     if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5 && Math.abs(dScale) < 1) return;
 
+    svgRef.current?.setAttribute('shape-rendering', 'optimizeSpeed');
     const start = performance.now();
     let raf = requestAnimationFrame(function step(now) {
       const u = Math.min(1, (now - start) / 750);
@@ -559,9 +576,10 @@ export default function Map({ slug }: MapProps) {
       setRotation([rotationRef.current[0], rotationRef.current[1]]);
       setGlobeScale(globeScaleRef.current);
       if (u < 1) raf = requestAnimationFrame(step);
+      else svgRef.current?.setAttribute('shape-rendering', 'geometricPrecision');
     });
     return () => cancelAnimationFrame(raf);
-  }, [isGlobe, globeTargetKey]);
+  }, [isGlobe, globeTargetKey, globeTargetLng, globeTargetLat, globeTargetScale]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
