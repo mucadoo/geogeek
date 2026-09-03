@@ -174,8 +174,36 @@ export default function GameMap({
   const focusTransformStyle = useMemo(() => {
     if (isGlobe) {
       const zoomed = autoZoom && !!highlightedStateId;
+      // The globe centres the target region by rotation, so a plain scale
+      // about the frame centre is the zoom. Size that scale to the region's
+      // own angular footprint — the same framing the flat map gets — instead
+      // of a fixed factor that leaves small countries tiny. Uses geographic
+      // (rotation-independent) extent so it doesn't wobble mid-spin.
+      let scale = 1;
+      if (zoomed) {
+        scale = 1.9;
+        const activeFeature = allFeatures.find((f) => String(f.id) === highlightedStateId);
+        const projScale = typeof (projection as d3.GeoProjection).scale === 'function'
+          ? (projection as d3.GeoProjection).scale()
+          : 0;
+        if (activeFeature && projScale > 0) {
+          const [[w, s], [e, n]] = d3.geoBounds(activeFeature as unknown as d3.GeoPermissibleObjects);
+          let lonSpan = e - w;
+          if (lonSpan < 0) lonSpan += 360;
+          const rad = Math.PI / 180;
+          const midLat = ((s + n) / 2) * rad;
+          // Orthographic projects an angular span θ (rad) near the centre to
+          // roughly projScale·θ pixels; clamp lonSpan so a sprawling country
+          // doesn't force a pointless zoom-out.
+          const projW = projScale * Math.min(lonSpan, 170) * rad * Math.max(0.15, Math.cos(midLat));
+          const projH = projScale * (n - s) * rad;
+          if (projW > 0 && projH > 0) {
+            scale = Math.max(1.4, Math.min(4, 0.55 / Math.max(projW / width, projH / height)));
+          }
+        }
+      }
       return {
-        transform: `scale(${zoomed ? 1.9 : 1})`,
+        transform: `scale(${scale})`,
         transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
         transformOrigin: `${width / 2}px ${height / 2}px`,
       };
@@ -209,7 +237,7 @@ export default function GameMap({
       transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
       transformOrigin: '0px 0px',
     };
-  }, [isGlobe, rotation, highlightedStateId, allFeatures, pathGenerator, width, height, autoZoom]);
+  }, [isGlobe, rotation, highlightedStateId, allFeatures, pathGenerator, projection, width, height, autoZoom]);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
