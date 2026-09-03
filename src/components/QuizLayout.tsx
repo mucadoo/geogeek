@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Copy, Volume2, VolumeX, Lightbulb, Globe2, Map as MapIcon } from 'lucide-react';
+import { Trophy, ArrowLeft, ArrowRight, BookOpen, CheckCircle2, AlertCircle, Maximize2, Minimize2, Copy, Volume2, VolumeX, Lightbulb, Globe2, Map as MapIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
@@ -16,6 +16,7 @@ import { GameHUD } from '@/components/GameHUD';
 import GameMap from '@/components/GameMap';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { PRESETS, AdvancedSettings, Difficulty } from '@/config/gameConstants';
+import { games } from '@/config/gamesList';
 import { Link } from '@/i18n/routing';
 import getFeedback from '@/lib/getFeedback';
 import { getHintLetterClue, getHintFact } from '@/lib/hints';
@@ -33,6 +34,13 @@ function cn(...inputs: ClassValue[]) {
 // Difficulty type's own values are kebab-case (matches PRESETS in gameConstants.ts).
 const DIFFICULTY_MESSAGE_KEY: Record<Difficulty, string> = {
   'very-easy': 'veryEasy', easy: 'easy', medium: 'medium', hard: 'hard', blazing: 'blazing', blitz: 'blitz', custom: 'custom',
+};
+
+// Drives the little signal-bar meter on each difficulty row: 1 (calm) to 5
+// (brutal). Blitz is a 60s sprint rather than a point on the ramp, so it sits
+// mid-scale; custom (0) shows a settings glyph instead of bars.
+const DIFFICULTY_INTENSITY: Record<Difficulty, number> = {
+  'very-easy': 1, easy: 2, medium: 3, hard: 4, blazing: 5, blitz: 3, custom: 0,
 };
 
 interface QuizLayoutProps {
@@ -82,6 +90,8 @@ export default function QuizLayout({
   } = useGameStore();
   
   const savedGame = savedGames[gameKey];
+  const gameMeta = games.find((g) => g.id === gameKey);
+  const GameIcon = gameMeta?.icon ?? Globe2;
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [adv, setAdv] = useState<AdvancedSettings>(PRESETS['medium']);
 
@@ -574,102 +584,103 @@ export default function QuizLayout({
           <div className="relative z-40 w-full">
             <div className="min-h-[calc(100vh-90px)] flex items-center justify-center p-4 py-12">
              {gameStatus === 'idle' ? (
-                <div className="flex flex-col w-full max-w-2xl rounded-3xl bg-[var(--card-bg)] p-8 md:p-10 text-center shadow-2xl border-2 border-dashed border-[var(--card-border)] relative overflow-hidden">
-                   <div className="flex-shrink-0 relative">
-                     <Link href="/games" className="absolute top-0 left-0 text-slate-400 transition-colors hover:text-primary">
-                      <ArrowLeft size={24} />
+                <div className="relative flex w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-2xl md:p-9">
+                   <div className="relative mb-7">
+                     <Link
+                       href="/games"
+                       aria-label={t('menu')}
+                       className="absolute -left-1 -top-1 flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-[var(--background)] hover:text-primary"
+                     >
+                       <ArrowLeft size={20} />
                      </Link>
-                     <div className="bg-[var(--primary)]/10 text-[var(--primary)] mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
-                       <Trophy size={32} />
-                     </div>
-                     <h1 className="mb-2 text-3xl font-game-heading tracking-widest text-[var(--foreground)] uppercase">{title}</h1>
-                     <p className="mb-6 font-game-mono text-sm text-slate-500">{description}</p>
-                   </div>
-                   
-                   <div className="flex-1 overflow-y-auto text-left space-y-6 pr-2">
-                     <section>
-                       <h3 className="text-xs font-game-heading text-slate-500 uppercase tracking-widest mb-4">{t('selectDifficulty')}</h3>
-                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
-                            <DifficultyTicket
-                              key={d}
-                              title={t(`difficulty.${DIFFICULTY_MESSAGE_KEY[d]}`)}
-                              isSelected={difficulty === d}
-                              onClick={() => handleDifficultyChange(d)}
-                            />
-                          ))}
-                          <DifficultyTicket
-                            title={t('difficulty.custom')}
-                            isSelected={difficulty === 'custom'}
-                            onClick={() => setDifficulty('custom')}
-                          />
+                     <div className="flex flex-col items-center text-center">
+                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                         <GameIcon size={26} />
                        </div>
-                       {/* One description for the current pick, instead of
-                           repeating one under all 7 tickets at once. */}
-                       <p className="mt-4 text-center font-game-mono text-xs text-slate-500">
-                         {t(`difficultyDesc.${DIFFICULTY_MESSAGE_KEY[difficulty]}`)}
-                       </p>
-                     </section>
-
-                     {difficulty === 'custom' && (
-                      <section className="border border-[var(--card-border)] rounded-2xl p-5 bg-[var(--background)] animate-in fade-in slide-in-from-top-2 duration-200">
-                        <h3 className="font-game-heading text-primary uppercase tracking-widest text-xs mb-3">{t('advancedConfiguration')}</h3>
-                        <div className="grid grid-cols-2 gap-2 text-xs font-game-mono">
-                          {([
-                            ['isMultipleChoice', t('multipleChoice')],
-                            ['strictMatching', t('strictMatching')],
-                            ['noMapHints', t('noMapHints')],
-                            ['hideBorders', t('hideBorders')],
-                            ['hints', t('hints')],
-                          ] as const).map(([key, label]) => (
-                            <label
-                              key={key}
-                              className="flex items-center gap-2 rounded-xl border border-[var(--card-border)] px-3 py-2.5 cursor-pointer transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary text-[var(--foreground)]"
-                            >
-                              <input
-                                type="checkbox"
-                                className="accent-primary"
-                                checked={adv[key]}
-                                onChange={(e) => setAdv({ ...adv, [key]: e.target.checked })}
-                              />
-                              {label}
-                            </label>
-                          ))}
-                          <div className="col-span-2 flex items-center justify-between gap-3 rounded-xl border border-[var(--card-border)] px-3 py-2.5">
-                            <label className="text-slate-500 shrink-0">{t('timePerGuess')}</label>
-                            <input
-                              type="number"
-                              min={1}
-                              value={adv.timePerGuess}
-                              onChange={(e) => setAdv({ ...adv, timePerGuess: parseInt(e.target.value) || 1 })}
-                              className="w-20 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg px-2 py-1 text-right outline-none focus:border-primary"
-                            />
-                          </div>
-                        </div>
-                      </section>
-                     )}
+                       <h1 className="text-3xl font-game-heading uppercase tracking-widest text-[var(--foreground)] md:text-4xl">{title}</h1>
+                       <p className="mt-2 max-w-sm font-game-mono text-[13px] leading-relaxed text-slate-500">{description}</p>
+                     </div>
                    </div>
 
-                   <div className="flex-shrink-0 pt-8">
+                   <div className="flex flex-col gap-2">
+                     {(Object.keys(PRESETS) as Difficulty[]).map((d) => (
+                       <DifficultyTicket
+                         key={d}
+                         title={t(`difficulty.${DIFFICULTY_MESSAGE_KEY[d]}`)}
+                         desc={t(`difficultyDesc.${DIFFICULTY_MESSAGE_KEY[d]}`)}
+                         intensity={DIFFICULTY_INTENSITY[d]}
+                         isSelected={difficulty === d}
+                         onClick={() => handleDifficultyChange(d)}
+                       />
+                     ))}
+                     <DifficultyTicket
+                       title={t('difficulty.custom')}
+                       desc={t('difficultyDesc.custom')}
+                       intensity={DIFFICULTY_INTENSITY.custom}
+                       isSelected={difficulty === 'custom'}
+                       onClick={() => setDifficulty('custom')}
+                     />
+                   </div>
+
+                   {difficulty === 'custom' && (
+                    <section className="mt-3 rounded-2xl border border-[var(--card-border)] bg-[var(--background)]/60 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <h3 className="font-game-heading text-primary uppercase tracking-widest text-xs mb-3">{t('advancedConfiguration')}</h3>
+                      <div className="grid grid-cols-2 gap-2 text-xs font-game-mono">
+                        {([
+                          ['isMultipleChoice', t('multipleChoice')],
+                          ['strictMatching', t('strictMatching')],
+                          ['noMapHints', t('noMapHints')],
+                          ['hideBorders', t('hideBorders')],
+                          ['hints', t('hints')],
+                        ] as const).map(([key, label]) => (
+                          <label
+                            key={key}
+                            className="flex items-center gap-2 rounded-xl border border-[var(--card-border)] px-3 py-2.5 cursor-pointer transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary text-[var(--foreground)]"
+                          >
+                            <input
+                              type="checkbox"
+                              className="accent-primary"
+                              checked={adv[key]}
+                              onChange={(e) => setAdv({ ...adv, [key]: e.target.checked })}
+                            />
+                            {label}
+                          </label>
+                        ))}
+                        <div className="col-span-2 flex items-center justify-between gap-3 rounded-xl border border-[var(--card-border)] px-3 py-2.5">
+                          <label className="text-slate-500 shrink-0">{t('timePerGuess')}</label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={adv.timePerGuess}
+                            onChange={(e) => setAdv({ ...adv, timePerGuess: parseInt(e.target.value) || 1 })}
+                            className="w-20 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg px-2 py-1 text-right outline-none focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                    </section>
+                   )}
+
+                   <div className="mt-6 flex flex-col gap-3">
                      {savedGame ? (
-                      <div className="flex gap-3 flex-col sm:flex-row">
-                        <button onClick={() => resumeGame(gameKey)} className="bg-[var(--primary)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
-                          {t('resume') || "RESUME GAME"}
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <button onClick={() => resumeGame(gameKey)} className="flex-1 rounded-2xl bg-primary py-3.5 font-game-heading text-lg uppercase tracking-widest text-white transition-colors hover:bg-teal-600">
+                          {t('resume') || 'RESUME GAME'}
                         </button>
-                        <button onClick={handleStartGame} className="bg-[var(--card-bg)] text-slate-500 border-2 border-dashed border-[var(--card-border)] flex-1 py-4 rounded-2xl font-game-heading uppercase tracking-widest text-lg hover:scale-105 hover:border-red-500 hover:text-red-500 transition-all shadow-sm">
-                          {t('newGame') || "NEW GAME"}
+                        <button onClick={handleStartGame} className="flex-1 rounded-2xl border border-[var(--card-border)] py-3.5 font-game-heading text-lg uppercase tracking-widest text-slate-500 transition-colors hover:border-red-400 hover:text-red-500">
+                          {t('newGame') || 'NEW GAME'}
                         </button>
                       </div>
                     ) : (
-                      <button onClick={handleStartGame} className="bg-[var(--primary)] w-full py-4 rounded-2xl font-game-heading uppercase tracking-widest text-white text-lg hover:scale-105 transition-all shadow-lg">
+                      <button onClick={handleStartGame} className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-game-heading text-lg uppercase tracking-widest text-white transition-colors hover:bg-teal-600">
                         {t('start')}
+                        <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                       </button>
                     )}
                     <button
                       onClick={() => setIsLearning(true)}
-                      className="mt-3 w-full py-3 rounded-2xl font-game-heading uppercase tracking-widest text-sm text-slate-500 border border-dashed border-[var(--card-border)] hover:border-primary hover:text-primary transition-all"
+                      className="flex items-center justify-center gap-2 py-1 font-game-mono text-xs uppercase tracking-widest text-slate-400 transition-colors hover:text-primary"
                     >
-                      {t('studyMapFirst')}
+                      <BookOpen size={14} /> {t('studyMapFirst')}
                     </button>
                    </div>
                 </div>
