@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
+import { useWorldMapDetail } from '@/hooks/useWorldMapData';
 import { useGameStore } from '@/store/useGameStore';
 
 // A point is hidden on the far side of the globe once it is more than 90° from
@@ -142,6 +143,28 @@ export default function GameMap({
       f.id == null ? { ...f, id: (f.properties as { name: string })?.name } : f
     );
   }, [mapData]);
+
+  // Level of detail: the base topology is world-atlas 50m, whose coastlines
+  // look faceted once auto-zoom blows a small country (Cabo Verde, Malta, the
+  // Caribbean) up to 4x. Once the player is zoomed onto a region, pull the
+  // 1:10m cut of the same topology and render the focused region — and any
+  // already-solved ones — from it, so the part of the map being looked at
+  // sharpens. Zoomed out we stay on 50m; the 10m file is fetched at most once.
+  const isWorldMap = !!(mapData?.objects as Record<string, unknown> | undefined)?.countries;
+  const wantDetail = isWorldMap && autoZoom && !!highlightedStateId;
+  const { data: detailTopo } = useWorldMapDetail(wantDetail) as { data: Topology | undefined };
+
+  const hiResById = useMemo(() => {
+    if (!detailTopo) return null;
+    const objectKey = detailTopo.objects.countries ? 'countries' : Object.keys(detailTopo.objects)[0];
+    const geo = feature(detailTopo, detailTopo.objects[objectKey]) as FeatureCollection;
+    const map = new Map<string, Feature>();
+    (geo.features as Feature[]).forEach((f) => {
+      const key = f.id == null ? (f.properties as { name?: string })?.name : String(f.id);
+      if (key) map.set(key, f);
+    });
+    return map;
+  }, [detailTopo]);
 
   // Globe auto-zoom: rotate the sphere so the target region faces the viewer
   // (the flat map's pan/scale transform is meaningless on a globe).
@@ -284,7 +307,14 @@ export default function GameMap({
 
             const isHighlighted = highlightedStateId === stateId;
             const isCorrect = correctlyGuessedIds.includes(stateId);
-            const pathData = pathGenerator(feat as unknown as d3.GeoPermissibleObjects);
+
+            // Swap in the hi-res geometry for the region in focus (and any
+            // already-solved ones) while zoomed; everything else — and the
+            // whole map once zoomed back out — stays on 50m.
+            const renderFeat = (wantDetail && (isHighlighted || isCorrect))
+              ? (hiResById?.get(stateId) ?? feat)
+              : feat;
+            const pathData = pathGenerator(renderFeat as unknown as d3.GeoPermissibleObjects);
 
             if (!pathData) return null;
 
