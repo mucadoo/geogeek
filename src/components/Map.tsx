@@ -47,6 +47,15 @@ const FLAT_MAX_ZOOM = 400;
 const COUNTRY_MAX_ZOOM = 220;
 const SUBDIVISION_MAX_ZOOM = 320;
 
+// The country ISO a `flatViewTarget` / `globeViewTarget` key belongs to, or null
+// for world / continent keys. Used to decide whether a persisted flatFocus (or
+// the live globe pose) still applies after a remount into the same country.
+const keyCountryIso = (key: string | null | undefined): string | null => {
+  if (!key) return null;
+  const [kind, iso] = key.split(':');
+  return (kind === 'country' || kind === 'region') && iso ? iso.toUpperCase() : null;
+};
+
 // Linear interpolator prevents the "swoop out" effect and flies directly to the target zoom
 const linearZoomInterpolator = (a: d3.ZoomView, b: d3.ZoomView) => {
   const x = d3.interpolateNumber(a[0], b[0]);
@@ -233,6 +242,12 @@ export default function Map({ slug }: MapProps) {
   // from the URL (`/map/<iso>` or `/map/<iso>/<region>`), so both maps head for
   // the country on the first render instead of flashing through the world view.
   const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts[0]?.length === 2 ? slugParts[0].toLowerCase() : undefined);
+  // ISO 3166-2 code the URL points at (`/map/<iso>/<region>`), uppercased, before
+  // `activeRegion` catches up on the next render. When set, neither map falls
+  // back to the whole-country frame while the subdivision geometry loads.
+  const regionSlug = slugParts[1] && /^[A-Za-z]{2}-/.test(slugParts[1]) ? slugParts[1].toUpperCase() : null;
+  const targetIsoRef = useRef(targetIso);
+  targetIsoRef.current = targetIso;
 
   // World-atlas country features, parsed once per map load. Shared by the flat
   // and globe fly-to targets.
@@ -264,7 +279,9 @@ export default function Map({ slug }: MapProps) {
       if (f) {
         const cap = activeSubdivision?.capitalCoordinates;
         return {
-          key: `region:${activeCountry.isoCode}:${activeRegion}`,
+          // `:cap`/`:approx` suffix: re-frame once the record loads and the
+          // centre snaps from the feature to the capital (matches the globe key).
+          key: `region:${activeCountry.isoCode}:${activeRegion}:${cap ? 'cap' : 'approx'}`,
           isSub: true,
           transform: fitFeatureFlat(
             f, flatProjection, WORLD_WIDTH, targetWidth, height,
@@ -273,6 +290,19 @@ export default function Map({ slug }: MapProps) {
           ),
         };
       }
+    }
+
+    // The URL points at a subdivision but its geometry isn't ready yet: hold
+    // (return null) rather than dropping back to the whole-country frame — a
+    // region -> region navigation remounts <Map>, so that fallback would make
+    // the map visibly zoom out to the country before flying into the new
+    // subdivision. Once `subMapData` settles to `null` (the country has no
+    // subdivision geometry) we do fall through to the country frame.
+    if (regionSlug) {
+      const subLoading =
+        subMapData === undefined ||
+        (!!subMapData && (subFeatures.length === 0 || Object.keys(codeByFeatureId).length === 0));
+      if (subLoading) return null;
     }
 
     // The country frame — also the fallback while a focused region's geometry is
@@ -298,7 +328,7 @@ export default function Map({ slug }: MapProps) {
     }
 
     return { key: 'world', isSub: false, transform: positionTransform() };
-  }, [activeCountry, activeRegion, activeSubdivision, isSubMap, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position, targetIso]);
+  }, [activeCountry, activeRegion, activeSubdivision, isSubMap, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position, targetIso, regionSlug]);
 
   // Same idea for the globe: a target point + zoom scale, keyed so the rotation
   // animation runs once per destination.
@@ -315,6 +345,14 @@ export default function Map({ slug }: MapProps) {
           ...fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT, 6),
         };
       }
+    }
+    // URL points at a subdivision whose geometry isn't ready: hold the current
+    // pose (see the flat-map note above) instead of zooming out to the country.
+    if (regionSlug) {
+      const subLoading =
+        subMapData === undefined ||
+        (!!subMapData && (subFeatures.length === 0 || Object.keys(codeByFeatureId).length === 0));
+      if (subLoading) return { key: 'pending', point: [0, 0], scale: GLOBE_SCALE_DEFAULT };
     }
     // Key off the URL-derived iso (`targetIso`), not the loaded record, so the
     // globe heads for the country from the first render instead of drifting to
@@ -349,7 +387,7 @@ export default function Map({ slug }: MapProps) {
       }
     }
     return { key: 'world', point: [10, 25], scale: GLOBE_SCALE_DEFAULT };
-  }, [activeCountry, activeRegion, activeSubdivision, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent, targetIso]);
+  }, [activeCountry, activeRegion, activeSubdivision, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent, targetIso, regionSlug]);
 
   useEffect(() => {
     async function initView() {
@@ -459,7 +497,16 @@ export default function Map({ slug }: MapProps) {
       })
       .on('end', (event) => {
         svg.attr('shape-rendering', 'geometricPrecision');
-        if (event.transform) setFlatZoom(event.transform.k);
+        if (event.transform) {
+          setFlatZoom(event.transform.k);
+          // Remember where the user left a country / subdivision view so a
+          // navigation that remounts <Map> can re-seed from here.
+          const key = lastFlatKeyRef.current;
+          if (event.sourceEvent && key && keyCountryIso(key)) {
+            const { x, y, k } = event.transform;
+            useMapStore.getState().setFlatFocus({ key, k, x, y });
+          }
+        }
       });
 
     zoomRef.current = zoom;
@@ -467,14 +514,23 @@ export default function Map({ slug }: MapProps) {
     svg.on('dblclick.zoom', null);
 
     if (!isInitialized) {
-      const [lng, lat] = positionRef.current.coordinates;
-      const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
-      const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(positionRef.current.zoom).translate(-x, -y);
-      // Fold onto the centre world copy so the −1/+1 copies backfill both edges;
-      // rebasing toward screen-centre here could shift past the last copy and
-      // leave a gap at the viewport edge before the first pan.
-      const seedX = wrapTranslateX(base.x, base.k, WORLD_WIDTH);
-      svg.call(zoom.transform, d3.zoomIdentity.translate(seedX, base.y).scale(base.k));
+      const focus = useMapStore.getState().flatFocus;
+      const wantIso = targetIsoRef.current ? targetIsoRef.current.toUpperCase() : null;
+      if (focus && wantIso && keyCountryIso(focus.key) === wantIso) {
+        // Re-entering the same country after a remount (region -> region, or
+        // country -> region): start from the frame we left so the fly-to glides
+        // from there instead of the map first snapping to a whole-country view.
+        svg.call(zoom.transform, d3.zoomIdentity.translate(focus.x, focus.y).scale(focus.k));
+      } else {
+        const [lng, lat] = positionRef.current.coordinates;
+        const [x, y] = flatProjection([lng, lat]) || [width / 2, height / 2];
+        const base = d3.zoomIdentity.translate(width / 2, height / 2).scale(positionRef.current.zoom).translate(-x, -y);
+        // Fold onto the centre world copy so the −1/+1 copies backfill both edges;
+        // rebasing toward screen-centre here could shift past the last copy and
+        // leave a gap at the viewport edge before the first pan.
+        const seedX = wrapTranslateX(base.x, base.k, WORLD_WIDTH);
+        svg.call(zoom.transform, d3.zoomIdentity.translate(seedX, base.y).scale(base.k));
+      }
     } else {
       // Returning from the globe: the globe effect cleared the <g> transform —
       // restore it from d3-zoom's stored value so the map doesn't flash unzoomed.
@@ -506,6 +562,18 @@ export default function Map({ slug }: MapProps) {
       prevKey.startsWith('country:') &&
       flatViewTarget.key.startsWith('country:') &&
       prevKey.split(':')[1] === flatViewTarget.key.split(':')[1];
+    // Same subdivision, centre just refined feature → capital (`:approx` → `:cap`):
+    // a tiny nudge, snap it.
+    const sameRegion =
+      !!prevKey &&
+      prevKey.startsWith('region:') &&
+      flatViewTarget.key.startsWith('region:') &&
+      prevKey.split(':').slice(0, 3).join(':') === flatViewTarget.key.split(':').slice(0, 3).join(':');
+    // After a remount we seeded d3-zoom from the persisted frame of this same
+    // country — glide from it rather than snapping straight to the destination.
+    const focus = useMapStore.getState().flatFocus;
+    const seededFromFocus =
+      isFirst && !!focus && keyCountryIso(focus.key) === keyCountryIso(flatViewTarget.key);
     lastFlatKeyRef.current = flatViewTarget.key;
 
     const svg = d3.select(svgRef.current);
@@ -522,11 +590,21 @@ export default function Map({ slug }: MapProps) {
     // balloon through a zoom-in and snap back at the end.
     setFlatZoom(target.k);
 
-    if (isFirst || sameCountry) {
+    const record = () =>
+      useMapStore.getState().setFlatFocus(
+        keyCountryIso(flatViewTarget.key)
+          ? { key: flatViewTarget.key, k: target.k, x: target.x, y: target.y }
+          : null,
+      );
+
+    if ((isFirst && !seededFromFocus) || sameCountry) {
       svg.interrupt();
       svg.call(zoom.transform, target);
+      record();
     } else {
-      svg.transition().duration(750).ease(d3.easeCubicInOut).call(zoom.transform, target);
+      // `sameRegion` is the small centre → capital correction: a quick retarget
+      // (d3 picks it up from the in-flight glide's current position, no snap).
+      svg.transition().duration(sameRegion ? 300 : 750).ease(d3.easeCubicInOut).call(zoom.transform, target).on('end', record);
     }
   }, [isGlobe, flatViewTarget, mounted, _hasHydrated, status]);
 
@@ -611,6 +689,10 @@ export default function Map({ slug }: MapProps) {
       }
       return;
     }
+    // Subdivision geometry still loading — leave the pose (persisted across the
+    // remount) untouched so we glide straight into the new region, not out to
+    // the country and back.
+    if (globeTargetKey === 'pending') return;
     const prev = lastGlobeTargetRef.current;
     // Same destination, only sub-threshold drift (centroid → capital as the
     // record loads): leave any in-flight fly-to running — don't cancel it.
