@@ -147,7 +147,10 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
         <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
           {t('exploreRegions')} ({regionsList.length})
         </h3>
-        <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
+        {/* overflow-x-clip + p-1: a FlagPill's hover:scale would otherwise spill
+            past the right edge, flip on a horizontal scrollbar, reflow the row and
+            pull the flag out from under the cursor — an endless grow/shrink loop. */}
+        <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto overflow-x-clip p-1 scrollbar-thin scrollbar-thumb-primary/20">
           {regionsList.map((region) => (
             <FlagPill
               key={region.code}
@@ -283,7 +286,7 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                 <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
                   {t('subdivisionsTitle')} ({subdivisions.length})
                 </h3>
-                <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-primary/20">
+                <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto overflow-x-clip p-1 scrollbar-thin scrollbar-thumb-primary/20">
                   {subdivisions.map((sub) => (
                     <FlagPill
                       key={sub.code}
