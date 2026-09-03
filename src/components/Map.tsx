@@ -30,7 +30,7 @@ import {
 import { useCountrySubMap } from '@/hooks/useRegionMapData';
 import { useWorldMapData } from '@/hooks/useWorldMapData';
 import { getLocalizedValue } from '@/lib/i18n-utils';
-import { fitAreaGlobe, fitFeatureFlat, fitFeatureGlobe, isFrontFacing, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
+import { fitAreaGlobe, fitFeatureFlat, fitFeatureGlobe, isFrontFacing, mainlandCentroid, orientationFor, rebaseTranslateX, wrapTranslateX } from '@/lib/mapProjection';
 import { buildCodeByFeatureId } from '@/lib/subdivisionMatch';
 import { useMapStore } from '@/store/useMapStore';
 import { Continent, Country, Subdivision } from '@/types';
@@ -38,6 +38,14 @@ import { Continent, Country, Subdivision } from '@/types';
 interface MapProps {
   slug?: string;
 }
+
+// Flat-map d3-zoom scale ceiling. Well above a large country's fitted zoom
+// (~10×) so small countries (Luxembourg, Malta) and first-level subdivisions —
+// often well under 1° across, needing 40–250× on this MERCATOR_SCALE=120 world —
+// actually fill the frame instead of hitting the cap and staying a distant speck.
+const FLAT_MAX_ZOOM = 400;
+const COUNTRY_MAX_ZOOM = 220;
+const SUBDIVISION_MAX_ZOOM = 320;
 
 // Linear interpolator prevents the "swoop out" effect and flies directly to the target zoom
 const linearZoomInterpolator = (a: d3.ZoomView, b: d3.ZoomView) => {
@@ -60,6 +68,10 @@ export default function Map({ slug }: MapProps) {
   const [activeSubdivision, setActiveSubdivision] = useState<Subdivision | null>(null);
   const [subdivisionsForCountry, setSubdivisionsForCountry] = useState<Subdivision[]>([]);
   const [activeContinent, setActiveContinent] = useState<Continent | null>(null);
+  // Live flat-map zoom scale, mirrored at rest (seed / fly-to / gesture end) so
+  // the capital marker can counter-scale and stay a constant on-screen size
+  // instead of ballooning with the <g> zoom transform at a subdivision's ~300×.
+  const [flatZoom, setFlatZoom] = useState(1);
 
   // Globe (orthographic) view state. `rotation` = orthographic `.rotate([λ, φ])`.
   // Lives in the store (see useMapStore) so it survives the <Map> remount on
@@ -79,6 +91,7 @@ export default function Map({ slug }: MapProps) {
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const lastFlatKeyRef = useRef<string | null>(null);
   const lastGlobeTargetRef = useRef<{ key: string; lng: number; lat: number; scale: number } | null>(null);
+  const globeFlyRafRef = useRef<number | null>(null);
   const isSubMapRef = useRef(false);
 
   // Guards against a Rules-of-Hooks violation: this render must call the exact
@@ -216,7 +229,10 @@ export default function Map({ slug }: MapProps) {
     };
   }, [isGlobe, globeProjection]);
 
-  const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts.length === 1 && slugParts[0].length === 2 ? slugParts[0].toLowerCase() : undefined);
+  // The country in view, from the loaded record or — before it loads — straight
+  // from the URL (`/map/<iso>` or `/map/<iso>/<region>`), so both maps head for
+  // the country on the first render instead of flashing through the world view.
+  const targetIso = activeCountry?.isoCode?.toLowerCase() || (slugParts[0]?.length === 2 ? slugParts[0].toLowerCase() : undefined);
 
   // World-atlas country features, parsed once per map load. Shared by the flat
   // and globe fly-to targets.
@@ -228,7 +244,7 @@ export default function Map({ slug }: MapProps) {
   // The single place that answers "where should the flat map be framed right
   // now?". `key` identifies the destination; the fly-to effect animates only
   // when it changes, so data loading in stages never restarts a flight.
-  const flatViewTarget = useMemo<{ key: string; transform: d3.ZoomTransform } | null>(() => {
+  const flatViewTarget = useMemo<{ key: string; transform: d3.ZoomTransform; isSub: boolean } | null>(() => {
     const targetWidth = width * 0.6;
 
     const positionTransform = () => {
@@ -246,31 +262,43 @@ export default function Map({ slug }: MapProps) {
     if (activeCountry?.isoCode && activeRegion && subMapData) {
       const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
       if (f) {
+        const cap = activeSubdivision?.capitalCoordinates;
         return {
           key: `region:${activeCountry.isoCode}:${activeRegion}`,
-          transform: fitFeatureFlat(f, flatProjection, WORLD_WIDTH, targetWidth, height),
+          isSub: true,
+          transform: fitFeatureFlat(
+            f, flatProjection, WORLD_WIDTH, targetWidth, height,
+            SUBDIVISION_MAX_ZOOM,
+            cap ? [cap.lng, cap.lat] : null,
+          ),
         };
       }
     }
 
-    // Also the fallback while a focused region's geometry is still loading.
-    if (activeCountry?.isoCode) {
-      const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
+    // The country frame — also the fallback while a focused region's geometry is
+    // still loading. Keys off the URL-derived iso so the first render already
+    // heads for the country instead of the world.
+    const countryIso = activeCountry?.isoCode || (targetIso ? targetIso.toUpperCase() : null);
+    if (countryIso) {
+      const numericId = ALPHA2_TO_NUMERIC[countryIso.toUpperCase()];
       const f = worldCountryFeatures.find((x: any) => String(x.id).padStart(3, '0') === numericId);
       if (f) {
         return {
-          key: `country:${activeCountry.isoCode}`,
-          transform: fitFeatureFlat(f, flatProjection, WORLD_WIDTH, targetWidth, height),
+          // `isSubMap` is in the key: when the country's sub-map geometry
+          // finishes loading the frame is recomputed without the world-wrap.
+          key: `country:${countryIso}:${isSubMap ? 'sub' : 'world'}`,
+          isSub: isSubMap,
+          transform: fitFeatureFlat(f, flatProjection, WORLD_WIDTH, targetWidth, height, COUNTRY_MAX_ZOOM),
         };
       }
     }
 
     if (selectedContinent) {
-      return { key: `continent:${selectedContinent}`, transform: positionTransform() };
+      return { key: `continent:${selectedContinent}`, isSub: false, transform: positionTransform() };
     }
 
-    return { key: 'world', transform: positionTransform() };
-  }, [activeCountry, activeRegion, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position]);
+    return { key: 'world', isSub: false, transform: positionTransform() };
+  }, [activeCountry, activeRegion, activeSubdivision, isSubMap, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position, targetIso]);
 
   // Same idea for the globe: a target point + zoom scale, keyed so the rotation
   // animation runs once per destination.
@@ -279,10 +307,12 @@ export default function Map({ slug }: MapProps) {
       const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
       if (f) {
         const cap = activeSubdivision?.capitalCoordinates;
-        const centre: [number, number] = cap ? [cap.lng, cap.lat] : (d3.geoCentroid(f) as [number, number]);
+        const centre: [number, number] = cap ? [cap.lng, cap.lat] : mainlandCentroid(f);
         return {
-          key: `region:${activeCountry.isoCode}:${activeRegion}`,
-          ...fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT),
+          key: `region:${activeCountry.isoCode}:${activeRegion}:${cap ? 'cap' : 'approx'}`,
+          // A first-level subdivision is small — let the globe push in closer
+          // than the country-level 3.6× cap so it isn't a dot on a big sphere.
+          ...fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT, 6),
         };
       }
     }
@@ -299,15 +329,15 @@ export default function Map({ slug }: MapProps) {
       const centre: [number, number] | null = cap
         ? [cap.lng, cap.lat]
         : f
-          ? (d3.geoCentroid(f) as [number, number])
+          ? mainlandCentroid(f)
           : null;
       if (centre) {
         return {
-          key: `country:${iso}`,
+          key: `country:${iso}:${cap ? 'cap' : 'approx'}`,
           ...(loaded?.areaKm2
-            ? fitAreaGlobe(loaded.areaKm2, centre, height, GLOBE_SCALE_DEFAULT, 'km2')
+            ? fitAreaGlobe(loaded.areaKm2, centre, height, GLOBE_SCALE_DEFAULT, 'km2', 4.5)
             : f
-              ? fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT)
+              ? fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT, 4.5)
               : { point: centre, scale: GLOBE_SCALE_DEFAULT * 2.4 }),
         };
       }
@@ -417,7 +447,7 @@ export default function Map({ slug }: MapProps) {
     };
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 8])
+      .scaleExtent([1, FLAT_MAX_ZOOM])
       .translateExtent([[-Infinity, flatYExtent[0]], [Infinity, flatYExtent[1]]])
       .touchable(true)
       .interpolate(linearZoomInterpolator)
@@ -427,8 +457,9 @@ export default function Map({ slug }: MapProps) {
       .on('zoom', (event) => {
         g.attr('transform', wrapTransform(event.transform, !!event.sourceEvent).toString());
       })
-      .on('end', () => {
+      .on('end', (event) => {
         svg.attr('shape-rendering', 'geometricPrecision');
+        if (event.transform) setFlatZoom(event.transform.k);
       });
 
     zoomRef.current = zoom;
@@ -449,6 +480,7 @@ export default function Map({ slug }: MapProps) {
       // restore it from d3-zoom's stored value so the map doesn't flash unzoomed.
       g.attr('transform', (svg.property('__zoom') as d3.ZoomTransform).toString());
     }
+    setFlatZoom((svg.property('__zoom') as d3.ZoomTransform | undefined)?.k ?? 1);
 
     return () => {
       svg.on('.zoom', null);
@@ -465,20 +497,33 @@ export default function Map({ slug }: MapProps) {
     if (!zoom) return;
 
     if (flatViewTarget.key === lastFlatKeyRef.current) return;
-    const isFirst = lastFlatKeyRef.current === null;
+    const prevKey = lastFlatKeyRef.current;
+    const isFirst = prevKey === null;
+    // `country:<iso>:world` → `country:<iso>:sub` (same country, sub-map geometry
+    // just loaded) is the same framing minus the world-wrap — snap, don't slide.
+    const sameCountry =
+      !!prevKey &&
+      prevKey.startsWith('country:') &&
+      flatViewTarget.key.startsWith('country:') &&
+      prevKey.split(':')[1] === flatViewTarget.key.split(':')[1];
     lastFlatKeyRef.current = flatViewTarget.key;
 
     const svg = d3.select(svgRef.current);
     const node = svgRef.current as unknown as { __zoom?: d3.ZoomTransform };
     const t = flatViewTarget.transform;
-    // Take the shortest horizontal path: aim for the world copy nearest the
-    // current pan position rather than the centre one.
+    // On the repeating world map, take the shortest horizontal path: aim for the
+    // world copy nearest the current pan position rather than the centre one. A
+    // sub-map is drawn once, so its translation is used as-is.
     const refX = node.__zoom ? node.__zoom.x : width / 2;
-    const target = d3.zoomIdentity
-      .translate(rebaseTranslateX(t.x, refX, t.k, WORLD_WIDTH), t.y)
-      .scale(t.k);
+    const tx = flatViewTarget.isSub ? t.x : rebaseTranslateX(t.x, refX, t.k, WORLD_WIDTH);
+    const target = d3.zoomIdentity.translate(tx, t.y).scale(t.k);
 
-    if (isFirst) {
+    // Size the capital marker for the destination up front, so it doesn't
+    // balloon through a zoom-in and snap back at the end.
+    setFlatZoom(target.k);
+
+    if (isFirst || sameCountry) {
+      svg.interrupt();
       svg.call(zoom.transform, target);
     } else {
       svg.transition().duration(750).ease(d3.easeCubicInOut).call(zoom.transform, target);
@@ -505,7 +550,14 @@ export default function Map({ slug }: MapProps) {
 
     const drag = d3.drag<SVGSVGElement, unknown>()
       .clickDistance(4)
-      .on('start', () => svg.attr('shape-rendering', 'optimizeSpeed'))
+      .on('start', () => {
+        // User grabbed the globe — abandon any in-flight fly-to.
+        if (globeFlyRafRef.current != null) {
+          cancelAnimationFrame(globeFlyRafRef.current);
+          globeFlyRafRef.current = null;
+        }
+        svg.attr('shape-rendering', 'optimizeSpeed');
+      })
       .on('drag', (event) => {
         const sens = 0.22 * (GLOBE_SCALE_DEFAULT / globeScaleRef.current);
         const [l, p] = rotationRef.current;
@@ -519,6 +571,10 @@ export default function Map({ slug }: MapProps) {
     let wheelIdle: ReturnType<typeof setTimeout> | null = null;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+      if (globeFlyRafRef.current != null) {
+        cancelAnimationFrame(globeFlyRafRef.current);
+        globeFlyRafRef.current = null;
+      }
       svg.attr('shape-rendering', 'optimizeSpeed');
       if (wheelIdle) clearTimeout(wheelIdle);
       wheelIdle = setTimeout(() => svg.attr('shape-rendering', 'geometricPrecision'), 200);
@@ -548,8 +604,16 @@ export default function Map({ slug }: MapProps) {
   const [globeTargetLng, globeTargetLat] = globeViewTarget.point;
   const globeTargetScale = globeViewTarget.scale;
   useEffect(() => {
-    if (!isGlobe) return;
+    if (!isGlobe) {
+      if (globeFlyRafRef.current != null) {
+        cancelAnimationFrame(globeFlyRafRef.current);
+        globeFlyRafRef.current = null;
+      }
+      return;
+    }
     const prev = lastGlobeTargetRef.current;
+    // Same destination, only sub-threshold drift (centroid → capital as the
+    // record loads): leave any in-flight fly-to running — don't cancel it.
     if (
       prev && prev.key === globeTargetKey &&
       Math.abs(prev.lng - globeTargetLng) < 1 &&
@@ -566,20 +630,32 @@ export default function Map({ slug }: MapProps) {
     const dScale = globeTargetScale - sScale;
     if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5 && Math.abs(dScale) < 1) return;
 
+    // A real move: retarget from the globe's current pose, replacing any
+    // in-flight fly-to. The raf handle lives in a ref (not effect-cleanup) so a
+    // harmless re-render can't cancel the animation and strand it mid-flight.
+    if (globeFlyRafRef.current != null) cancelAnimationFrame(globeFlyRafRef.current);
     svgRef.current?.setAttribute('shape-rendering', 'optimizeSpeed');
     const start = performance.now();
-    let raf = requestAnimationFrame(function step(now) {
+    const step = (now: number) => {
       const u = Math.min(1, (now - start) / 750);
       const e = d3.easeCubicInOut(u);
       rotationRef.current = [sl + dl * e, sp + dp * e];
       globeScaleRef.current = sScale + dScale * e;
       setRotation([rotationRef.current[0], rotationRef.current[1]]);
       setGlobeScale(globeScaleRef.current);
-      if (u < 1) raf = requestAnimationFrame(step);
-      else svgRef.current?.setAttribute('shape-rendering', 'geometricPrecision');
-    });
-    return () => cancelAnimationFrame(raf);
+      if (u < 1) {
+        globeFlyRafRef.current = requestAnimationFrame(step);
+      } else {
+        globeFlyRafRef.current = null;
+        svgRef.current?.setAttribute('shape-rendering', 'geometricPrecision');
+      }
+    };
+    globeFlyRafRef.current = requestAnimationFrame(step);
   }, [isGlobe, globeTargetKey, globeTargetLng, globeTargetLat, globeTargetScale]);
+
+  useEffect(() => () => {
+    if (globeFlyRafRef.current != null) cancelAnimationFrame(globeFlyRafRef.current);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setTooltip({ ...tooltip, x: e.clientX, y: e.clientY });
@@ -724,20 +800,23 @@ export default function Map({ slug }: MapProps) {
                 if (isGlobe && !isFrontFacing([coords.lng, coords.lat], rotation)) return null;
                 const projected = projection([coords.lng, coords.lat]);
                 if (!projected) return null;
+                // The marker lives inside the zoomed <g>, so on the flat map it
+                // would grow with the zoom scale (up to ~300× on a subdivision).
+                // Counter-scale by the live zoom so it stays a constant size; the
+                // globe re-projects instead of transforming, so no counter-scale.
+                const inv = isGlobe ? 1 : 1 / Math.max(1, flatZoom);
                 return (
-                  <g>
-                    <circle
-                      cx={projected[0]}
-                      cy={projected[1]}
-                      r={4}
-                      fill="var(--primary)"
-                      stroke="white"
-                      strokeWidth={1}
-                    />
+                  <g transform={`translate(${projected[0]} ${projected[1]}) scale(${inv})`}>
+                    <circle r={3.5} fill="var(--primary)" stroke="white" strokeWidth={1} />
                     <text
-                      x={projected[0] + 8}
-                      y={projected[1] + 4}
-                      className="font-game-mono text-xs fill-[var(--foreground)]"
+                      x={7}
+                      y={3.5}
+                      fontSize={11}
+                      paintOrder="stroke"
+                      stroke="var(--background)"
+                      strokeWidth={3}
+                      strokeLinejoin="round"
+                      className="font-game-mono fill-[var(--foreground)]"
                     >
                       {getLocalizedValue(source.capital, locale)}
                     </text>

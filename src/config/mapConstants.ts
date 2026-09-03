@@ -39,7 +39,7 @@ export const WORLD_WIDTH = 2 * Math.PI * MERCATOR_SCALE;
 
 // Globe (orthographic) — starting radius and the wheel-zoom clamp.
 export const GLOBE_SCALE_DEFAULT = 240;
-export const GLOBE_SCALE_RANGE: [number, number] = [180, 1400];
+export const GLOBE_SCALE_RANGE: [number, number] = [180, 1600];
 
 export const CONTINENT_VIEWS = {
   'Africa': { coordinates: [20, 0] as [number, number], zoom: 2.2 },
