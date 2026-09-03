@@ -345,5 +345,21 @@
     "myPassion": "La mia passione",
     "myVision": "La mia visione",
     "joinJourney": "Unisciti al viaggio"
+  },
+  "Compare": {
+    "title": "Confronta",
+    "heading": "Confronto tra paesi",
+    "subtitle": "Due paesi a confronto: superficie, popolazione, economia e altro.",
+    "countryA": "Paese A",
+    "countryB": "Paese B",
+    "selectCountry": "Seleziona un paese",
+    "searchPlaceholder": "Cerca paesi...",
+    "swap": "Scambia i paesi",
+    "noResults": "Nessun paese trovato.",
+    "sizeTitle": "Dimensione relativa",
+    "equalArea": "Disegnato in scala equivalente",
+    "sizeCaption": "{name} è {factor}× più grande per superficie",
+    "sizeEqual": "Entrambi coprono quasi la stessa superficie",
+    "statsTitle": "Statistiche"
   }
 }

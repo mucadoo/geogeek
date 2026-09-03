@@ -202,5 +202,21 @@
     "myPassion": "私の情熱",
     "myVision": "私のビジョン",
     "joinJourney": "旅に参加する"
+  },
+  "Compare": {
+    "title": "比較",
+    "heading": "国の比較",
+    "subtitle": "2つの国を並べて比較 — 面積、人口、経済など。",
+    "countryA": "国 A",
+    "countryB": "国 B",
+    "selectCountry": "国を選択",
+    "searchPlaceholder": "国を検索...",
+    "swap": "国を入れ替える",
+    "noResults": "国が見つかりません。",
+    "sizeTitle": "面積の比較",
+    "equalArea": "正積図法の共通スケールで表示",
+    "sizeCaption": "{name} は面積が {factor}× 大きい",
+    "sizeEqual": "どちらもほぼ同じ面積です",
+    "statsTitle": "統計"
   }
 }

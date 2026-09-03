@@ -202,5 +202,21 @@
     "myPassion": "Meine Leidenschaft",
     "myVision": "Meine Vision",
     "joinJourney": "Begleite die Reise"
+  },
+  "Compare": {
+    "title": "Vergleich",
+    "heading": "Länder im Vergleich",
+    "subtitle": "Zwei Länder im direkten Vergleich – Größe, Bevölkerung, Wirtschaft und mehr.",
+    "countryA": "Land A",
+    "countryB": "Land B",
+    "selectCountry": "Land auswählen",
+    "searchPlaceholder": "Länder suchen …",
+    "swap": "Länder tauschen",
+    "noResults": "Keine Länder gefunden.",
+    "sizeTitle": "Größenvergleich",
+    "equalArea": "In flächentreuem Maßstab dargestellt",
+    "sizeCaption": "{name} ist flächenmäßig {factor}× größer",
+    "sizeEqual": "Beide haben nahezu dieselbe Fläche",
+    "statsTitle": "Statistiken"
   }
 }

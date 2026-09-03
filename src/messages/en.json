@@ -346,5 +346,21 @@
     "myPassion": "My Passion",
     "myVision": "My Vision",
     "joinJourney": "Join the Journey"
+  },
+  "Compare": {
+    "title": "Compare",
+    "heading": "Country Comparison",
+    "subtitle": "Two countries, side by side — size, population, economy and more.",
+    "countryA": "Country A",
+    "countryB": "Country B",
+    "selectCountry": "Select a country",
+    "searchPlaceholder": "Search countries...",
+    "swap": "Swap countries",
+    "noResults": "No countries found.",
+    "sizeTitle": "Relative Size",
+    "equalArea": "Drawn at a shared equal-area scale",
+    "sizeCaption": "{name} is {factor}× larger by area",
+    "sizeEqual": "Both cover almost the same area",
+    "statsTitle": "Statistics"
   }
 }

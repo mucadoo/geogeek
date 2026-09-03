@@ -202,5 +202,21 @@
     "myPassion": "我的热情",
     "myVision": "我的愿景",
     "joinJourney": "加入这段旅程"
+  },
+  "Compare": {
+    "title": "对比",
+    "heading": "国家对比",
+    "subtitle": "两个国家并排比较——面积、人口、经济等。",
+    "countryA": "国家 A",
+    "countryB": "国家 B",
+    "selectCountry": "选择国家",
+    "searchPlaceholder": "搜索国家...",
+    "swap": "交换国家",
+    "noResults": "未找到国家。",
+    "sizeTitle": "相对大小",
+    "equalArea": "以等积比例绘制",
+    "sizeCaption": "{name} 的面积大 {factor} 倍",
+    "sizeEqual": "两国面积几乎相同",
+    "statsTitle": "统计数据"
   }
 }
