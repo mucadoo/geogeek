@@ -137,7 +137,11 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
     };
   }, [subdivision?.code]);
 
-  const RegionPicker = () => (
+  // Plain JSX, not a nested component: MapSidebar re-renders on every map-store
+  // change, and a component defined here would be a new type each render, so its
+  // subtree (and every Radix tooltip hover timer in it) would remount and the
+  // FlagPill tooltips would never get the chance to open.
+  const regionPicker = (
     regionsList.length > 0 ? (
       <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl">
         <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
@@ -423,14 +427,14 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
               </div>
             )}
 
-            <RegionPicker />
+            {regionPicker}
           </div>
         )}
 
         {type === 'region' && data && !subdivision && (
           <div className="space-y-6">
             <p className="text-xs text-slate-400 italic">{t('regionOf', { name: getLocalizedValue(data.name, locale) })}</p>
-            <RegionPicker />
+            {regionPicker}
           </div>
         )}
 
