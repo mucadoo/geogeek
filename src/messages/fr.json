@@ -269,6 +269,8 @@
     "unmuteSound": "Activer le son",
     "disableAutoZoom": "Désactiver le zoom auto",
     "enableAutoZoom": "Activer le zoom auto",
+    "flatMap": "Carte plate",
+    "globeView": "Vue du globe",
     "guessed": "Trouvés",
     "skipped": "Passés",
     "noneYet": "Aucun pour l'instant",

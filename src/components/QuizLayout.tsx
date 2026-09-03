@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
-import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Copy, Volume2, VolumeX, Lightbulb } from 'lucide-react';
+import { Trophy, ArrowLeft, CheckCircle2, AlertCircle, Maximize2, Minimize2, Copy, Volume2, VolumeX, Lightbulb, Globe2, Map as MapIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
@@ -42,7 +42,11 @@ interface QuizLayoutProps {
   mapData: Topology | undefined;
   mapStatus: 'pending' | 'success' | 'error';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  projection: any; 
+  projection: any;
+  /** Whether `projection` is the draggable orthographic globe. */
+  isGlobe?: boolean;
+  /** Whether this game's dataset supports a globe view at all (real lng/lat). */
+  globeAvailable?: boolean;
   validNames: string[];
   duration: number;
   gameMode?: GameMode;
@@ -58,7 +62,8 @@ interface QuizLayoutProps {
 }
 
 export default function QuizLayout({
-  gameKey, title, description, mapData, mapStatus, projection, validNames, gameMode = 'name', capitalMap = {},
+  gameKey, title, description, mapData, mapStatus, projection, isGlobe = false, globeAvailable = false,
+  validNames, gameMode = 'name', capitalMap = {},
   showOnlyValid = false, capitalCoordinates = {}, localizedNames = {}, shareResults = false
 }: QuizLayoutProps) {
   const t = useTranslations('Quiz');
@@ -71,7 +76,7 @@ export default function QuizLayout({
     totalToGuess, timeLeft, tick, isNewHighScore,
     userInput, setUserInput, submitGuess, skipState, lastGuessCorrect,
     correctlyGuessedIds, missedStates, options,
-    autoZoom, setAutoZoom, soundEnabled, setSoundEnabled, streak,
+    autoZoom, setAutoZoom, soundEnabled, setSoundEnabled, gameView, setGameView, streak,
     pauseGame, resumeGame, quitGame, savedGames, currentGameKey,
     hintLevel, revealHint
   } = useGameStore();
@@ -353,6 +358,7 @@ export default function QuizLayout({
             gameMode={gameMode as any}
             capitalMap={capitalMap}
             capitalCoordinates={capitalCoordinates}
+            isGlobe={isGlobe}
             showOnlyValid={showOnlyValid}
             onRegionClick={handleRegionClick}
             hideBorders={adv.hideBorders}
@@ -368,6 +374,21 @@ export default function QuizLayout({
           <GameHUD score={score} total={totalToGuess} timeLeft={timeLeft} />
 
           <div className="absolute top-6 right-10 z-20 flex gap-2 pointer-events-auto">
+            {globeAvailable && (
+              <SimpleTooltip label={gameView === 'globe' ? t('flatMap') : t('globeView')}>
+                <button
+                  onClick={() => setGameView(gameView === 'globe' ? 'flat' : 'globe')}
+                  aria-label={gameView === 'globe' ? t('flatMap') : t('globeView')}
+                  aria-pressed={gameView === 'globe'}
+                  className={cn(
+                    "p-3 rounded-2xl border backdrop-blur-md transition-all shadow-lg",
+                    gameView === 'globe' ? "bg-primary/20 border-primary text-primary" : "bg-[var(--card-bg)]/85 border-[var(--card-border)] text-slate-400"
+                  )}
+                >
+                  {gameView === 'globe' ? <MapIcon size={24} /> : <Globe2 size={24} />}
+                </button>
+              </SimpleTooltip>
+            )}
             <SimpleTooltip label={soundEnabled ? t('muteSound') : t('unmuteSound')}>
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}

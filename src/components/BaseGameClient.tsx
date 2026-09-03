@@ -5,8 +5,9 @@ import { useMemo } from 'react';
 
 import QuizLayout from '@/components/QuizLayout';
 import { useGameConfig } from '@/hooks/useGameConfig';
-import { ProjectionConfig, useGameProjection } from '@/hooks/useGameProjection';
+import { gameGlobeAvailable, ProjectionConfig, useGameProjection } from '@/hooks/useGameProjection';
 import { getRegionNameTranslations } from '@/lib/regionNameTranslations';
+import { useGameStore } from '@/store/useGameStore';
 
 // Maps a capital/reverse gameKey to the config key holding its
 // region-name -> capital-name lookup table. Add an entry here whenever a
@@ -55,7 +56,10 @@ export default function BaseGameClient({
   const t = useTranslations('Games');
   const tRegions = useTranslations('RegionNames');
 
-  const projection = useGameProjection(mapData, projectionConfig);
+  const gameView = useGameStore((s) => s.gameView);
+  const globeAvailable = gameGlobeAvailable(projectionConfig);
+  const isGlobe = globeAvailable && gameView === 'globe';
+  const projection = useGameProjection(mapData, projectionConfig, isGlobe);
 
   const baseNames: string[] = useMemo(() => {
     if (!config || !config[configKey]) return [];
@@ -112,6 +116,8 @@ export default function BaseGameClient({
       mapData={mapData}
       mapStatus={mapStatus}
       projection={projection}
+      isGlobe={isGlobe}
+      globeAvailable={globeAvailable}
       validNames={localizedValidNames}
       localizedNames={localizedNames}
       duration={finalDuration}

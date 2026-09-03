@@ -68,6 +68,8 @@ interface GameState {
   totalToGuess: number;
   autoZoom: boolean;
   soundEnabled: boolean;
+  /** Map projection for the quiz map: a flat map or a draggable orthographic globe. */
+  gameView: 'flat' | 'globe';
   /** Consecutive correct answers in the current run; resets on a wrong guess or a skip. */
   streak: number;
   /** Progressive hint ladder for the current target: 0 = none revealed, 1 = letter clue, 2 = fun fact. Resets on every new/skipped state. */
@@ -93,6 +95,7 @@ interface GameState {
   setUserInput: (input: string) => void;
   setAutoZoom: (enabled: boolean) => void;
   setSoundEnabled: (enabled: boolean) => void;
+  setGameView: (view: 'flat' | 'globe') => void;
   revealHint: () => void;
   resetGame: () => void;
 }
@@ -205,6 +208,7 @@ export const useGameStore = create<GameState>()(
         totalToGuess: 0,
         autoZoom: true,
         soundEnabled: true,
+        gameView: 'flat',
         streak: 0,
         hintLevel: 0,
 
@@ -333,6 +337,7 @@ export const useGameStore = create<GameState>()(
         setUserInput: (userInput) => set({ userInput, lastGuessCorrect: null, lastSkippedState: null }),
         setAutoZoom: (autoZoom) => set({ autoZoom }),
         setSoundEnabled: (soundEnabled) => set({ soundEnabled }),
+        setGameView: (gameView) => set({ gameView }),
         revealHint: () => set((state) => ({ hintLevel: Math.min(state.hintLevel + 1, 2) })),
 
         submitGuess: (guess) => {
@@ -505,6 +510,7 @@ export const useGameStore = create<GameState>()(
         advancedSettings: state.advancedSettings,
         autoZoom: state.autoZoom,
         soundEnabled: state.soundEnabled,
+        gameView: state.gameView,
       }),
     }
   )

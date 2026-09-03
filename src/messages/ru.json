@@ -137,6 +137,8 @@
     "unmuteSound": "Включить звук",
     "disableAutoZoom": "Отключить автозум",
     "enableAutoZoom": "Включить автозум",
+    "flatMap": "Плоская карта",
+    "globeView": "Вид глобуса",
     "guessed": "Угадано",
     "skipped": "Пропущено",
     "noneYet": "Пока нет",

@@ -137,6 +137,8 @@
     "unmuteSound": "取消静音",
     "disableAutoZoom": "禁用自动缩放",
     "enableAutoZoom": "启用自动缩放",
+    "flatMap": "平面地图",
+    "globeView": "地球仪视图",
     "guessed": "已猜对",
     "skipped": "已跳过",
     "noneYet": "暂无",

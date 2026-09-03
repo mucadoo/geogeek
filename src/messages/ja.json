@@ -137,6 +137,8 @@
     "unmuteSound": "サウンドをオンにする",
     "disableAutoZoom": "オートズームを無効にする",
     "enableAutoZoom": "オートズームを有効にする",
+    "flatMap": "平面地図",
+    "globeView": "地球儀ビュー",
     "guessed": "正解",
     "skipped": "スキップ済み",
     "noneYet": "まだありません",

@@ -269,6 +269,8 @@
     "unmuteSound": "Activar sonido",
     "disableAutoZoom": "Desactivar zoom automático",
     "enableAutoZoom": "Activar zoom automático",
+    "flatMap": "Mapa plano",
+    "globeView": "Vista de globo",
     "guessed": "Acertados",
     "skipped": "Omitidos",
     "noneYet": "Ninguno aún",

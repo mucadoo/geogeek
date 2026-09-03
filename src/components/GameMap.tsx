@@ -2,16 +2,23 @@
 
 import * as d3 from 'd3';
 import { Feature, FeatureCollection } from 'geojson';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { feature } from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
 import { useGameStore } from '@/store/useGameStore';
 
+// A point is hidden on the far side of the globe once it is more than 90° from
+// the point facing the viewer (`[-λ, -φ]` of the current rotation).
+const isOnFarSide = (lng: number, lat: number, rotation: [number, number]) =>
+  d3.geoDistance([lng, lat], [-rotation[0], -rotation[1]]) > Math.PI / 2;
+
 interface GameMapProps {
   mapData: Topology;
   highlightedStateId: string | null;
   projection: d3.GeoProjection | d3.GeoIdentityTransform;
+  /** When true, `projection` is a draggable orthographic globe. */
+  isGlobe?: boolean;
   validNames: string[];
   width?: number;
   height?: number;
@@ -63,8 +70,8 @@ function getFocusBounds(pathGenerator: d3.GeoPath, activeFeature: Feature): Boun
   return bounds && !isNaN(bounds[0][0]) ? bounds : null;
 }
 
-export default function GameMap({ 
-  mapData, highlightedStateId, projection, validNames,
+export default function GameMap({
+  mapData, highlightedStateId, projection, isGlobe = false, validNames,
   width = 960, height = 600,
   showOnlyValid = false, gameMode = 'name', capitalMap = {}, capitalCoordinates = {},
   onRegionClick,
@@ -74,6 +81,53 @@ export default function GameMap({
   getLabel = (name: string) => name,
 }: GameMapProps) {
   const { correctlyGuessedIds, lastGuessCorrect, autoZoom } = useGameStore();
+
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [rotation, setRotation] = useState<[number, number]>([0, 0]);
+  const rotationRef = useRef(rotation);
+  rotationRef.current = rotation;
+  const autoRotateRaf = useRef<number | null>(null);
+
+  // Re-seed the rotation from the projection whenever a new one is built (a new
+  // game, or the flat/globe toggle) so the globe starts framed on the region.
+  useEffect(() => {
+    if (isGlobe && typeof (projection as d3.GeoProjection).rotate === 'function') {
+      const [l, p] = (projection as d3.GeoProjection).rotate();
+      setRotation([l, p]);
+    }
+  }, [projection, isGlobe]);
+
+  // Drag to spin the globe. A drag also abandons any in-flight auto-rotate.
+  useEffect(() => {
+    if (!isGlobe || !svgRef.current) return;
+    const svg = d3.select(svgRef.current);
+    let raf: number | null = null;
+    const flush = () => { raf = null; setRotation([rotationRef.current[0], rotationRef.current[1]]); };
+    const schedule = () => { if (raf == null) raf = requestAnimationFrame(flush); };
+
+    const drag = d3.drag<SVGSVGElement, unknown>()
+      .clickDistance(5)
+      .on('start', () => {
+        if (autoRotateRaf.current != null) { cancelAnimationFrame(autoRotateRaf.current); autoRotateRaf.current = null; }
+      })
+      .on('drag', (event) => {
+        const k = 0.3;
+        const [l, p] = rotationRef.current;
+        rotationRef.current = [l + event.dx * k, Math.max(-90, Math.min(90, p - event.dy * k))];
+        schedule();
+      });
+
+    svg.call(drag);
+    return () => {
+      svg.on('.drag', null);
+      if (raf != null) cancelAnimationFrame(raf);
+    };
+  }, [isGlobe]);
+
+  // Apply the live rotation before every projection use.
+  if (isGlobe && typeof (projection as d3.GeoProjection).rotate === 'function') {
+    (projection as d3.GeoProjection).rotate(rotation);
+  }
   const pathGenerator = d3.geoPath().projection(projection);
 
   const allFeatures = useMemo(() => {
@@ -89,8 +143,43 @@ export default function GameMap({
     );
   }, [mapData]);
 
+  // Globe auto-zoom: rotate the sphere so the target region faces the viewer
+  // (the flat map's pan/scale transform is meaningless on a globe).
+  useEffect(() => {
+    if (!isGlobe || !autoZoom || !highlightedStateId || !allFeatures.length) return;
+    const activeFeature = allFeatures.find((f) => String(f.id) === highlightedStateId);
+    if (!activeFeature) return;
+    const [cx, cy] = d3.geoCentroid(activeFeature as unknown as d3.GeoPermissibleObjects);
+    if (isNaN(cx) || isNaN(cy)) return;
+
+    const [sl, sp] = rotationRef.current;
+    const dl = ((-cx - sl) % 360 + 540) % 360 - 180;
+    const dp = -cy - sp;
+    if (Math.abs(dl) < 0.5 && Math.abs(dp) < 0.5) return;
+
+    if (autoRotateRaf.current != null) cancelAnimationFrame(autoRotateRaf.current);
+    const start = performance.now();
+    const step = (now: number) => {
+      const e = d3.easeCubicInOut(Math.min(1, (now - start) / 700));
+      setRotation([sl + dl * e, sp + dp * e]);
+      autoRotateRaf.current = e < 1 ? requestAnimationFrame(step) : null;
+    };
+    autoRotateRaf.current = requestAnimationFrame(step);
+    return () => {
+      if (autoRotateRaf.current != null) { cancelAnimationFrame(autoRotateRaf.current); autoRotateRaf.current = null; }
+    };
+  }, [isGlobe, autoZoom, highlightedStateId, allFeatures]);
+
   // Compute smooth zoom focus transformation style
   const focusTransformStyle = useMemo(() => {
+    if (isGlobe) {
+      const zoomed = autoZoom && !!highlightedStateId;
+      return {
+        transform: `scale(${zoomed ? 1.9 : 1})`,
+        transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
+        transformOrigin: `${width / 2}px ${height / 2}px`,
+      };
+    }
     if (!autoZoom || !highlightedStateId || !allFeatures.length) {
       return { transform: 'translate(0px, 0px) scale(1)', transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)' };
     }
@@ -120,21 +209,44 @@ export default function GameMap({
       transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
       transformOrigin: '0px 0px',
     };
-  }, [highlightedStateId, allFeatures, pathGenerator, width, height, autoZoom]);
+  }, [isGlobe, rotation, highlightedStateId, allFeatures, pathGenerator, width, height, autoZoom]);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-full max-h-[600px] w-full outline-none bg-[var(--ocean-bg)] overflow-hidden rounded-2xl">
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${width} ${height}`}
+        className={`h-full max-h-[600px] w-full outline-none bg-[var(--ocean-bg)] overflow-hidden rounded-2xl ${isGlobe ? 'cursor-grab active:cursor-grabbing touch-none' : ''}`}
+      >
         <defs>
           <pattern id="ocean-dots" width="20" height="20" patternUnits="userSpaceOnUse">
             <circle cx="2" cy="2" r="1" className="fill-black dark:fill-white opacity-10" />
           </pattern>
         </defs>
-        
+
         <rect width="100%" height="100%" fill="url(#ocean-dots)" />
-        
+
         {/* Dynamic Zooming Group Wrapper */}
         <g style={focusTransformStyle} className="will-change-transform">
+          {isGlobe && (
+            <g className="pointer-events-none">
+              <path
+                d={pathGenerator({ type: 'Sphere' } as d3.GeoPermissibleObjects) || ''}
+                fill="var(--ocean-bg)"
+                stroke="var(--map-stroke)"
+                strokeWidth={0.75}
+                vectorEffect="non-scaling-stroke"
+              />
+              <path
+                d={pathGenerator(d3.geoGraticule10() as d3.GeoPermissibleObjects) || ''}
+                fill="none"
+                stroke="var(--map-stroke)"
+                strokeOpacity={0.35}
+                strokeWidth={0.4}
+                vectorEffect="non-scaling-stroke"
+              />
+            </g>
+          )}
           {allFeatures.map((feat: Feature, i: number) => {
             const stateId = String(feat.id);
             const stateName = (feat.properties as { name: string }).name || "";
@@ -203,6 +315,11 @@ export default function GameMap({
                 const isQuizRegion = validNames.some(vn => normalizeString(vn) === normalizeString(stateName));
                 if (!isQuizRegion) return null;
 
+                if (isGlobe) {
+                  const [glng, glat] = d3.geoCentroid(feat as unknown as d3.GeoPermissibleObjects);
+                  if (!isNaN(glng) && isOnFarSide(glng, glat, rotation)) return null;
+                }
+
                 const bounds = getFocusBounds(pathGenerator, feat);
                 const centroid = pathGenerator.centroid(feat as unknown as d3.GeoPermissibleObjects);
                 if (!centroid || isNaN(centroid[0]) || !bounds) return null;
@@ -245,6 +362,7 @@ export default function GameMap({
                 
                 if (capitalName && capitalCoordinates[capitalName] && typeof projection === 'function') {
                   const rawCoords = capitalCoordinates[capitalName];
+                  if (isGlobe && isOnFarSide(rawCoords[0], rawCoords[1], rotation)) return null;
                   const projected = projection(rawCoords);
                   if (projected) coords = projected as [number, number];
                 }
