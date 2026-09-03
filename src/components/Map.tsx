@@ -128,6 +128,22 @@ export default function Map({ slug }: MapProps) {
   const positionRef = useRef(position);
   positionRef.current = position;
 
+  // Flat <-> globe is a hard projection swap (Mercator zoom-transform vs.
+  // re-projected orthographic). Rather than let it cut, fade the map out, swap
+  // while it's invisible, then fade the new projection back in.
+  const [viewSwitching, setViewSwitching] = useState(false);
+  const switchTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const switchView = (mode: 'flat' | 'globe') => {
+    if (mode === viewMode || viewSwitching) return;
+    switchTimersRef.current.forEach(clearTimeout);
+    setViewSwitching(true);
+    switchTimersRef.current = [
+      setTimeout(() => setViewMode(mode), 220),
+      setTimeout(() => setViewSwitching(false), 300),
+    ];
+  };
+  useEffect(() => () => switchTimersRef.current.forEach(clearTimeout), []);
+
   const { data: subMapData } = useCountrySubMap(activeCountry?.isoCode || null);
 
   const isSubMap = !!(activeCountry && subMapData);
@@ -774,7 +790,7 @@ export default function Map({ slug }: MapProps) {
             <div className="flex gap-1 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)]/85 p-1 shadow-xl backdrop-blur-md">
               <SimpleTooltip label={t('flatView')} side="right">
                 <button
-                  onClick={() => setViewMode('flat')}
+                  onClick={() => switchView('flat')}
                   aria-label={t('flatView')}
                   aria-pressed={!isGlobe}
                   className={`rounded-full p-2 transition-all ${!isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
@@ -784,7 +800,7 @@ export default function Map({ slug }: MapProps) {
               </SimpleTooltip>
               <SimpleTooltip label={t('globeView')} side="right">
                 <button
-                  onClick={() => setViewMode('globe')}
+                  onClick={() => switchView('globe')}
                   aria-label={t('globeView')}
                   aria-pressed={isGlobe}
                   className={`rounded-full p-2 transition-all ${isGlobe ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-primary'}`}
@@ -838,7 +854,12 @@ export default function Map({ slug }: MapProps) {
             ref={svgRef}
             viewBox={`0 0 ${width} ${height}`}
             preserveAspectRatio="xMidYMid meet"
-            className="h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none"
+            style={{
+              opacity: viewSwitching ? 0 : 1,
+              transform: viewSwitching ? 'scale(0.97)' : 'scale(1)',
+              transition: 'opacity 220ms ease-out, transform 220ms ease-out',
+            }}
+            className={`h-full w-full outline-none cursor-grab active:cursor-grabbing touch-none ${viewSwitching ? 'pointer-events-none' : ''}`}
           >
             <g ref={gRef} className="will-change-transform">
               {isGlobe && globeOverlay && (
