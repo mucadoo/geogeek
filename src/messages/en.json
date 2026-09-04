@@ -192,6 +192,7 @@
     "viewOnMap": "View on Map",
     "quickFacts": "Quick Facts",
     "parentCountry": "Parent Country",
+    "parentSubdivision": "Parent Subdivision",
     "regionId": "Region ID",
     "countryCapital": "Country Capital",
     "officialLanguage": "Official Language",
@@ -203,6 +204,7 @@
     "subdivisionType": "Type",
     "density": "Density",
     "neighbouringSubdivisions": "Neighbouring Subdivisions",
+    "childSubdivisions": "Sub-divisions",
     "countryCount": "Countries",
     "memberCountries": "Member Countries",
     "labels": {

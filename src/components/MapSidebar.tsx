@@ -25,6 +25,10 @@ interface MapSidebarProps {
   data?: Country;
   subdivision?: Subdivision | null;
   subdivisions?: Subdivision[];
+  // Second-level units inside the focused first-level subdivision.
+  childSubdivisions?: Subdivision[];
+  // The containing first-level subdivision when a level-2 one is focused.
+  parentSubdivision?: Subdivision | null;
   continent?: Continent | null;
   regionsList?: { code: string; name: string; flagUrl?: string | null }[];
   activeRegionCode?: string | null;
@@ -76,7 +80,7 @@ function FlagPill({
   );
 }
 
-export default function MapSidebar({ type, title, data, subdivision, subdivisions = [], continent, regionsList = [], activeRegionCode }: MapSidebarProps) {
+export default function MapSidebar({ type, title, data, subdivision, subdivisions = [], childSubdivisions = [], parentSubdivision = null, continent, regionsList = [], activeRegionCode }: MapSidebarProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('CountryDetails');
@@ -391,6 +395,13 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                   { label: t('subdivisionType'), value: getLocalizedValue(subdivision.type, locale) },
                   { label: t('labels.isoCode'), value: subdivision.code },
                   { label: t('countryCapital'), value: getLocalizedValue(subdivision.capital, locale) },
+                  ...(subdivision.level === 2 && parentSubdivision
+                    ? [{
+                        label: t('parentSubdivision'),
+                        value: getLocalizedValue(parentSubdivision.name, locale),
+                        onClick: () => router.push(`${countryPath}/${parentSubdivision.code}`),
+                      }]
+                    : []),
                   { label: t('parentCountry'), value: getLocalizedValue(data.name, locale), onClick: () => router.push(countryPath) },
                   { label: t('officialLanguage'), value: subdivision.officialLanguage.en },
                   { label: t('labels.population'), value: subdivision.population ? subdivision.population.toLocaleString(locale) + (subdivision.populationYear ? ` (${subdivision.populationYear})` : '') : 'N/A' },
@@ -424,6 +435,24 @@ export default function MapSidebar({ type, title, data, subdivision, subdivision
                       name={getLocalizedValue(b.name, locale)}
                       flagUrl={borderFlags[b.code!]}
                       onClick={() => router.push(`/map/${b.code!.slice(0, 2).toLowerCase()}/${b.code}`)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {childSubdivisions.length > 0 && (
+              <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl">
+                <h3 className="mb-4 font-bebas text-xl tracking-widest text-primary uppercase">
+                  {t('childSubdivisions')} ({childSubdivisions.length})
+                </h3>
+                <div className="flex flex-wrap items-center gap-2 max-h-56 overflow-y-auto overflow-x-clip p-1 scrollbar-thin scrollbar-thumb-primary/20">
+                  {childSubdivisions.map((child) => (
+                    <FlagPill
+                      key={child.code}
+                      name={getLocalizedValue(child.name, locale)}
+                      flagUrl={child.flagUrl}
+                      onClick={() => router.push(`${countryPath}/${child.code}`)}
                     />
                   ))}
                 </div>

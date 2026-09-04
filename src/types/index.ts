@@ -96,6 +96,13 @@ export interface Subdivision {
   code: string;
   wikidataId: string | null;
   countryIsoCode: string;
+  // Administrative depth: 1 = first-level unit the country directly contains
+  // (state / province / region), 2 = a unit inside a first-level one (Italian
+  // province, French département, Scottish council area, …).
+  level: 1 | 2;
+  // ISO 3166-2 code of the containing first-level subdivision; set on level-2
+  // rows only, null for level-1 rows (and level-2 rows whose parent has no code).
+  parentCode: string | null;
   name: LocalizedString;
   type: LocalizedString;
   typeEn: string | null;

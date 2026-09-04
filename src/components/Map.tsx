@@ -15,6 +15,7 @@ import {
   getContinentByCodeAction,
   getCountryByIsoAction,
   getSubdivisionByCodeAction,
+  listChildSubdivisionsAction,
   listSubdivisionsByCountryAction,
 } from '@/app/actions';
 import {
@@ -76,6 +77,9 @@ export default function Map({ slug }: MapProps) {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const [activeSubdivision, setActiveSubdivision] = useState<Subdivision | null>(null);
   const [subdivisionsForCountry, setSubdivisionsForCountry] = useState<Subdivision[]>([]);
+  // Second-level units in scope for the current view: the children of a focused
+  // level-1 subdivision, or the siblings of a focused level-2 one. Empty otherwise.
+  const [relatedSubdivisions, setRelatedSubdivisions] = useState<Subdivision[]>([]);
   const [activeContinent, setActiveContinent] = useState<Continent | null>(null);
   // Live flat-map zoom scale, mirrored at rest (seed / fly-to / gesture end) so
   // the capital marker can counter-scale and stay a constant on-screen size
@@ -173,10 +177,31 @@ export default function Map({ slug }: MapProps) {
     return activeRegion;
   }, [activeRegion, activeSubdivision, locale]);
 
+  // The containing first-level subdivision when a level-2 one is focused. It's
+  // already in the country's first-level list, so no extra fetch.
+  const parentSubdivision = useMemo(() => {
+    if (activeSubdivision?.level !== 2 || !activeSubdivision.parentCode) return null;
+    return subdivisionsForCountry.find((s) => s.code === activeSubdivision.parentCode) ?? null;
+  }, [activeSubdivision, subdivisionsForCountry]);
+
+  // The first-level code the map should frame / highlight. A level-2 unit has no
+  // geometry of its own, so the map centres on its parent region instead.
+  const frameRegionCode = useMemo(() => {
+    if (activeSubdivision?.level === 2 && activeSubdivision.parentCode) return activeSubdivision.parentCode;
+    return activeRegion;
+  }, [activeSubdivision, activeRegion]);
+
   // Region picker list: prefer the sub-map's own regions (so it lines up with
   // what's drawn), otherwise fall back to the full subdivision list (data-only
   // browser for countries without map geometry).
   const regionsList = useMemo(() => {
+    // Focused on a second-level unit: the picker lists its siblings, not the
+    // country's first-level regions.
+    if (activeSubdivision?.level === 2) {
+      return relatedSubdivisions
+        .map((s) => ({ code: s.code, name: getLocalizedValue(s.name, locale), flagUrl: s.flagUrl }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
     if (subFeatures.length > 0 && Object.keys(codeByFeatureId).length > 0) {
       const seen = new Set<string>();
       const byCode: Record<string, Subdivision> = {};
@@ -198,11 +223,17 @@ export default function Map({ slug }: MapProps) {
     return subdivisionsForCountry
       .map((s) => ({ code: s.code, name: getLocalizedValue(s.name, locale), flagUrl: s.flagUrl }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [subFeatures, codeByFeatureId, subdivisionsForCountry, locale]);
+  }, [activeSubdivision, relatedSubdivisions, subFeatures, codeByFeatureId, subdivisionsForCountry, locale]);
 
   const handleBackClick = () => {
     if (activeRegion) {
-      router.push(`/map/${slugParts[0]}`);
+      // From a level-2 unit, step up to its parent region rather than all the
+      // way out to the country.
+      if (activeSubdivision?.level === 2 && activeSubdivision.parentCode) {
+        router.push(`/map/${slugParts[0]}/${activeSubdivision.parentCode}`);
+      } else {
+        router.push(`/map/${slugParts[0]}`);
+      }
     } else if (activeCountry?.isoCode) {
       const numericId = ALPHA2_TO_NUMERIC[activeCountry.isoCode.toUpperCase()];
       const continent = NUMERIC_TO_CONTINENT[numericId];
@@ -290,14 +321,16 @@ export default function Map({ slug }: MapProps) {
         .scale(base.k);
     };
 
-    if (activeCountry?.isoCode && activeRegion && subMapData) {
-      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
+    if (activeCountry?.isoCode && frameRegionCode && subMapData) {
+      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === frameRegionCode);
       if (f) {
-        const cap = activeSubdivision?.capitalCoordinates;
+        // A level-2 unit is framed on its parent region — bias to the parent's
+        // extent, not the child's own (unavailable) capital.
+        const cap = activeSubdivision?.level === 2 ? null : activeSubdivision?.capitalCoordinates;
         return {
           // `:cap`/`:approx` suffix: re-frame once the record loads and the
           // centre snaps from the feature to the capital (matches the globe key).
-          key: `region:${activeCountry.isoCode}:${activeRegion}:${cap ? 'cap' : 'approx'}`,
+          key: `region:${activeCountry.isoCode}:${frameRegionCode}:${cap ? 'cap' : 'approx'}`,
           isSub: true,
           transform: fitFeatureFlat(
             f, flatProjection, WORLD_WIDTH, targetWidth, height,
@@ -344,18 +377,18 @@ export default function Map({ slug }: MapProps) {
     }
 
     return { key: 'world', isSub: false, transform: positionTransform() };
-  }, [activeCountry, activeRegion, activeSubdivision, isSubMap, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position, targetIso, regionSlug]);
+  }, [activeCountry, activeRegion, activeSubdivision, frameRegionCode, isSubMap, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, flatProjection, selectedContinent, position, targetIso, regionSlug]);
 
   // Same idea for the globe: a target point + zoom scale, keyed so the rotation
   // animation runs once per destination.
   const globeViewTarget = useMemo<{ key: string; point: [number, number]; scale: number }>(() => {
-    if (activeCountry?.isoCode && activeRegion && subMapData) {
-      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === activeRegion);
+    if (activeCountry?.isoCode && frameRegionCode && subMapData) {
+      const f = subFeatures.find((x: any) => codeByFeatureId[String(x.id)] === frameRegionCode);
       if (f) {
-        const cap = activeSubdivision?.capitalCoordinates;
+        const cap = activeSubdivision?.level === 2 ? null : activeSubdivision?.capitalCoordinates;
         const centre: [number, number] = cap ? [cap.lng, cap.lat] : mainlandCentroid(f);
         return {
-          key: `region:${activeCountry.isoCode}:${activeRegion}:${cap ? 'cap' : 'approx'}`,
+          key: `region:${activeCountry.isoCode}:${frameRegionCode}:${cap ? 'cap' : 'approx'}`,
           // A first-level subdivision is small — let the globe push in closer
           // than the country-level 3.6× cap so it isn't a dot on a big sphere.
           ...fitFeatureGlobe(f, centre, height, GLOBE_SCALE_DEFAULT, 6),
@@ -403,7 +436,7 @@ export default function Map({ slug }: MapProps) {
       }
     }
     return { key: 'world', point: [10, 25], scale: GLOBE_SCALE_DEFAULT };
-  }, [activeCountry, activeRegion, activeSubdivision, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent, targetIso, regionSlug]);
+  }, [activeCountry, activeRegion, activeSubdivision, frameRegionCode, subMapData, subFeatures, codeByFeatureId, worldCountryFeatures, ALPHA2_TO_NUMERIC, selectedContinent, targetIso, regionSlug]);
 
   useEffect(() => {
     async function initView() {
@@ -413,6 +446,7 @@ export default function Map({ slug }: MapProps) {
         setActiveRegion(null);
         setActiveSubdivision(null);
         setSubdivisionsForCountry([]);
+        setRelatedSubdivisions([]);
         setActiveContinent(null);
         return;
       }
@@ -431,6 +465,7 @@ export default function Map({ slug }: MapProps) {
         setActiveRegion(null);
         setActiveSubdivision(null);
         setSubdivisionsForCountry([]);
+        setRelatedSubdivisions([]);
         const continentCode = CONTINENT_NAME_TO_CODE[continentName];
         setActiveContinent(continentCode ? await getContinentByCodeAction(continentCode) : null);
         return;
@@ -452,11 +487,22 @@ export default function Map({ slug }: MapProps) {
           if (!country) {
             setActiveRegion(null);
             setActiveSubdivision(null);
+            setRelatedSubdivisions([]);
             return;
           }
         }
 
-        setActiveSubdivision(regionCode ? await getSubdivisionByCodeAction(regionCode) : null);
+        const sub = regionCode ? await getSubdivisionByCodeAction(regionCode) : null;
+        setActiveSubdivision(sub);
+        // A level-1 subdivision shows its own second-level children; a level-2
+        // one shows its siblings (the other children of the same parent).
+        if (sub?.level === 2 && sub.parentCode) {
+          setRelatedSubdivisions(await listChildSubdivisionsAction(sub.parentCode));
+        } else if (sub?.level === 1) {
+          setRelatedSubdivisions(await listChildSubdivisionsAction(sub.code));
+        } else {
+          setRelatedSubdivisions([]);
+        }
       } else {
         // Fallback for unknown slugs
         resetMap();
@@ -464,6 +510,7 @@ export default function Map({ slug }: MapProps) {
         setActiveRegion(null);
         setActiveSubdivision(null);
         setSubdivisionsForCountry([]);
+        setRelatedSubdivisions([]);
         setActiveContinent(null);
       }
     }
@@ -889,7 +936,7 @@ export default function Map({ slug }: MapProps) {
                   activeCountryIso={targetIso}
                   isSubMap={isSubMap}
                   subdivisions={subdivisionsForCountry}
-                  activeRegionCode={activeRegion}
+                  activeRegionCode={frameRegionCode}
                   repeat={!isGlobe && !isSubMap}
                   worldWidth={WORLD_WIDTH}
                 />
@@ -936,6 +983,8 @@ export default function Map({ slug }: MapProps) {
               data={activeCountry}
               subdivision={activeSubdivision}
               subdivisions={subdivisionsForCountry}
+              childSubdivisions={activeSubdivision?.level === 1 ? relatedSubdivisions : []}
+              parentSubdivision={parentSubdivision}
               regionsList={regionsList}
               activeRegionCode={activeRegion}
             />

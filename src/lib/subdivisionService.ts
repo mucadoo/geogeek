@@ -26,6 +26,8 @@ interface RawSubdivision {
   code: string;
   wikidataId?: string | null;
   countryIsoCode: string;
+  level?: 1 | 2 | null;
+  parentCode?: string | null;
   name?: RawLocalized | null;
   type?: RawLocalized | null;
   typeEn?: string | null;
@@ -83,6 +85,8 @@ function buildSubdivision(raw: RawSubdivision): Subdivision {
     code: (raw.code || '').toUpperCase(),
     wikidataId: raw.wikidataId ?? null,
     countryIsoCode: (raw.countryIsoCode || '').toUpperCase(),
+    level: raw.level === 2 ? 2 : 1,
+    parentCode: raw.parentCode ? raw.parentCode.toUpperCase() : null,
     name: localize(raw.name),
     type: localize(raw.type),
     typeEn: raw.typeEn ?? null,
@@ -177,11 +181,25 @@ export const subdivisionService = {
     return all.filter((s) => wanted.has(s.code));
   },
 
+  // First-level units only — the map geometry and the country sidebar's region
+  // list are both first-level. Second-level units hang off a parent via
+  // listChildSubdivisions().
   listSubdivisionsByCountry: async (isoCode: string): Promise<Subdivision[]> => {
     const target = isoCode.toUpperCase();
     const all = await getSubdivisionsData();
     return all
-      .filter((s) => s.countryIsoCode === target)
+      .filter((s) => s.countryIsoCode === target && s.level === 1)
+      .sort((a, b) => a.name.en.localeCompare(b.name.en));
+  },
+
+  // Second-level units contained by the given first-level subdivision, keyed by
+  // its ISO 3166-2 code (e.g. "IT-82" -> the provinces of Sicily). Coverage
+  // follows Wikidata and is uneven across countries.
+  listChildSubdivisions: async (parentCode: string): Promise<Subdivision[]> => {
+    const target = parentCode.toUpperCase();
+    const all = await getSubdivisionsData();
+    return all
+      .filter((s) => s.level === 2 && s.parentCode === target)
       .sort((a, b) => a.name.en.localeCompare(b.name.en));
   },
 };

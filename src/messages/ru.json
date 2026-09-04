@@ -68,6 +68,7 @@
     "viewOnMap": "Показать на карте",
     "quickFacts": "Краткие факты",
     "parentCountry": "Страна",
+    "parentSubdivision": "Вышестоящая единица",
     "regionId": "ID региона",
     "countryCapital": "Столица страны",
     "officialLanguage": "Официальный язык",
@@ -79,6 +80,7 @@
     "subdivisionType": "Тип",
     "density": "Плотность",
     "neighbouringSubdivisions": "Соседние субъекты",
+    "childSubdivisions": "Подразделения",
     "countryCount": "Страны",
     "memberCountries": "Страны",
     "labels": {

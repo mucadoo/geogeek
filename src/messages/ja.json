@@ -68,6 +68,7 @@
     "viewOnMap": "地図で見る",
     "quickFacts": "クイックファクト",
     "parentCountry": "所属国",
+    "parentSubdivision": "上位行政区画",
     "regionId": "地域ID",
     "countryCapital": "首都",
     "officialLanguage": "公用語",
@@ -79,6 +80,7 @@
     "subdivisionType": "種類",
     "density": "人口密度",
     "neighbouringSubdivisions": "隣接する行政区画",
+    "childSubdivisions": "下位行政区画",
     "countryCount": "国数",
     "memberCountries": "構成国",
     "labels": {

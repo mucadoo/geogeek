@@ -66,6 +66,14 @@ export async function listSubdivisionsByCountryAction(isoCode: string): Promise<
   }
 }
 
+export async function listChildSubdivisionsAction(parentCode: string): Promise<Subdivision[]> {
+  try {
+    return await subdivisionService.listChildSubdivisions(parentCode);
+  } catch {
+    return [];
+  }
+}
+
 export async function getContinentByCodeAction(code: string): Promise<Continent | null> {
   try {
     const continent = await continentService.getContinentByCode(code);

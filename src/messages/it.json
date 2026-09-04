@@ -192,6 +192,7 @@
     "viewOnMap": "Visualizza sulla mappa",
     "quickFacts": "Dati rapidi",
     "parentCountry": "Paese",
+    "parentSubdivision": "Suddivisione di Livello Superiore",
     "regionId": "ID regione",
     "countryCapital": "Capitale del paese",
     "officialLanguage": "Lingua ufficiale",
@@ -203,6 +204,7 @@
     "subdivisionType": "Tipo",
     "density": "Densità",
     "neighbouringSubdivisions": "Suddivisioni confinanti",
+    "childSubdivisions": "Suddivisioni",
     "countryCount": "Paesi",
     "memberCountries": "Paesi",
     "labels": {

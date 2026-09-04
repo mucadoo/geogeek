@@ -93,6 +93,9 @@ async function main() {
 
   const byCountry = new Map();
   for (const s of subs) {
+    // First-level units only — second-level codes (level 2) would otherwise be
+    // matched by the nearest-centroid fallback and corrupt the level-1 shapes.
+    if ((s.level ?? 1) !== 1) continue;
     if (!s.coordinates) continue;
     if (!byCountry.has(s.countryIsoCode)) byCountry.set(s.countryIsoCode, []);
     byCountry.get(s.countryIsoCode).push(s);
@@ -140,8 +143,9 @@ async function main() {
   const topo = JSON.parse(fs.readFileSync(OUT, 'utf8'));
   const polygons = topo.objects[Object.keys(topo.objects)[0]].geometries;
   const covered = new Set(polygons.map((g) => g.id));
+  const level1 = subs.filter((s) => (s.level ?? 1) === 1);
   const gaps = {};
-  for (const s of subs) {
+  for (const s of level1) {
     if (!covered.has(s.code)) gaps[s.countryIsoCode] = (gaps[s.countryIsoCode] || 0) + 1;
   }
   const gapList = Object.entries(gaps).sort((a, b) => b[1] - a[1]);
@@ -153,8 +157,8 @@ async function main() {
       `${(fs.statSync(OUT).size / 1e6).toFixed(2)} MB, ${polygons.length} polygons.`
   );
   console.log(
-    `Coverage: ${covered.size}/${subs.length} subdivisions ` +
-      `(${((covered.size / subs.length) * 100).toFixed(1)}%), ${assigned} NE features used.`
+    `Coverage: ${covered.size}/${level1.length} first-level subdivisions ` +
+      `(${((covered.size / level1.length) * 100).toFixed(1)}%), ${assigned} NE features used.`
   );
   if (gapList.length) {
     console.log(

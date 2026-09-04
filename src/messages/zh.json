@@ -68,6 +68,7 @@
     "viewOnMap": "在地图上查看",
     "quickFacts": "快速信息",
     "parentCountry": "所属国家",
+    "parentSubdivision": "上级行政区",
     "regionId": "地区ID",
     "countryCapital": "国家首都",
     "officialLanguage": "官方语言",
@@ -79,6 +80,7 @@
     "subdivisionType": "类型",
     "density": "人口密度",
     "neighbouringSubdivisions": "相邻行政区",
+    "childSubdivisions": "下级行政区",
     "countryCount": "国家数",
     "memberCountries": "成员国",
     "labels": {

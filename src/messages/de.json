@@ -68,6 +68,7 @@
     "viewOnMap": "Auf Karte ansehen",
     "quickFacts": "Kurzübersicht",
     "parentCountry": "Land",
+    "parentSubdivision": "Übergeordnete Einheit",
     "regionId": "Regions-ID",
     "countryCapital": "Landeshauptstadt",
     "officialLanguage": "Amtssprache",
@@ -79,6 +80,7 @@
     "subdivisionType": "Typ",
     "density": "Dichte",
     "neighbouringSubdivisions": "Benachbarte Einheiten",
+    "childSubdivisions": "Untereinheiten",
     "countryCount": "Länder",
     "memberCountries": "Länder",
     "labels": {
